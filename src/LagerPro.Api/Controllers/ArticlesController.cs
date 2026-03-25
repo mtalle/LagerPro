@@ -1,6 +1,6 @@
-using LagerPro.Contracts.Dtos.Articles;
+using LagerPro.Application.Features.Articles.Commands.CreateArticle;
+using LagerPro.Application.Features.Articles.Queries.GetAllArticles;
 using LagerPro.Contracts.Requests.Articles;
-using LagerPro.Contracts.Responses.Articles;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LagerPro.Api.Controllers;
@@ -9,64 +9,39 @@ namespace LagerPro.Api.Controllers;
 [Route("api/[controller]")]
 public class ArticlesController : ControllerBase
 {
-    private static readonly List<ArticleDto> Articles =
-    [
-        new(1, "RAW-001", "Eksempelartikkel", "kg", "Ravare")
-    ];
+    private readonly GetAllArticlesHandler _getAllHandler;
+    private readonly CreateArticleHandler _createHandler;
 
-    [HttpGet]
-    public ActionResult<ArticleListResponse> Get()
+    public ArticlesController(GetAllArticlesHandler getAllHandler, CreateArticleHandler createHandler)
     {
-        return Ok(new ArticleListResponse(Articles));
+        _getAllHandler = getAllHandler;
+        _createHandler = createHandler;
     }
 
-    [HttpGet("{id:int}")]
-    public ActionResult<ArticleResponse> GetById(int id)
+    [HttpGet]
+    public async Task<IActionResult> Get(CancellationToken cancellationToken)
     {
-        var article = Articles.FirstOrDefault(x => x.Id == id);
-        return article is null ? NotFound() : Ok(new ArticleResponse(article));
+        var articles = await _getAllHandler.Handle(cancellationToken);
+        return Ok(articles);
     }
 
     [HttpPost]
-    public ActionResult<ArticleResponse> Create([FromBody] CreateArticleRequest request)
+    public async Task<IActionResult> Create([FromBody] CreateArticleRequest request, CancellationToken cancellationToken)
     {
-        var nextId = Articles.Count == 0 ? 1 : Articles.Max(x => x.Id) + 1;
-        var article = new ArticleDto(nextId, request.ArtikkelNr, request.Navn, request.Enhet, request.Type);
-        Articles.Add(article);
+        var id = await _createHandler.Handle(
+            new CreateArticleCommand(
+                request.ArtikkelNr,
+                request.Navn,
+                request.Enhet,
+                request.Type,
+                null,
+                null,
+                null,
+                0,
+                0,
+                0),
+            cancellationToken);
 
-        return CreatedAtAction(nameof(GetById), new { id = nextId }, new ArticleResponse(article));
-    }
-
-    [HttpPut("{id:int}")]
-    public IActionResult Update(int id, [FromBody] UpdateArticleRequest request)
-    {
-        var index = Articles.FindIndex(x => x.Id == id);
-        if (index < 0)
-        {
-            return NotFound();
-        }
-
-        var existing = Articles[index];
-        Articles[index] = existing with
-        {
-            Navn = request.Navn,
-            Enhet = request.Enhet,
-            Type = request.Type
-        };
-
-        return NoContent();
-    }
-
-    [HttpDelete("{id:int}")]
-    public IActionResult Delete(int id)
-    {
-        var article = Articles.FirstOrDefault(x => x.Id == id);
-        if (article is null)
-        {
-            return NotFound();
-        }
-
-        Articles.Remove(article);
-        return NoContent();
+        return CreatedAtAction(nameof(Get), new { id }, new { id });
     }
 }

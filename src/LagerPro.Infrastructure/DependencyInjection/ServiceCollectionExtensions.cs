@@ -1,3 +1,4 @@
+using LagerPro.Application.Abstractions;
 using LagerPro.Domain.Repositories;
 using LagerPro.Infrastructure.Persistence;
 using LagerPro.Infrastructure.Repositories;
@@ -18,6 +19,7 @@ public static class ServiceCollectionExtensions
             options.UseSqlServer(connectionString));
 
         services.AddScoped<IArtikkelRepository, ArtikkelRepository>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
     }
