@@ -19,6 +19,12 @@ public static class ServiceCollectionExtensions
             options.UseSqlServer(connectionString));
 
         services.AddScoped<IArtikkelRepository, ArtikkelRepository>();
+        services.AddScoped<IKundeRepository, KundeRepository>();
+        services.AddScoped<ILeverandorRepository, LeverandorRepository>();
+        services.AddScoped<ILagerTransaksjonRepository, LagerTransaksjonRepository>();
+        services.AddScoped<IReseptRepository, ReseptRepository>();
+        services.AddScoped<IProduksjonsOrdreRepository, ProduksjonsOrdreRepository>();
+        services.AddScoped<ILeveringRepository, LeveringRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
