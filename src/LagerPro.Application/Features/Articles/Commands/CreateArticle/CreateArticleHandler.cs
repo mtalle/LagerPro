@@ -1,19 +1,16 @@
 using LagerPro.Application.Abstractions;
 using LagerPro.Domain.Entities;
 using LagerPro.Domain.Enums;
-using LagerPro.Domain.Repositories;
 
 namespace LagerPro.Application.Features.Articles.Commands.CreateArticle;
 
 public class CreateArticleHandler
 {
-    private readonly IArtikkelRepository _repository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IAppWriteStore _store;
 
-    public CreateArticleHandler(IArtikkelRepository repository, IUnitOfWork unitOfWork)
+    public CreateArticleHandler(IAppWriteStore store)
     {
-        _repository = repository;
-        _unitOfWork = unitOfWork;
+        _store = store;
     }
 
     public async Task<int> Handle(CreateArticleCommand command, CancellationToken cancellationToken = default)
@@ -33,9 +30,7 @@ public class CreateArticleHandler
             Aktiv = true
         };
 
-        await _repository.AddAsync(article, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-        return article.Id;
+        await _store.AddArtikkelAsync(article, cancellationToken);
+        return 0;
     }
 }
