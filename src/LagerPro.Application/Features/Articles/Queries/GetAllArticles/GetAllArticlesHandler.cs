@@ -1,20 +1,20 @@
-using LagerPro.Domain.Repositories;
+using LagerPro.Application.Abstractions;
+using LagerPro.Contracts.Dtos.Articles;
 
 namespace LagerPro.Application.Features.Articles.Queries.GetAllArticles;
 
 public class GetAllArticlesHandler
 {
-    private readonly IArtikkelRepository _repository;
+    private readonly IAppReadStore _store;
 
-    public GetAllArticlesHandler(IArtikkelRepository repository)
+    public GetAllArticlesHandler(IAppReadStore store)
     {
-        _repository = repository;
+        _store = store;
     }
 
-    public async Task<IReadOnlyList<ArticleDto>> Handle(CancellationToken cancellationToken = default)
+    public Task<IReadOnlyList<ArticleDto>> Handle(CancellationToken cancellationToken = default)
     {
-        var articles = await _repository.GetAllAsync(cancellationToken);
-        return articles.Select(x => new ArticleDto(
+        var articles = _store.Artikler.Select(x => new ArticleDto(
             x.Id,
             x.ArtikkelNr,
             x.Navn,
@@ -27,5 +27,7 @@ public class GetAllArticlesHandler
             x.Utpris,
             x.MinBeholdning,
             x.Aktiv)).ToList();
+
+        return Task.FromResult<IReadOnlyList<ArticleDto>>(articles);
     }
 }
