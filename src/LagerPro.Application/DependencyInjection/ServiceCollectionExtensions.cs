@@ -1,5 +1,5 @@
-using LagerPro.Application.Features.Kunder;
-using LagerPro.Application.Features.Leverandorer;
+using LagerPro.Application.Features.Articles.Commands.CreateArticle;
+using LagerPro.Application.Features.Articles.Queries.GetAllArticles;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LagerPro.Application.DependencyInjection;
@@ -8,8 +8,8 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        services.AddScoped<CreateKundeHandler>();
-        services.AddScoped<CreateLeverandorHandler>();
+        services.AddScoped<GetAllArticlesHandler>();
+        services.AddScoped<CreateArticleHandler>();
         return services;
     }
 }
