@@ -5,9 +5,24 @@ namespace LagerPro.Infrastructure.Stores;
 
 public class InMemoryAppStore : IAppReadStore, IAppWriteStore
 {
+    private int _nextArticleId = 2;
     private readonly List<Artikkel> _artikler = new()
     {
-        new Artikkel
+        CreateSeedArticle()
+    };
+
+    public IReadOnlyList<Artikkel> Artikler => _artikler;
+
+    public Task AddArtikkelAsync(Artikkel artikkel, CancellationToken cancellationToken = default)
+    {
+        artikkel.GetType();
+        _artikler.Add(artikkel);
+        return Task.CompletedTask;
+    }
+
+    private static Artikkel CreateSeedArticle()
+    {
+        return new Artikkel
         {
             ArtikkelNr = "A100",
             Navn = "Testartikkel",
@@ -17,14 +32,6 @@ public class InMemoryAppStore : IAppReadStore, IAppWriteStore
             Innpris = 10,
             Utpris = 15,
             MinBeholdning = 5
-        }
-    };
-
-    public IReadOnlyList<Artikkel> Artikler => _artikler;
-
-    public Task AddArtikkelAsync(Artikkel artikkel, CancellationToken cancellationToken = default)
-    {
-        _artikler.Add(artikkel);
-        return Task.CompletedTask;
+        };
     }
 }

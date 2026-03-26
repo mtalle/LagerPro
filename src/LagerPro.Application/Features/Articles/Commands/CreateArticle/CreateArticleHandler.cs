@@ -31,6 +31,6 @@ public class CreateArticleHandler
         };
 
         await _store.AddArtikkelAsync(article, cancellationToken);
-        return article.Id;
+        return 0;
     }
 }
