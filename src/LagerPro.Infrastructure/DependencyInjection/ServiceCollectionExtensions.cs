@@ -1,8 +1,3 @@
-using LagerPro.Application.Abstractions;
-using LagerPro.Domain.Repositories;
-using LagerPro.Infrastructure.Persistence;
-using LagerPro.Infrastructure.Repositories;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,21 +7,6 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? "Server=localhost;Database=LagerProDb;Trusted_Connection=False;Encrypt=True;TrustServerCertificate=True;";
-
-        services.AddDbContext<LagerProDbContext>(options =>
-            options.UseSqlServer(connectionString));
-
-        services.AddScoped<IArtikkelRepository, ArtikkelRepository>();
-        services.AddScoped<IKundeRepository, KundeRepository>();
-        services.AddScoped<ILeverandorRepository, LeverandorRepository>();
-        services.AddScoped<ILagerTransaksjonRepository, LagerTransaksjonRepository>();
-        services.AddScoped<IReseptRepository, ReseptRepository>();
-        services.AddScoped<IProduksjonsOrdreRepository, ProduksjonsOrdreRepository>();
-        services.AddScoped<ILeveringRepository, LeveringRepository>();
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
-
         return services;
     }
 }
