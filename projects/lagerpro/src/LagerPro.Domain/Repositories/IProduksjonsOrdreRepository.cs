@@ -1,0 +1,10 @@
+using LagerPro.Domain.Entities;
+
+namespace LagerPro.Domain.Repositories;
+
+public interface IProduksjonsOrdreRepository
+{
+    Task<ProduksjonsOrdre?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<ProduksjonsOrdre>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task AddAsync(ProduksjonsOrdre produksjonsOrdre, CancellationToken cancellationToken = default);
+}
