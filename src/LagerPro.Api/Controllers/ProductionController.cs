@@ -16,17 +16,20 @@ public class ProductionController : ControllerBase
     private readonly GetProduksjonsOrdreByIdHandler _getByIdHandler;
     private readonly CreateProduksjonsOrdreHandler _createHandler;
     private readonly FerdigmeldProduksjonsOrdreHandler _ferdigmeldHandler;
+    private readonly UpdateProduksjonsOrdreStatusHandler _updateStatusHandler;
 
     public ProductionController(
         GetAllProduksjonsOrdreHandler getAllHandler,
         GetProduksjonsOrdreByIdHandler getByIdHandler,
         CreateProduksjonsOrdreHandler createHandler,
-        FerdigmeldProduksjonsOrdreHandler ferdigmeldHandler)
+        FerdigmeldProduksjonsOrdreHandler ferdigmeldHandler,
+        UpdateProduksjonsOrdreStatusHandler updateStatusHandler)
     {
         _getAllHandler = getAllHandler;
         _getByIdHandler = getByIdHandler;
         _createHandler = createHandler;
         _ferdigmeldHandler = ferdigmeldHandler;
+        _updateStatusHandler = updateStatusHandler;
     }
 
     [HttpGet]
@@ -56,6 +59,14 @@ public class ProductionController : ControllerBase
             cancellationToken);
 
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
+    }
+
+    [HttpPatch("{id}/status")]
+    public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateProduksjonsOrdreStatusRequest request, CancellationToken cancellationToken)
+    {
+        var success = await _updateStatusHandler.Handle(new UpdateProduksjonsOrdreStatusCommand(id, request.Status), cancellationToken);
+        if (!success) return NotFound(new { message = $"Produksjonsordre with id {id} not found or invalid status." });
+        return Ok(new { id, status = request.Status });
     }
 
     [HttpPost("{id}/ferdigmeld")]
