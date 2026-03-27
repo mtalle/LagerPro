@@ -1,6 +1,7 @@
-namespace LagerPro.Application.Features.Articles.Commands.CreateArticle;
+namespace LagerPro.Application.Features.Articles.Commands.UpdateArticle;
 
-public record CreateArticleCommand(
+public record UpdateArticleCommand(
+    int Id,
     string ArtikkelNr,
     string Navn,
     string Enhet,
