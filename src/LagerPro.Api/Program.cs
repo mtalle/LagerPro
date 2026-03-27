@@ -1,5 +1,4 @@
 using LagerPro.Application.DependencyInjection;
-using LagerPro.Application.Services;
 using LagerPro.Infrastructure.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,7 +8,6 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddControllers();
-builder.Services.AddSingleton<ProjectStatusService>();
 
 var app = builder.Build();
 
