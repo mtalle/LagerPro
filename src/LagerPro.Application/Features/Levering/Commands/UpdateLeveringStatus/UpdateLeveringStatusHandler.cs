@@ -34,19 +34,19 @@ public class UpdateLeveringStatusHandler
         if (!Enum.TryParse<LeveringStatus>(command.Status, ignoreCase: true, out var newStatus))
             return false;
 
-        levering.Status = newStatus;
-
-        // When sent/delivered, reduce lager and record transactions
-        if (newStatus == LeveringStatus.Sendt || newStatus == LeveringStatus.Levert)
+        // Lager trekkes ved levering (CreateLevering setter Planlagt og trekker lager).
+        // Kun ved status=Planlagt → Levert skal vi bekrefte endelig lagerreduksjon
+        // (allerede gjort i Create, så vi logger kun transaksjonen på nytt for sporbarhet).
+        if (newStatus == LeveringStatus.Levert && levering.Status == LeveringStatus.Planlagt)
         {
             foreach (var linje in levering.Linjer)
             {
                 var beholdning = await _lagerRepository.GetByArtikkelOgLotAsync(
                     linje.ArtikkelId, linje.LotNr, cancellationToken);
 
+                // Beholdning ble allerede redusert i CreateLevering — oppdater kun tidsstempel
                 if (beholdning is not null)
                 {
-                    beholdning.Mengde -= linje.Mengde;
                     beholdning.SistOppdatert = DateTime.UtcNow;
                 }
 
@@ -56,10 +56,10 @@ public class UpdateLeveringStatusHandler
                     LotNr = linje.LotNr,
                     Type = TransaksjonsType.Levering,
                     Mengde = -linje.Mengde,
-                    BeholdningEtter = (beholdning?.Mengde - linje.Mengde) ?? 0,
+                    BeholdningEtter = beholdning?.Mengde ?? 0,
                     Kilde = "Levering",
                     KildeId = levering.Id,
-                    Kommentar = $"Levering #{levering.Id} {newStatus}",
+                    Kommentar = $"Levering #{levering.Id} levert",
                     UtfortAv = levering.LevertAv,
                     Tidspunkt = DateTime.UtcNow
                 };
@@ -67,8 +67,10 @@ public class UpdateLeveringStatusHandler
             }
         }
 
+        levering.Status = newStatus;
+
         if (newStatus == LeveringStatus.Levert)
-            levering.LevertAv = levering.LevertAv ?? Environment.UserName;
+            levering.LevertAv ??= Environment.UserName;
 
         await _repository.UpdateAsync(levering, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

@@ -34,12 +34,11 @@ public class UpdateMottakStatusHandler
 
         mottak.Status = newStatus;
 
-        // When approved, record lager transactions and update inventory
-        if (newStatus == MottakStatus.Godkjent)
+        // Kun godkjennings-steget skal oppdatere lager — og kun én gang (kun hvis ikke allerede godkjent)
+        if (newStatus == MottakStatus.Godkjent && mottak.Status != MottakStatus.Godkjent)
         {
-            foreach (var linje in mottak.Linjer)
+            foreach (var linje in mottak.Linjer.Where(l => l.Godkjent))
             {
-                // Upsert lager beholdning
                 var beholdning = new LagerBeholdning
                 {
                     ArtikkelId = linje.ArtikkelId,
@@ -51,15 +50,16 @@ public class UpdateMottakStatusHandler
                 };
                 await _lagerRepository.UpsertAsync(beholdning, cancellationToken);
 
-                // Record transaction
+                var oppdatertBeholdning = await _lagerRepository.GetByArtikkelOgLotAsync(
+                    linje.ArtikkelId, linje.LotNr, cancellationToken);
+
                 var transaksjon = new LagerTransaksjon
                 {
                     ArtikkelId = linje.ArtikkelId,
                     LotNr = linje.LotNr,
                     Type = TransaksjonsType.Mottak,
                     Mengde = linje.Mengde,
-                    BeholdningEtter = (await _lagerRepository.GetByArtikkelOgLotAsync(
-                        linje.ArtikkelId, linje.LotNr, cancellationToken))?.Mengde ?? 0,
+                    BeholdningEtter = oppdatertBeholdning?.Mengde ?? linje.Mengde,
                     Kilde = "Mottak",
                     KildeId = mottak.Id,
                     Kommentar = $"Mottak #{mottak.Id} godkjent",

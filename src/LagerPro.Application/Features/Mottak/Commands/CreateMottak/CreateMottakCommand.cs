@@ -18,4 +18,8 @@ public record MottakLinjeCommand(
     string? Strekkode,
     string? Avvik,
     string? Kommentar,
+<<<<<<< HEAD
     bool Godkjent = false);
+=======
+    bool Godkjent = false);
+>>>>>>> d6f9ec7 (fix: double-deduction bug, mottak lager auto-approve, traceability endpoints, kunder/leverandorer GET)
