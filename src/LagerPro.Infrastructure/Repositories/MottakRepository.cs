@@ -34,4 +34,10 @@ public class MottakRepository : IMottakRepository
         await _dbContext.Mottak.AddAsync(mottak, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task UpdateAsync(Mottak mottak, CancellationToken cancellationToken = default)
+    {
+        _dbContext.Mottak.Update(mottak);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
 }

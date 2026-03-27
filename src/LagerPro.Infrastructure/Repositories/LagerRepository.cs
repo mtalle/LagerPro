@@ -32,4 +32,24 @@ public class LagerRepository : ILagerRepository
             .OrderBy(x => x.Artikkel!.ArtikkelNr)
             .ThenBy(x => x.LotNr)
             .ToListAsync(cancellationToken);
+
+    public async Task UpsertAsync(LagerBeholdning beholdning, CancellationToken cancellationToken = default)
+    {
+        var existing = await _dbContext.LagerBeholdninger
+            .FirstOrDefaultAsync(x => x.ArtikkelId == beholdning.ArtikkelId && x.LotNr == beholdning.LotNr, cancellationToken);
+
+        if (existing is null)
+        {
+            await _dbContext.LagerBeholdninger.AddAsync(beholdning, cancellationToken);
+        }
+        else
+        {
+            existing.Mengde += beholdning.Mengde;
+            existing.SistOppdatert = DateTime.UtcNow;
+            if (!string.IsNullOrEmpty(beholdning.Lokasjon)) existing.Lokasjon = beholdning.Lokasjon;
+            if (beholdning.BestForDato.HasValue) existing.BestForDato = beholdning.BestForDato;
+        }
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
 }

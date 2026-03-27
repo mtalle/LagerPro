@@ -17,4 +17,4 @@ public record MottakLinjeCommand(
     decimal? Temperatur,
     string? Strekkode,
     string? Avvik,
-    string? Komentar);
+    string? Kommentar);

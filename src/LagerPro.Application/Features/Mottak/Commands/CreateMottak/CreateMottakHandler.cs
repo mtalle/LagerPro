@@ -1,36 +1,26 @@
 using LagerPro.Application.Abstractions;
 using LagerPro.Domain.Enums;
 using LagerPro.Domain.Repositories;
-using DomainMottak = LagerPro.Domain.Entities.Mottak;
-using DomainMottakLinje = LagerPro.Domain.Entities.MottakLinje;
 
 namespace LagerPro.Application.Features.Mottak.Commands.CreateMottak;
+
+using MottakEntity = LagerPro.Domain.Entities.Mottak;
+using MottakLinjeEntity = LagerPro.Domain.Entities.MottakLinje;
 
 public class CreateMottakHandler
 {
     private readonly IMottakRepository _mottakRepository;
-    private readonly IArtikkelRepository _artikkelRepository;
-    private readonly ILagerRepository _lagerRepository;
-    private readonly ILagerTransaksjonRepository _lagerTransaksjonRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public CreateMottakHandler(
-        IMottakRepository mottakRepository,
-        IArtikkelRepository artikkelRepository,
-        ILagerRepository lagerRepository,
-        ILagerTransaksjonRepository lagerTransaksjonRepository,
-        IUnitOfWork unitOfWork)
+    public CreateMottakHandler(IMottakRepository mottakRepository, IUnitOfWork unitOfWork)
     {
         _mottakRepository = mottakRepository;
-        _artikkelRepository = artikkelRepository;
-        _lagerRepository = lagerRepository;
-        _lagerTransaksjonRepository = lagerTransaksjonRepository;
         _unitOfWork = unitOfWork;
     }
 
     public async Task<int> Handle(CreateMottakCommand command, CancellationToken cancellationToken = default)
     {
-        var mottak = new DomainMottak
+        var mottak = new MottakEntity
         {
             LeverandorId = command.LeverandorId,
             MottaksDato = command.MottaksDato,
@@ -43,7 +33,7 @@ public class CreateMottakHandler
 
         foreach (var linjeCommand in command.Linjer)
         {
-            var linje = new DomainMottakLinje
+            mottak.Linjer.Add(new MottakLinjeEntity
             {
                 ArtikkelId = linjeCommand.ArtikkelId,
                 LotNr = linjeCommand.LotNr,
@@ -53,10 +43,9 @@ public class CreateMottakHandler
                 Temperatur = linjeCommand.Temperatur,
                 Strekkode = linjeCommand.Strekkode,
                 Avvik = linjeCommand.Avvik,
-                Kommentar = linjeCommand.Komentar,
+                Kommentar = linjeCommand.Kommentar,
                 Godkjent = string.IsNullOrEmpty(linjeCommand.Avvik)
-            };
-            mottak.Linjer.Add(linje);
+            });
         }
 
         await _mottakRepository.AddAsync(mottak, cancellationToken);

@@ -17,4 +17,4 @@ public record CreateMottakLinjeRequest(
     decimal? Temperatur,
     string? Strekkode,
     string? Avvik,
-    string? Komentar);
+    string? Kommentar);

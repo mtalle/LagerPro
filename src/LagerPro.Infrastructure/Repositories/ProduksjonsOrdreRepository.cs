@@ -17,6 +17,7 @@ public class ProduksjonsOrdreRepository : IProduksjonsOrdreRepository
     public async Task<ProduksjonsOrdre?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         => await _dbContext.ProduksjonsOrdre
             .Include(x => x.Resept)
+            .ThenInclude(r => r!.Ferdigvare)
             .Include(x => x.Forbruk)
             .ThenInclude(f => f.Artikkel)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
@@ -24,6 +25,7 @@ public class ProduksjonsOrdreRepository : IProduksjonsOrdreRepository
     public async Task<IReadOnlyList<ProduksjonsOrdre>> GetAllAsync(CancellationToken cancellationToken = default)
         => await _dbContext.ProduksjonsOrdre
             .Include(x => x.Resept)
+            .ThenInclude(r => r!.Ferdigvare)
             .Include(x => x.Forbruk)
             .ThenInclude(f => f.Artikkel)
             .OrderByDescending(x => x.PlanlagtDato)
@@ -32,6 +34,12 @@ public class ProduksjonsOrdreRepository : IProduksjonsOrdreRepository
     public async Task AddAsync(ProduksjonsOrdre produksjonsOrdre, CancellationToken cancellationToken = default)
     {
         await _dbContext.ProduksjonsOrdre.AddAsync(produksjonsOrdre, cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task UpdateAsync(ProduksjonsOrdre produksjonsOrdre, CancellationToken cancellationToken = default)
+    {
+        _dbContext.ProduksjonsOrdre.Update(produksjonsOrdre);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 }
