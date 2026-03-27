@@ -21,7 +21,11 @@ public class LeveringRepository : ILeveringRepository
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
     public async Task<IReadOnlyList<Levering>> GetAllAsync(CancellationToken cancellationToken = default)
-        => await _dbContext.Leveringer.OrderByDescending(x => x.LeveringsDato).ToListAsync(cancellationToken);
+        => await _dbContext.Leveringer
+            .Include(x => x.Linjer)
+            .ThenInclude(l => l.Artikkel)
+            .OrderByDescending(x => x.LeveringsDato)
+            .ToListAsync(cancellationToken);
 
     public async Task AddAsync(Levering levering, CancellationToken cancellationToken = default)
     {

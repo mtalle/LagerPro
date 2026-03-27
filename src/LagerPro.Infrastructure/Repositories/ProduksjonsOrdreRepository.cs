@@ -22,7 +22,10 @@ public class ProduksjonsOrdreRepository : IProduksjonsOrdreRepository
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
     public async Task<IReadOnlyList<ProduksjonsOrdre>> GetAllAsync(CancellationToken cancellationToken = default)
-        => await _dbContext.ProduksjonsOrdre.OrderByDescending(x => x.PlanlagtDato).ToListAsync(cancellationToken);
+        => await _dbContext.ProduksjonsOrdre
+            .Include(x => x.Resept)
+            .OrderByDescending(x => x.PlanlagtDato)
+            .ToListAsync(cancellationToken);
 
     public async Task AddAsync(ProduksjonsOrdre produksjonsOrdre, CancellationToken cancellationToken = default)
     {
