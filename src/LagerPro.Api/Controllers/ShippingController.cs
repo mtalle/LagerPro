@@ -1,4 +1,5 @@
 using LagerPro.Application.Features.Levering.Commands.CreateLevering;
+using LagerPro.Application.Features.Levering.Commands.UpdateLeveringStatus;
 using LagerPro.Application.Features.Levering.Queries.GetAllLevering;
 using LagerPro.Application.Features.Levering.Queries.GetLeveringById;
 using LagerPro.Contracts.Requests.Levering;
@@ -13,15 +14,18 @@ public class ShippingController : ControllerBase
     private readonly GetAllLeveringHandler _getAllHandler;
     private readonly GetLeveringByIdHandler _getByIdHandler;
     private readonly CreateLeveringHandler _createHandler;
+    private readonly UpdateLeveringStatusHandler _updateStatusHandler;
 
     public ShippingController(
         GetAllLeveringHandler getAllHandler,
         GetLeveringByIdHandler getByIdHandler,
-        CreateLeveringHandler createHandler)
+        CreateLeveringHandler createHandler,
+        UpdateLeveringStatusHandler updateStatusHandler)
     {
         _getAllHandler = getAllHandler;
         _getByIdHandler = getByIdHandler;
         _createHandler = createHandler;
+        _updateStatusHandler = updateStatusHandler;
     }
 
     [HttpGet]
@@ -59,5 +63,13 @@ public class ShippingController : ControllerBase
             cancellationToken);
 
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
+    }
+
+    [HttpPatch("{id}/status")]
+    public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateLeveringStatusRequest request, CancellationToken cancellationToken)
+    {
+        var success = await _updateStatusHandler.Handle(new UpdateLeveringStatusCommand(id, request.Status), cancellationToken);
+        if (!success) return NotFound(new { message = $"Levering with id {id} not found or invalid status." });
+        return Ok(new { id, status = request.Status });
     }
 }

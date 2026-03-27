@@ -1,6 +1,8 @@
 using LagerPro.Application.Features.Produksjon.Commands.CreateProduksjonsOrdre;
 using LagerPro.Application.Features.Produksjon.Commands.FerdigmeldProduksjonsOrdre;
+using LagerPro.Application.Features.Produksjon.Commands.UpdateProduksjonsOrdreStatus;
 using LagerPro.Application.Features.Produksjon.Queries.GetAllProduksjonsOrdre;
+using LagerPro.Application.Features.Produksjon.Queries.GetProduksjonsOrdreById;
 using LagerPro.Contracts.Requests.Produksjon;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,15 +13,18 @@ namespace LagerPro.Api.Controllers;
 public class ProductionController : ControllerBase
 {
     private readonly GetAllProduksjonsOrdreHandler _getAllHandler;
+    private readonly GetProduksjonsOrdreByIdHandler _getByIdHandler;
     private readonly CreateProduksjonsOrdreHandler _createHandler;
     private readonly FerdigmeldProduksjonsOrdreHandler _ferdigmeldHandler;
 
     public ProductionController(
         GetAllProduksjonsOrdreHandler getAllHandler,
+        GetProduksjonsOrdreByIdHandler getByIdHandler,
         CreateProduksjonsOrdreHandler createHandler,
         FerdigmeldProduksjonsOrdreHandler ferdigmeldHandler)
     {
         _getAllHandler = getAllHandler;
+        _getByIdHandler = getByIdHandler;
         _createHandler = createHandler;
         _ferdigmeldHandler = ferdigmeldHandler;
     }
@@ -28,6 +33,14 @@ public class ProductionController : ControllerBase
     public async Task<IActionResult> Get(CancellationToken cancellationToken)
     {
         var ordre = await _getAllHandler.Handle(new GetAllProduksjonsOrdreQuery(), cancellationToken);
+        return Ok(ordre);
+    }
+
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
+    {
+        var ordre = await _getByIdHandler.Handle(new GetProduksjonsOrdreByIdQuery(id), cancellationToken);
+        if (ordre is null) return NotFound(new { message = $"Produksjonsordre with id {id} not found." });
         return Ok(ordre);
     }
 
@@ -42,7 +55,7 @@ public class ProductionController : ControllerBase
                 request.Kommentar),
             cancellationToken);
 
-        return CreatedAtAction(nameof(Get), new { id }, new { id });
+        return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }
 
     [HttpPost("{id}/ferdigmeld")]
