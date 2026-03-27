@@ -3,7 +3,11 @@ using LagerPro.Application.Features.Articles.Commands.DeleteArticle;
 using LagerPro.Application.Features.Articles.Commands.UpdateArticle;
 using LagerPro.Application.Features.Articles.Queries.GetAllArticles;
 using LagerPro.Application.Features.Articles.Queries.GetArticleById;
+using LagerPro.Application.Features.Kunder.Queries.GetAllKunder;
+using LagerPro.Application.Features.Kunder.Queries.GetKundeById;
 using LagerPro.Application.Features.Lager.Queries.GetAllLagerBeholdning;
+using LagerPro.Application.Features.Leverandorer.Queries.GetAllLeverandorer;
+using LagerPro.Application.Features.Leverandorer.Queries.GetLeverandorById;
 using LagerPro.Application.Features.Levering.Commands.CreateLevering;
 using LagerPro.Application.Features.Levering.Commands.UpdateLeveringStatus;
 using LagerPro.Application.Features.Levering.Queries.GetAllLevering;
@@ -31,6 +35,14 @@ public static class ServiceCollectionExtensions
         services.AddScoped<CreateArticleHandler>();
         services.AddScoped<UpdateArticleHandler>();
         services.AddScoped<DeleteArticleHandler>();
+
+        // Kunder
+        services.AddScoped<GetAllKunderHandler>();
+        services.AddScoped<GetKundeByIdHandler>();
+
+        // Leverandører
+        services.AddScoped<GetAllLeverandorerHandler>();
+        services.AddScoped<GetLeverandorByIdHandler>();
 
         // Mottak
         services.AddScoped<GetAllMottakHandler>();
