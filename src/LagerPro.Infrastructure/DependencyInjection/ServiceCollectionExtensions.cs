@@ -1,9 +1,4 @@
 using LagerPro.Application.Abstractions;
-using LagerPro.Application.Features.Articles.Commands.CreateArticle;
-using LagerPro.Application.Features.Articles.Commands.DeleteArticle;
-using LagerPro.Application.Features.Articles.Commands.UpdateArticle;
-using LagerPro.Application.Features.Articles.Queries.GetAllArticles;
-using LagerPro.Application.Features.Articles.Queries.GetArticleById;
 using LagerPro.Domain.Repositories;
 using LagerPro.Infrastructure.Persistence;
 using LagerPro.Infrastructure.Repositories;
@@ -18,7 +13,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
+            ?? "Server=localhost;Database=LagerProDb;Trusted_Connection=False;Encrypt=True;TrustServerCertificate=True;";
 
         services.AddDbContext<LagerProDbContext>(options =>
             options.UseSqlServer(connectionString));
@@ -26,11 +21,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IArtikkelRepository, ArtikkelRepository>();
         services.AddScoped<IKundeRepository, KundeRepository>();
         services.AddScoped<ILeverandorRepository, LeverandorRepository>();
-        services.AddScoped<ILagerRepository, LagerRepository>();
         services.AddScoped<ILagerTransaksjonRepository, LagerTransaksjonRepository>();
-        services.AddScoped<IMottakRepository, MottakRepository>();
-        services.AddScoped<IProduksjonsOrdreRepository, ProduksjonsOrdreRepository>();
         services.AddScoped<IReseptRepository, ReseptRepository>();
+        services.AddScoped<IProduksjonsOrdreRepository, ProduksjonsOrdreRepository>();
         services.AddScoped<ILeveringRepository, LeveringRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 

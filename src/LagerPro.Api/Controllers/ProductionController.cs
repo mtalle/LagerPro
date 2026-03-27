@@ -25,7 +25,7 @@ public class ProductionController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+    public async Task<IActionResult> Get(CancellationToken cancellationToken)
     {
         var ordre = await _getAllHandler.Handle(new GetAllProduksjonsOrdreQuery(), cancellationToken);
         return Ok(ordre);
@@ -42,7 +42,7 @@ public class ProductionController : ControllerBase
                 request.Kommentar),
             cancellationToken);
 
-        return CreatedAtAction(nameof(GetAll), new { id }, new { id });
+        return CreatedAtAction(nameof(Get), new { id }, new { id });
     }
 
     [HttpPost("{id}/ferdigmeld")]

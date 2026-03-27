@@ -18,9 +18,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
 app.MapControllers();
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
-app.MapGet("/", () => Results.Redirect("/status/index.html"));
 
 app.Run();

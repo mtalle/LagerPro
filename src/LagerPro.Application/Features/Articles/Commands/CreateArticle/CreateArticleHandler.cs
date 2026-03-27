@@ -30,7 +30,7 @@ public class CreateArticleHandler
             Innpris = command.Innpris,
             Utpris = command.Utpris,
             MinBeholdning = command.MinBeholdning,
-            Aktiv = command.Aktiv
+            Aktiv = true
         };
 
         await _repository.AddAsync(article, cancellationToken);

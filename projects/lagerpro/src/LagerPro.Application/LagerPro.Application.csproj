@@ -7,8 +7,4 @@
     <ProjectReference Include="..\LagerPro.Domain\LagerPro.Domain.csproj" />
     <ProjectReference Include="..\LagerPro.Contracts\LagerPro.Contracts.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup>
 </Project>

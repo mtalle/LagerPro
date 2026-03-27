@@ -25,7 +25,7 @@ public class ShippingController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+    public async Task<IActionResult> Get(CancellationToken cancellationToken)
     {
         var leveringer = await _getAllHandler.Handle(new GetAllLeveringQuery(), cancellationToken);
         return Ok(leveringer);

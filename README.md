@@ -14,8 +14,12 @@ Full LOT-sporing gjennom hele verdikjeden.
 - Sporbarhet er **lovpålagt** (Mattilsynet, HACCP)
 - Mange småbedrifter bruker Excel/papir
 - Store systemer (Visma, SAP) er for dyre/komplekse
+- Martin har **førstehånds bransjeerfaring**
 
-#
+## Nåværende status
+- Prototype bygget i Base44: https://lager-pro-6a1e4d2f.base44.app
+- Funker som demo, men ikke salgbart (Base44-begrensninger)
+- Strekkodeleser delvis implementert
 
 ## Plan
 - [ ] Velge tech-stack for "skikkelig" versjon

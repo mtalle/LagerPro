@@ -1,6 +1,7 @@
-namespace LagerPro.Application.Features.Articles.Commands.CreateArticle;
+namespace LagerPro.Application.Features.Articles;
 
-public record CreateArticleCommand(
+public record ArticleDto(
+    int Id,
     string ArtikkelNr,
     string Navn,
     string Enhet,
@@ -10,4 +11,5 @@ public record CreateArticleCommand(
     string? Kategori,
     decimal Innpris,
     decimal Utpris,
-    int MinBeholdning);
+    int MinBeholdning,
+    bool Aktiv);

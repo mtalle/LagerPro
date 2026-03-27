@@ -1,4 +1,3 @@
-using LagerPro.Contracts.Dtos.Articles;
 using LagerPro.Domain.Repositories;
 
 namespace LagerPro.Application.Features.Articles.Queries.GetAllArticles;
