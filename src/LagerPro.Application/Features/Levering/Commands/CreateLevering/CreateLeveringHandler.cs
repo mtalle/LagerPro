@@ -11,21 +11,15 @@ public class CreateLeveringHandler
 {
     private readonly ILeveringRepository _leveringRepository;
     private readonly IKundeRepository _kundeRepository;
-    private readonly ILagerRepository _lagerRepository;
-    private readonly ILagerTransaksjonRepository _lagerTransaksjonRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public CreateLeveringHandler(
         ILeveringRepository leveringRepository,
         IKundeRepository kundeRepository,
-        ILagerRepository lagerRepository,
-        ILagerTransaksjonRepository lagerTransaksjonRepository,
         IUnitOfWork unitOfWork)
     {
         _leveringRepository = leveringRepository;
         _kundeRepository = kundeRepository;
-        _lagerRepository = lagerRepository;
-        _lagerTransaksjonRepository = lagerTransaksjonRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -63,32 +57,6 @@ public class CreateLeveringHandler
         await _leveringRepository.AddAsync(levering, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // Trekk fra lager for hver linje
-        foreach (var linje in levering.Linjer)
-        {
-            var beholdning = await _lagerRepository.GetByArtikkelOgLotAsync(linje.ArtikkelId, linje.LotNr, cancellationToken);
-            if (beholdning is not null)
-            {
-                beholdning.Mengde -= linje.Mengde;
-                beholdning.SistOppdatert = DateTime.UtcNow;
-            }
-
-            await _lagerTransaksjonRepository.AddAsync(new LagerTransaksjon
-            {
-                ArtikkelId = linje.ArtikkelId,
-                LotNr = linje.LotNr,
-                Type = TransaksjonsType.Levering,
-                Mengde = linje.Mengde,
-                BeholdningEtter = beholdning?.Mengde ?? 0,
-                Kilde = "Levering",
-                KildeId = levering.Id,
-                Kommentar = linje.Kommentar,
-                UtfortAv = command.LevertAv,
-                Tidspunkt = DateTime.UtcNow
-            }, cancellationToken);
-        }
-
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
         return levering.Id;
     }
 }
