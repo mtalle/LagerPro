@@ -7,6 +7,7 @@ using LagerPro.Application.Features.Lager.Queries.GetAllLagerBeholdning;
 using LagerPro.Application.Features.Levering.Commands.CreateLevering;
 using LagerPro.Application.Features.Levering.Commands.UpdateLeveringStatus;
 using LagerPro.Application.Features.Levering.Queries.GetAllLevering;
+using LagerPro.Application.Features.Levering.Queries.GetLeveringById;
 using LagerPro.Application.Features.Mottak.Commands.CreateMottak;
 using LagerPro.Application.Features.Mottak.Commands.UpdateMottakStatus;
 using LagerPro.Application.Features.Mottak.Queries.GetAllMottak;
@@ -49,6 +50,7 @@ public static class ServiceCollectionExtensions
 
         // Levering
         services.AddScoped<GetAllLeveringHandler>();
+        services.AddScoped<GetLeveringByIdHandler>();
         services.AddScoped<CreateLeveringHandler>();
         services.AddScoped<UpdateLeveringStatusHandler>();
 

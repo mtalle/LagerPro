@@ -1,5 +1,6 @@
 using LagerPro.Application.Features.Levering.Commands.CreateLevering;
 using LagerPro.Application.Features.Levering.Queries.GetAllLevering;
+using LagerPro.Application.Features.Levering.Queries.GetLeveringById;
 using LagerPro.Contracts.Requests.Levering;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,11 +11,16 @@ namespace LagerPro.Api.Controllers;
 public class ShippingController : ControllerBase
 {
     private readonly GetAllLeveringHandler _getAllHandler;
+    private readonly GetLeveringByIdHandler _getByIdHandler;
     private readonly CreateLeveringHandler _createHandler;
 
-    public ShippingController(GetAllLeveringHandler getAllHandler, CreateLeveringHandler createHandler)
+    public ShippingController(
+        GetAllLeveringHandler getAllHandler,
+        GetLeveringByIdHandler getByIdHandler,
+        CreateLeveringHandler createHandler)
     {
         _getAllHandler = getAllHandler;
+        _getByIdHandler = getByIdHandler;
         _createHandler = createHandler;
     }
 
@@ -23,6 +29,14 @@ public class ShippingController : ControllerBase
     {
         var leveringer = await _getAllHandler.Handle(new GetAllLeveringQuery(), cancellationToken);
         return Ok(leveringer);
+    }
+
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
+    {
+        var levering = await _getByIdHandler.Handle(new GetLeveringByIdQuery(id), cancellationToken);
+        if (levering is null) return NotFound(new { message = $"Levering with id {id} not found." });
+        return Ok(levering);
     }
 
     [HttpPost]
@@ -44,6 +58,6 @@ public class ShippingController : ControllerBase
                     null)).ToList()),
             cancellationToken);
 
-        return CreatedAtAction(nameof(GetAll), new { id }, new { id });
+        return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }
 }
