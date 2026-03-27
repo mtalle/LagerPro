@@ -12,6 +12,7 @@ using LagerPro.Application.Features.Mottak.Commands.UpdateMottakStatus;
 using LagerPro.Application.Features.Mottak.Queries.GetAllMottak;
 using LagerPro.Application.Features.Mottak.Queries.GetMottakById;
 using LagerPro.Application.Features.Produksjon.Commands.CreateProduksjonsOrdre;
+using LagerPro.Application.Features.Produksjon.Commands.FerdigmeldProduksjonsOrdre;
 using LagerPro.Application.Features.Produksjon.Commands.UpdateProduksjonsOrdreStatus;
 using LagerPro.Application.Features.Produksjon.Queries.GetAllProduksjonsOrdre;
 using LagerPro.Application.Features.Produksjon.Queries.GetProduksjonsOrdreById;
@@ -44,6 +45,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<GetProduksjonsOrdreByIdHandler>();
         services.AddScoped<CreateProduksjonsOrdreHandler>();
         services.AddScoped<UpdateProduksjonsOrdreStatusHandler>();
+        services.AddScoped<FerdigmeldProduksjonsOrdreHandler>();
 
         // Levering
         services.AddScoped<GetAllLeveringHandler>();
