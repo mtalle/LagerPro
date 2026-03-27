@@ -8,4 +8,5 @@ public interface ILagerRepository
     Task<IReadOnlyList<LagerBeholdning>> GetByArtikkelAsync(int artikkelId, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<LagerBeholdning>> GetAllAsync(CancellationToken cancellationToken = default);
     Task UpsertAsync(LagerBeholdning beholdning, CancellationToken cancellationToken = default);
+    Task AddAsync(LagerBeholdning beholdning, CancellationToken cancellationToken = default);
 }

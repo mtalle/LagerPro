@@ -52,4 +52,7 @@ public class LagerRepository : ILagerRepository
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task AddAsync(LagerBeholdning beholdning, CancellationToken cancellationToken = default)
+        => await _dbContext.LagerBeholdninger.AddAsync(beholdning, cancellationToken);
 }
