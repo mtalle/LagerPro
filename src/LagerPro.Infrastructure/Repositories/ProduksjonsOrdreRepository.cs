@@ -14,13 +14,20 @@ public class ProduksjonsOrdreRepository : IProduksjonsOrdreRepository
         _dbContext = dbContext;
     }
 
-    public Task<ProduksjonsOrdre?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
-        => _dbContext.ProduksjonsOrdre
+    public async Task<ProduksjonsOrdre?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+        => await _dbContext.ProduksjonsOrdre
+            .Include(x => x.Resept)
             .Include(x => x.Forbruk)
+            .ThenInclude(f => f.Artikkel)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
     public async Task<IReadOnlyList<ProduksjonsOrdre>> GetAllAsync(CancellationToken cancellationToken = default)
-        => await _dbContext.ProduksjonsOrdre.OrderByDescending(x => x.PlanlagtDato).ToListAsync(cancellationToken);
+        => await _dbContext.ProduksjonsOrdre
+            .Include(x => x.Resept)
+            .Include(x => x.Forbruk)
+            .ThenInclude(f => f.Artikkel)
+            .OrderByDescending(x => x.PlanlagtDato)
+            .ToListAsync(cancellationToken);
 
     public async Task AddAsync(ProduksjonsOrdre produksjonsOrdre, CancellationToken cancellationToken = default)
     {

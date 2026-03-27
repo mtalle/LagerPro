@@ -25,4 +25,11 @@ public class LagerRepository : ILagerRepository
             .Where(x => x.ArtikkelId == artikkelId)
             .OrderBy(x => x.LotNr)
             .ToListAsync(cancellationToken);
+
+    public async Task<IReadOnlyList<LagerBeholdning>> GetAllAsync(CancellationToken cancellationToken = default)
+        => await _dbContext.LagerBeholdninger
+            .Include(x => x.Artikkel)
+            .OrderBy(x => x.Artikkel!.ArtikkelNr)
+            .ThenBy(x => x.LotNr)
+            .ToListAsync(cancellationToken);
 }

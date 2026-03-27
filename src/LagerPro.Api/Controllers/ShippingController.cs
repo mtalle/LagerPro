@@ -1,3 +1,4 @@
+using LagerPro.Application.Features.Levering.Queries.GetAllLevering;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LagerPro.Api.Controllers;
@@ -6,12 +7,17 @@ namespace LagerPro.Api.Controllers;
 [Route("api/[controller]")]
 public class ShippingController : ControllerBase
 {
-    [HttpGet]
-    public IActionResult Get()
+    private readonly GetAllLeveringHandler _handler;
+
+    public ShippingController(GetAllLeveringHandler handler)
     {
-        return Ok(new[]
-        {
-            new { Id = 1, Referanse = "LEV-001", Status = "Planlagt" }
-        });
+        _handler = handler;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+    {
+        var leveringer = await _handler.Handle(new GetAllLeveringQuery(), cancellationToken);
+        return Ok(leveringer);
     }
 }

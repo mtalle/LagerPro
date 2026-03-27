@@ -1,3 +1,4 @@
+using LagerPro.Application.Features.Produksjon.Queries.GetAllProduksjonsOrdre;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LagerPro.Api.Controllers;
@@ -6,12 +7,17 @@ namespace LagerPro.Api.Controllers;
 [Route("api/[controller]")]
 public class ProductionController : ControllerBase
 {
-    [HttpGet]
-    public IActionResult Get()
+    private readonly GetAllProduksjonsOrdreHandler _handler;
+
+    public ProductionController(GetAllProduksjonsOrdreHandler handler)
     {
-        return Ok(new[]
-        {
-            new { Id = 1, OrdreNr = "PO-001", Status = "Planlagt" }
-        });
+        _handler = handler;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+    {
+        var ordre = await _handler.Handle(new GetAllProduksjonsOrdreQuery(), cancellationToken);
+        return Ok(ordre);
     }
 }
