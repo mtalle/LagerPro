@@ -1,3 +1,4 @@
+using LagerPro.Application.Features.Lager.Queries.GetAllLagerBeholdning;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LagerPro.Api.Controllers;
@@ -6,12 +7,17 @@ namespace LagerPro.Api.Controllers;
 [Route("api/[controller]")]
 public class InventoryController : ControllerBase
 {
-    [HttpGet]
-    public IActionResult Get()
+    private readonly GetAllLagerBeholdningHandler _handler;
+
+    public InventoryController(GetAllLagerBeholdningHandler handler)
     {
-        return Ok(new[]
-        {
-            new { Id = 1, LotNr = "LOT-001", Mengde = 120.5m }
-        });
+        _handler = handler;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Get(CancellationToken cancellationToken)
+    {
+        var beholdninger = await _handler.Handle(new GetAllLagerBeholdningQuery(), cancellationToken);
+        return Ok(beholdninger);
     }
 }

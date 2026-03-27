@@ -7,4 +7,5 @@ public interface IProduksjonsOrdreRepository
     Task<ProduksjonsOrdre?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<ProduksjonsOrdre>> GetAllAsync(CancellationToken cancellationToken = default);
     Task AddAsync(ProduksjonsOrdre produksjonsOrdre, CancellationToken cancellationToken = default);
+    Task UpdateAsync(ProduksjonsOrdre produksjonsOrdre, CancellationToken cancellationToken = default);
 }

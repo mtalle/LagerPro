@@ -1,26 +1,37 @@
 using LagerPro.Application.Abstractions;
+using LagerPro.Domain.Entities;
 using LagerPro.Domain.Enums;
 using LagerPro.Domain.Repositories;
+using DomainMottak = LagerPro.Domain.Entities.Mottak;
+using DomainMottakLinje = LagerPro.Domain.Entities.MottakLinje;
 
 namespace LagerPro.Application.Features.Mottak.Commands.CreateMottak;
-
-using MottakEntity = LagerPro.Domain.Entities.Mottak;
-using MottakLinjeEntity = LagerPro.Domain.Entities.MottakLinje;
 
 public class CreateMottakHandler
 {
     private readonly IMottakRepository _mottakRepository;
+    private readonly IArtikkelRepository _artikkelRepository;
+    private readonly ILagerRepository _lagerRepository;
+    private readonly ILagerTransaksjonRepository _lagerTransaksjonRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public CreateMottakHandler(IMottakRepository mottakRepository, IUnitOfWork unitOfWork)
+    public CreateMottakHandler(
+        IMottakRepository mottakRepository,
+        IArtikkelRepository artikkelRepository,
+        ILagerRepository lagerRepository,
+        ILagerTransaksjonRepository lagerTransaksjonRepository,
+        IUnitOfWork unitOfWork)
     {
         _mottakRepository = mottakRepository;
+        _artikkelRepository = artikkelRepository;
+        _lagerRepository = lagerRepository;
+        _lagerTransaksjonRepository = lagerTransaksjonRepository;
         _unitOfWork = unitOfWork;
     }
 
     public async Task<int> Handle(CreateMottakCommand command, CancellationToken cancellationToken = default)
     {
-        var mottak = new MottakEntity
+        var mottak = new DomainMottak
         {
             LeverandorId = command.LeverandorId,
             MottaksDato = command.MottaksDato,
@@ -33,7 +44,7 @@ public class CreateMottakHandler
 
         foreach (var linjeCommand in command.Linjer)
         {
-            mottak.Linjer.Add(new MottakLinjeEntity
+            var linje = new DomainMottakLinje
             {
                 ArtikkelId = linjeCommand.ArtikkelId,
                 LotNr = linjeCommand.LotNr,
@@ -45,12 +56,45 @@ public class CreateMottakHandler
                 Avvik = linjeCommand.Avvik,
                 Kommentar = linjeCommand.Kommentar,
                 Godkjent = string.IsNullOrEmpty(linjeCommand.Avvik)
-            });
+            };
+            mottak.Linjer.Add(linje);
         }
 
         await _mottakRepository.AddAsync(mottak, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        // Oppdater lager-beholdning og transaksjoner for godkjente linjer
+        foreach (var linje in mottak.Linjer.Where(l => l.Godkjent))
+        {
+            var artikkel = await _artikkelRepository.GetByIdAsync(linje.ArtikkelId, cancellationToken);
+
+            await _lagerRepository.UpsertAsync(new LagerBeholdning
+            {
+                ArtikkelId = linje.ArtikkelId,
+                LotNr = linje.LotNr,
+                Mengde = linje.Mengde,
+                Enhet = artikkel?.Enhet ?? linje.Enhet,
+                BestForDato = linje.BestForDato,
+                SistOppdatert = DateTime.UtcNow
+            }, cancellationToken);
+
+            var oppdatertBeholdning = await _lagerRepository.GetByArtikkelOgLotAsync(linje.ArtikkelId, linje.LotNr, cancellationToken);
+
+            await _lagerTransaksjonRepository.AddAsync(new LagerTransaksjon
+            {
+                ArtikkelId = linje.ArtikkelId,
+                LotNr = linje.LotNr,
+                Type = TransaksjonsType.Mottak,
+                Mengde = linje.Mengde,
+                BeholdningEtter = oppdatertBeholdning?.Mengde ?? linje.Mengde,
+                Kilde = "Mottak",
+                KildeId = mottak.Id,
+                UtfortAv = command.MottattAv,
+                Tidspunkt = DateTime.UtcNow
+            }, cancellationToken);
+        }
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
         return mottak.Id;
     }
 }

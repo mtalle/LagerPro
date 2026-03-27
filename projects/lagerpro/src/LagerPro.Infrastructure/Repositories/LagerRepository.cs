@@ -26,6 +26,11 @@ public class LagerRepository : ILagerRepository
             .OrderBy(x => x.LotNr)
             .ToListAsync(cancellationToken);
 
+    public async Task<LagerBeholdning?> GetByLotNrAsync(string lotNr, CancellationToken cancellationToken = default)
+        => await _dbContext.LagerBeholdninger
+            .Include(x => x.Artikkel)
+            .FirstOrDefaultAsync(x => x.LotNr == lotNr, cancellationToken);
+
     public async Task<IReadOnlyList<LagerBeholdning>> GetAllAsync(CancellationToken cancellationToken = default)
         => await _dbContext.LagerBeholdninger
             .Include(x => x.Artikkel)
@@ -52,4 +57,7 @@ public class LagerRepository : ILagerRepository
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task AddAsync(LagerBeholdning beholdning, CancellationToken cancellationToken = default)
+        => await _dbContext.LagerBeholdninger.AddAsync(beholdning, cancellationToken);
 }

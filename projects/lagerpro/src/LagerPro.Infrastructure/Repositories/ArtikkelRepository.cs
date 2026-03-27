@@ -31,4 +31,10 @@ public class ArtikkelRepository : IArtikkelRepository
         await _dbContext.Artikler.AddAsync(artikkel, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    public void Delete(Artikkel artikkel)
+    {
+        _dbContext.Artikler.Remove(artikkel);
+        _dbContext.SaveChanges();
+    }
 }

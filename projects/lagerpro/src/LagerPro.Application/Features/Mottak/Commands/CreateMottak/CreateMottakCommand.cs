@@ -17,4 +17,5 @@ public record MottakLinjeCommand(
     decimal? Temperatur,
     string? Strekkode,
     string? Avvik,
-    string? Kommentar);
+    string? Kommentar,
+    bool Godkjent = false);
