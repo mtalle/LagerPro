@@ -1,11 +1,20 @@
 # LagerPro — MVP-plan
 
+## Visjon
+**For matindustrien** — sporbarheit, lagerstyring og produksjonsplanlegging i éin applikasjon.
+
+**Kjerneverdi:** Live lager med full sporing frå råvare til ferdig produkt.
+
+**Langtsiktig:** Versjon 1 → éin solid applikasjon, bygd på generisk architektur.
+
+---
+
 ## Mål
 Få en første brukertestbar MVP av LagerPro så fort som mulig.
 
 ## Backend-status (2026-03-28) ✅
 **Ferdig:** Artikler, Kunder, Leverandører, Resepter, Mottak, Produksjon, Levering, Lager, Sporbarhet
-**Tester:** 73+ passing
+**Tester:** 82 passing
 **Alle API-endepunkt på plass og pushet til GitHub**
 
 ---

@@ -1,7 +1,11 @@
-# LagerPro — Backend MVP: Sporbarhet & Kvalitetssikring
+# LagerPro — Backend MVP: Sporbarheit & Kvalitetssikring
 
-## Mål
-Komplett backend for heil sporbarheitskjede frå råvare til ferdigvare til kunde.
+## Visjon
+**For matindustrien** — sporbarheit, lagerstyring og produksjonsplanlegging i éin applikasjon.
+
+**Kjerneverdi:** Live lager med full sporing frå råvare til ferdig produkt.
+
+---
 
 ## Fase 1: Backend ferdig (no → 1 uke)
 
@@ -43,12 +47,12 @@ Råvare (Mottak) → Lager → Produksjon (Forbruk + Ferdigvare) → Lager → L
 | GET | `/api/traceability/batch/{batchNr}` | Produksjonsbatch med detaljar |
 | GET | `/api/traceability/kunde/{kundeId}` | Alle leveringar til ein kunde |
 
-### Transaksjonstyper
-- `Mottak` — råvare motteke
+### Transaksjonstyper (for matindustrien)
+- `Mottak` — råvare motteke (med temperatur, holdbarheit)
 - `ProduksjonInn` — ferdigvare produsert
 - `ProduksjonUttak` — råvare brukt i produksjon
 - `Levering` — ferdigvare sendt til kunde
-- `Korrigering` — manuell justering (med grunn)
+- `Korrigering` — manuell justering (med grunn + autorisering)
 
 ---
 
