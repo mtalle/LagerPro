@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LagerPro.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/levering")]
 public class ShippingController : ControllerBase
 {
     private readonly GetAllLeveringHandler _getAllHandler;

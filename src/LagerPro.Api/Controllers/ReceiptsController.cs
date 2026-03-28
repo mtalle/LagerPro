@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LagerPro.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/mottak")]
 public class ReceiptsController : ControllerBase
 {
     private readonly GetAllMottakHandler _getAllHandler;

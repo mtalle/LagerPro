@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LagerPro.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/produksjon")]
 public class ProductionController : ControllerBase
 {
     private readonly GetAllProduksjonsOrdreHandler _getAllHandler;

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LagerPro.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/lager")]
 public class InventoryController : ControllerBase
 {
     private readonly GetAllLagerBeholdningHandler _getAllHandler;
