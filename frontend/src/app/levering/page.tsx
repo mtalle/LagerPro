@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Levering, Kunde, LagerBeholdning, get, post, patch } from '../../lib/api';
 
 const STATUS_MAP: Record<string, string> = {
-  Registrert: 'badge-registrert',
+  Planlagt: 'badge-planlagt',
   Plukket: 'badge-planlagt',
   Sendt: 'badge-sendt',
   Levert: 'badge-levert',

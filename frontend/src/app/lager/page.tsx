@@ -12,7 +12,7 @@ export default function LagerPage() {
 
   async function loadData() {
     try {
-      const data = await get<LagerBeholdning[]>('/lager');
+      const data = await get<LagerBeholdning[]>('/inventory');
       setBeholdninger(data);
     } catch (e) {
       console.error(e);
