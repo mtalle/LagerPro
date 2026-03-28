@@ -1,5 +1,3 @@
-using LagerPro.Domain.Entities;
-
 namespace LagerPro.Contracts.Dtos.Levering;
 
 public record LeveringDto(
