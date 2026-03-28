@@ -12,6 +12,7 @@ obj/
 # Node (for Next.js frontend)
 node_modules/
 npm-debug.log*
+frontend/.next/
 
 # Nested project copies (keep only root)
 projects/

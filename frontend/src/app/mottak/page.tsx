@@ -93,6 +93,35 @@ export default function MottakPage() {
 
   if (loading) return <div className="loading">Laster mottak...</div>;
 
+  function renderMottakRows() {
+    return mottak.map(m => (
+      <Fragment key={m.id}>
+        <tr style={{ cursor: 'pointer' }} onClick={() => setExpanded(expanded === m.id ? null : m.id)}>
+          <td>#{m.id}</td>
+          <td>{new Date(m.mottaksDato).toLocaleDateString('no-NO')}</td>
+          <td>{m.leverandorNavn ?? `Lev.ID ${m.leverandorId}`}</td>
+          <td>{m.referanse ?? '—'}</td>
+          <td>{statusBadge(m.status)}</td>
+          <td>{m.mottattAv ?? '—'}</td>
+          <td>
+            {m.status === 'Registrert' && <button className="btn btn-sm btn-primary" onClick={e => { e.stopPropagation(); updateStatus(m.id, 'Mottatt'); }}>Mottatt</button>}
+            {m.status === 'Mottatt' && <button className="btn btn-sm btn-primary" onClick={e => { e.stopPropagation(); updateStatus(m.id, 'Godkjent'); }}>Godkjenn</button>}
+          </td>
+        </tr>
+        {expanded === m.id && m.linjer.map(l => (
+          <tr key={`${m.id}-linje-${l.id}`} style={{ background: '#f9fafb', fontSize: '0.85rem' }}>
+            <td colSpan={2}></td>
+            <td><code>{l.artikkelNavn ?? `Art.ID ${l.artikkelId}`}</code></td>
+            <td>Lot: <code>{l.lotNr}</code></td>
+            <td>{l.mengde} {l.enhet}</td>
+            <td><span className={`badge ${l.godkjent ? 'badge-aktiv' : 'badge-inactive'}`}>{l.godkjent ? 'Godkjent' : l.avvik ?? 'Avvik'}</span></td>
+            <td>{l.bestForDato ? `BF: ${new Date(l.bestForDato).toLocaleDateString('no-NO')}` : ''}</td>
+          </tr>
+        ))}
+      </Fragment>
+    ));
+  }
+
   return (
     <>
       <div className="page-header">
@@ -109,20 +138,7 @@ export default function MottakPage() {
         <tbody>
           {mottak.length === 0 ? (
             <tr><td colSpan={7} style={{ textAlign: 'center', color: '#9ca3af', padding: '2rem' }}>Ingen mottak</td></tr>
-          ) : mottak.map(m => (
-            <tr key={m.id} style={{ cursor: 'pointer' }} onClick={() => setExpanded(expanded === m.id ? null : m.id)}>
-              <td>#{m.id}</td>
-              <td>{new Date(m.mottaksDato).toLocaleDateString('no-NO')}</td>
-              <td>{m.leverandorNavn ?? `Lev.ID ${m.leverandorId}`}</td>
-              <td>{m.referanse ?? '—'}</td>
-              <td>{statusBadge(m.status)}</td>
-              <td>{m.mottattAv ?? '—'}</td>
-              <td>
-                {m.status === 'Registrert' && <button className="btn btn-sm btn-primary" onClick={e => { e.stopPropagation(); updateStatus(m.id, 'Mottatt'); }}>Mottatt</button>}
-                {m.status === 'Mottatt' && <button className="btn btn-sm btn-primary" onClick={e => { e.stopPropagation(); updateStatus(m.id, 'Godkjent'); }}>Godkjenn</button>}
-              </td>
-            </tr>
-          ))}
+          ) : renderMottakRows()}
         </tbody>
       </table>
 
