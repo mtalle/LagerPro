@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Leverandor, Kunde, get, post, put, del } from '../../lib/api';
+import { Leverandor, get, post, put, del } from '../../lib/api';
 
 export default function LeverandorerPage() {
   const [leverandorer, setLeverandorer] = useState<Leverandor[]>([]);

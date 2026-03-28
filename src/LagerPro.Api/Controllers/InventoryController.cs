@@ -7,6 +7,7 @@ namespace LagerPro.Api.Controllers;
 
 [ApiController]
 [Route("api/lager")]
+[Route("api/inventory", Order = 1)]
 public class InventoryController : ControllerBase
 {
     private readonly GetAllLagerFlatHandler _getAllHandler;

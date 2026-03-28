@@ -85,7 +85,18 @@ export default function KunderPage() {
   }
 
   async function handleToggleActive(k: Kunde) {
-    const updated = { ...form, navn: k.navn, kontaktperson: k.kontaktperson ?? '', telefon: k.telefon ?? '', epost: k.epost ?? '', adresse: k.adresse ?? '', postnr: k.postnr ?? '', poststed: k.poststed ?? '', orgNr: k.orgNr ?? '', kommentar: k.kommentar ?? '' };
+    const updated = {
+      navn: k.navn,
+      kontaktperson: k.kontaktperson ?? '',
+      telefon: k.telefon ?? '',
+      epost: k.epost ?? '',
+      adresse: k.adresse ?? '',
+      postnr: k.postnr ?? '',
+      poststed: k.poststed ?? '',
+      orgNr: k.orgNr ?? '',
+      kommentar: k.kommentar ?? '',
+      aktiv: !k.aktiv,
+    };
     try { await put(`/kunder/${k.id}`, updated); load(); }
     catch (err) { alert('Feil: ' + (err as Error).message); }
   }
