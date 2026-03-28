@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { ProduksjonsOrdre, Resept, LagerBeholdning, get, post, patch } from '../../lib/api';
+import { ProduksjonsOrdre, Resept, get, post, patch } from '../../lib/api';
 
 const STATUS_MAP: Record<string, string> = {
   Planlagt: 'badge-planlagt',
@@ -9,18 +9,48 @@ const STATUS_MAP: Record<string, string> = {
   Kansellert: 'badge-kansellert',
 };
 
+interface FerdigmeldLinje {
+  ravareId: number;
+  ravareNavn: string | null;
+  enhet: string | null;
+  oppskriftsMengde: number;
+  foreslattLotNr: string | null;
+  foreslattMengde: number | null;
+  tilgjengeligBeholdning: number | null;
+  harLager: boolean;
+}
+
+interface FerdigmeldPrefill {
+  ordreId: number;
+  ordreNr: string;
+  reseptId: number;
+  reseptNavn: string | null;
+  ferdigvareId: number;
+  ferdigvareNavn: string | null;
+  antallPortjoner: number;
+  ferdigvareEnhet: string | null;
+  foreslattAntall: number;
+  reseptLinjer: FerdigmeldLinje[];
+}
+
 export default function ProduksjonPage() {
   const [ordre, setOrdre] = useState<ProduksjonsOrdre[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showFerdigmeldModal, setShowFerdigmeldModal] = useState(false);
-  const [ferdigmeldOrdre, setFerdigmeldOrdre] = useState<ProduksjonsOrdre | null>(null);
-
-  const [resepter, setResepter] = useState<Resept[]>([]);
+  const [ferdigmeldPrefill, setFerdigmeldPrefill] = useState<FerdigmeldPrefill | null>(null);
   const [search, setSearch] = useState('');
 
+  const [resepter, setResepter] = useState<Resept[]>([]);
+
   const [createForm, setCreateForm] = useState({ reseptId: 0, planlagtDato: new Date().toISOString().slice(0, 10), kommentar: '' });
-  const [ferdigmeldForm, setFerdigmeldForm] = useState({ antallProdusert: 1, kommentar: '', utfortAv: '', forbruk: [] as { artikkelId: number; lotNr: string; mengdeBrukt: number; enhet: string; overstyrt: boolean; kommentar: string }[] });
+
+  const [ferdigmeldForm, setFerdigmeldForm] = useState({
+    antallProdusert: 1,
+    kommentar: '',
+    utfortAv: '',
+    forbruk: [] as { artikkelId: number; lotNr: string; mengdeBrukt: number; enhet: string; overstyrt: boolean; kommentar: string }[],
+  });
 
   useEffect(() => { load(); }, []);
 
@@ -38,6 +68,7 @@ export default function ProduksjonPage() {
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
+    if (!createForm.reseptId) { alert('Velg en resept.'); return; }
     try {
       await post('/production', { ...createForm, planlagtDato: new Date(createForm.planlagtDato).toISOString() });
       setShowCreateModal(false);
@@ -46,27 +77,55 @@ export default function ProduksjonPage() {
     } catch (e) { alert('Feil: ' + (e as Error).message); }
   }
 
-  function openFerdigmeld(o: ProduksjonsOrdre) {
-    setFerdigmeldOrdre(o);
-    // Pre-fill from order
-    setFerdigmeldForm({ antallProdusert: 1, kommentar: '', utfortAv: '', forbruk: [] });
-    setShowFerdigmeldModal(true);
+  async function openFerdigmeld(o: ProduksjonsOrdre) {
+    try {
+      const prefill = await get<FerdigmeldPrefill>(`/production/${o.id}/ferdigmeld/prefill`);
+      setFerdigmeldPrefill(prefill);
+      const scale = prefill.foreslattAntall > 0 ? prefill.foreslattAntall : 1;
+      setFerdigmeldForm({
+        antallProdusert: scale,
+        kommentar: '',
+        utfortAv: '',
+        forbruk: prefill.reseptLinjer.map(linje => ({
+          artikkelId: linje.ravareId,
+          lotNr: linje.foreslattLotNr ?? '',
+          mengdeBrukt: Math.round(linje.oppskriftsMengde * scale * 100) / 100,
+          enhet: linje.enhet ?? 'STK',
+          overstyrt: false,
+          kommentar: '',
+        })),
+      });
+      setShowFerdigmeldModal(true);
+    } catch (e) {
+      alert('Kunne ikke laste ferdigmeld-data: ' + (e as Error).message);
+    }
+  }
+
+  function updateForbrukLinje(i: number, field: string, value: unknown) {
+    const forbruk = [...ferdigmeldForm.forbruk];
+    (forbruk[i] as Record<string, unknown>)[field] = value;
+    setFerdigmeldForm({ ...ferdigmeldForm, forbruk });
   }
 
   async function handleFerdigmeld(e: React.FormEvent) {
     e.preventDefault();
-    if (!ferdigmeldOrdre) return;
+    if (!ferdigmeldPrefill) return;
     try {
-      await post(`/production/${ferdigmeldOrdre.id}/ferdigmeld`, {
+      await post(`/production/${ferdigmeldPrefill.ordreId}/ferdigmeld`, {
         antallProdusert: ferdigmeldForm.antallProdusert,
         kommentar: ferdigmeldForm.kommentar || null,
         utfortAv: ferdigmeldForm.utfortAv || null,
-        forbruk: ferdigmeldForm.forbruk.length > 0 ? ferdigmeldForm.forbruk.map(f => ({
-          artikkelId: f.artikkelId, lotNr: f.lotNr, mengdeBrukt: f.mengdeBrukt,
-          enhet: f.enhet || null, overstyrt: f.overstyrt, kommentar: f.kommentar || null,
-        })) : null,
+        forbruk: ferdigmeldForm.forbruk.map(f => ({
+          artikkelId: f.artikkelId,
+          lotNr: f.lotNr || null,
+          mengdeBrukt: f.mengdeBrukt,
+          enhet: f.enhet || null,
+          overstyrt: f.overstyrt,
+          kommentar: f.kommentar || null,
+        })),
       });
       setShowFerdigmeldModal(false);
+      setFerdigmeldPrefill(null);
       load();
     } catch (e) { alert('Feil: ' + (e as Error).message); }
   }
@@ -130,7 +189,6 @@ export default function ProduksjonPage() {
         </tbody>
       </table>
 
-      {/* Create modal */}
       {showCreateModal && (
         <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
@@ -162,29 +220,98 @@ export default function ProduksjonPage() {
         </div>
       )}
 
-      {/* Ferdigmeld modal */}
-      {showFerdigmeldModal && ferdigmeldOrdre && (
-        <div className="modal-overlay" onClick={() => setShowFerdigmeldModal(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 700 }}>
-            <h2>Ferdigmeld produksjon</h2>
+      {showFerdigmeldModal && ferdigmeldPrefill && (
+        <div className="modal-overlay" onClick={() => { setShowFerdigmeldModal(false); setFerdigmeldPrefill(null); }}>
+          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 850 }}>
+            <h2>Ferdigmeld produksjon #{ferdigmeldPrefill.ordreNr}</h2>
+            <p style={{ color: '#6b7280', fontSize: '0.9rem', marginBottom: '1rem' }}>
+              {ferdigmeldPrefill.reseptNavn} — {ferdigmeldPrefill.ferdigvareNavn ?? '—'}
+            </p>
             <form onSubmit={handleFerdigmeld}>
               <div className="form-grid">
                 <div className="form-group">
                   <label>Antall produsert *</label>
-                  <input type="number" required min="0.01" step="0.01" value={ferdigmeldForm.antallProdusert}
-                    onChange={e => setFerdigmeldForm({ ...ferdigmeldForm, antallProdusert: parseFloat(e.target.value) || 0 })} />
+                  <input type="number" required min="0.01" step="0.01"
+                    value={ferdigmeldForm.antallProdusert}
+                    onChange={e => {
+                      const nytt = parseFloat(e.target.value) || 0;
+                      const base = ferdigmeldPrefill.foreslattAntall > 0 ? ferdigmeldPrefill.foreslattAntall : 1;
+                      const scale = nytt / base;
+                      setFerdigmeldForm({
+                        ...ferdigmeldForm,
+                        antallProdusert: nytt,
+                        forbruk: ferdigmeldPrefill.reseptLinjer.map(linje => ({
+                          artikkelId: linje.ravareId,
+                          lotNr: linje.foreslattLotNr ?? '',
+                          mengdeBrukt: Math.round(linje.oppskriftsMengde * scale * 100) / 100,
+                          enhet: linje.enhet ?? 'STK',
+                          overstyrt: false,
+                          kommentar: '',
+                        })),
+                      });
+                    }}
+                  />
                 </div>
                 <div className="form-group">
                   <label>Utfort av</label>
-                  <input value={ferdigmeldForm.utfortAv} onChange={e => setFerdigmeldForm({ ...ferdigmeldForm, utfortAv: e.target.value })} />
+                  <input value={ferdigmeldForm.utfortAv}
+                    onChange={e => setFerdigmeldForm({ ...ferdigmeldForm, utfortAv: e.target.value })} />
                 </div>
               </div>
+
+              <h3 style={{ fontSize: '0.95rem', marginBottom: '0.5rem', color: '#374151' }}>Forbruk</h3>
+              <div style={{ overflowX: 'auto', marginBottom: '1rem' }}>
+                <table style={{ width: '100%', fontSize: '0.85rem' }}>
+                  <thead>
+                    <tr style={{ textAlign: 'left', background: '#f3f4f6' }}>
+                      <th>Råvare</th><th>Oppskrift</th><th>LotNr</th><th>Mengde</th><th>Enhet</th><th>Lager</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ferdigmeldPrefill.reseptLinjer.map((linje, i) => (
+                      <tr key={linje.ravareId}>
+                        <td>{linje.ravareNavn ?? `ID ${linje.ravareId}`}</td>
+                        <td>{linje.oppskriftsMengde} {linje.enhet ?? ''}</td>
+                        <td>
+                          <input value={ferdigmeldForm.forbruk[i]?.lotNr ?? ''}
+                            onChange={e => updateForbrukLinje(i, 'lotNr', e.target.value)}
+                            placeholder="Lotnr"
+                            style={{ width: 100, fontSize: '0.8rem', padding: '0.25rem 0.4rem' }} />
+                        </td>
+                        <td>
+                          <input type="number" step="0.01" min="0"
+                            value={ferdigmeldForm.forbruk[i]?.mengdeBrukt ?? 0}
+                            onChange={e => updateForbrukLinje(i, 'mengdeBrukt', parseFloat(e.target.value) || 0)}
+                            style={{ width: 80, fontSize: '0.8rem', padding: '0.25rem 0.4rem' }} />
+                        </td>
+                        <td>
+                          <select value={ferdigmeldForm.forbruk[i]?.enhet ?? 'STK'}
+                            onChange={e => updateForbrukLinje(i, 'enhet', e.target.value)}
+                            style={{ fontSize: '0.8rem' }}>
+                            <option value="KG">KG</option>
+                            <option value="L">L</option>
+                            <option value="STK">STK</option>
+                            <option value="M">M</option>
+                          </select>
+                        </td>
+                        <td>
+                          <span style={{ fontSize: '0.8rem', color: linje.harLager ? '#16a34a' : '#dc2626' }}>
+                            {linje.tilgjengeligBeholdning != null ? `${linje.tilgjengeligBeholdning} ${linje.enhet ?? ''}` : '—'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
               <div className="form-group" style={{ marginBottom: '1rem' }}>
                 <label>Kommentar</label>
-                <textarea rows={2} value={ferdigmeldForm.kommentar} onChange={e => setFerdigmeldForm({ ...ferdigmeldForm, kommentar: e.target.value })} />
+                <textarea rows={2} value={ferdigmeldForm.kommentar}
+                  onChange={e => setFerdigmeldForm({ ...ferdigmeldForm, kommentar: e.target.value })} />
               </div>
               <div className="form-actions">
-                <button type="button" className="btn btn-secondary" onClick={() => setShowFerdigmeldModal(false)}>Avbryt</button>
+                <button type="button" className="btn btn-secondary" onClick={() => { setShowFerdigmeldModal(false); setFerdigmeldPrefill(null); }}>Avbryt</button>
                 <button type="submit" className="btn btn-primary">Ferdigmeld</button>
               </div>
             </form>
