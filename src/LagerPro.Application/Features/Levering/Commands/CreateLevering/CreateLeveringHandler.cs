@@ -78,32 +78,8 @@ public class CreateLeveringHandler
 
         await _leveringRepository.AddAsync(levering, cancellationToken);
 
-        // Trekk fra lager og logg transaksjoner i samme transaction
-        foreach (var linje in levering.Linjer)
-        {
-            var beholdning = await _lagerRepository.GetByArtikkelOgLotAsync(
-                linje.ArtikkelId, linje.LotNr, cancellationToken);
-
-            if (beholdning is not null)
-            {
-                beholdning.Mengde -= linje.Mengde;
-                beholdning.SistOppdatert = DateTime.UtcNow;
-            }
-
-            await _lagerTransaksjonRepository.AddAsync(new LagerTransaksjon
-            {
-                ArtikkelId = linje.ArtikkelId,
-                LotNr = linje.LotNr,
-                Type = TransaksjonsType.Levering,
-                Mengde = linje.Mengde,
-                BeholdningEtter = beholdning?.Mengde ?? 0,
-                Kilde = "Levering",
-                KildeId = levering.Id,
-                Kommentar = linje.Kommentar ?? $"Levering #{levering.Id} opprettet",
-                UtfortAv = command.LevertAv,
-                Tidspunkt = DateTime.UtcNow
-            }, cancellationToken);
-        }
+        // Kun validering her — lager trekkes ved Plukket-status for å unngå dobbeltrekk.
+        // Plukket er den offisielle bekreftelsen på at varene er plukket fra lager.
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return levering.Id;

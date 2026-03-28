@@ -2,6 +2,7 @@ using LagerPro.Application.Features.Produksjon.Commands.CreateProduksjonsOrdre;
 using LagerPro.Application.Features.Produksjon.Commands.FerdigmeldProduksjonsOrdre;
 using LagerPro.Application.Features.Produksjon.Commands.UpdateProduksjonsOrdreStatus;
 using LagerPro.Application.Features.Produksjon.Queries.GetAllProduksjonsOrdre;
+using LagerPro.Application.Features.Produksjon.Queries.GetFerdigmeldPrefill;
 using LagerPro.Application.Features.Produksjon.Queries.GetPlukkliste;
 using LagerPro.Application.Features.Produksjon.Queries.GetProduksjonsOrdreById;
 using LagerPro.Contracts.Requests.Produksjon;
@@ -20,6 +21,7 @@ public class ProductionController : ControllerBase
     private readonly FerdigmeldProduksjonsOrdreHandler _ferdigmeldHandler;
     private readonly UpdateProduksjonsOrdreStatusHandler _updateStatusHandler;
     private readonly GetPlukklisteHandler _plukklisteHandler;
+    private readonly GetFerdigmeldPrefillHandler _ferdigmeldPrefillHandler;
 
     public ProductionController(
         GetAllProduksjonsOrdreHandler getAllHandler,
@@ -27,7 +29,8 @@ public class ProductionController : ControllerBase
         CreateProduksjonsOrdreHandler createHandler,
         FerdigmeldProduksjonsOrdreHandler ferdigmeldHandler,
         UpdateProduksjonsOrdreStatusHandler updateStatusHandler,
-        GetPlukklisteHandler plukklisteHandler)
+        GetPlukklisteHandler plukklisteHandler,
+        GetFerdigmeldPrefillHandler ferdigmeldPrefillHandler)
     {
         _getAllHandler = getAllHandler;
         _getByIdHandler = getByIdHandler;
@@ -35,6 +38,7 @@ public class ProductionController : ControllerBase
         _ferdigmeldHandler = ferdigmeldHandler;
         _updateStatusHandler = updateStatusHandler;
         _plukklisteHandler = plukklisteHandler;
+        _ferdigmeldPrefillHandler = ferdigmeldPrefillHandler;
     }
 
     [HttpGet]
@@ -50,6 +54,14 @@ public class ProductionController : ControllerBase
         var ordre = await _getByIdHandler.Handle(new GetProduksjonsOrdreByIdQuery(id), cancellationToken);
         if (ordre is null) return NotFound(new { message = $"Produksjonsordre with id {id} not found." });
         return Ok(ordre);
+    }
+
+    [HttpGet("{id:int}/ferdigmeld/prefill")]
+    public async Task<IActionResult> GetFerdigmeldPrefill(int id, CancellationToken cancellationToken)
+    {
+        var prefill = await _ferdigmeldPrefillHandler.Handle(new GetFerdigmeldPrefillQuery(id), cancellationToken);
+        if (prefill is null) return NotFound(new { message = $"Produksjonsordre with id {id} not found." });
+        return Ok(prefill);
     }
 
     [HttpPost]
