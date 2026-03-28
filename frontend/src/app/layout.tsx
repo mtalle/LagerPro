@@ -13,7 +13,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <nav className="navbar">
           <span className="logo">📦 LagerPro</span>
           <div className="nav-links">
-            <a href="/">Artikler</a>
+            <a href="/">Dashboard</a>
+            <a href="/artikler">Artikler</a>
             <a href="/kunder">Kunder</a>
             <a href="/leverandorer">Leverandører</a>
             <a href="/lager">Lager</a>

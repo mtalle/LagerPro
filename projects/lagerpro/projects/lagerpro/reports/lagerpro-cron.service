@@ -1,7 +1,0 @@
-[Unit]
-Description=LagerPro status runner
-
-[Service]
-Type=oneshot
-WorkingDirectory=/home/ubuntu/.openclaw/workspace
-ExecStart=/home/ubuntu/.openclaw/workspace/reports/lagerpro-cron.sh

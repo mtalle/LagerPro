@@ -7,6 +7,7 @@ export default function MottakPage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [leverandorer, setLeverandorer] = useState<Leverandor[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [expanded, setExpanded] = useState<number | null>(null);
   const [error, setError] = useState('');
@@ -93,8 +94,18 @@ export default function MottakPage() {
 
   if (loading) return <div className="loading">Laster mottak...</div>;
 
+  const filtered = mottak.filter(m => {
+    const q = search.toLowerCase();
+    return (
+      (m.leverandorNavn ?? '').toLowerCase().includes(q) ||
+      (m.referanse ?? '').toLowerCase().includes(q) ||
+      (m.mottattAv ?? '').toLowerCase().includes(q) ||
+      m.id.toString().includes(q)
+    );
+  });
+
   function renderMottakRows() {
-    return mottak.map(m => (
+    return filtered.map(m => (
       <Fragment key={m.id}>
         <tr style={{ cursor: 'pointer' }} onClick={() => setExpanded(expanded === m.id ? null : m.id)}>
           <td>#{m.id}</td>
@@ -132,6 +143,15 @@ export default function MottakPage() {
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
+
+      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
+        <input
+          placeholder="Søk leverandør, referanse..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={{ padding: '0.4rem 0.8rem', border: '1px solid #d1d5db', borderRadius: 6, width: 300, fontSize: '0.9rem' }}
+        />
+      </div>
 
       <table>
         <thead>
