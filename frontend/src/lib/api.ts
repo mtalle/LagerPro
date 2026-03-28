@@ -85,6 +85,7 @@ export interface LagerBeholdning {
   lokasjon?: string;
   bestForDato?: string;
   sistOppdatert: string;
+  minBeholdning?: number;
 }
 
 export interface Mottak {
@@ -186,4 +187,20 @@ export interface ReseptLinje {
   enhet: string;
   rekkefolge: number;
   kommentar?: string;
+}
+
+export interface ForbrukLinje {
+  artikkelId: number;
+  lotNr: string;
+  mengdeBrukt: number;
+  enhet?: string;
+  overstyrt: boolean;
+  kommentar?: string;
+}
+
+export interface FerdigmeldRequest {
+  antallProdusert: number;
+  kommentar?: string;
+  utfortAv?: string;
+  forbruk?: ForbrukLinje[];
 }
