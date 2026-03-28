@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>LagerPro.Application</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LagerPro.Domain\LagerPro.Domain.csproj" />
+    <ProjectReference Include="..\LagerPro.Contracts\LagerPro.Contracts.csproj" />
+  </ItemGroup>
+</Project>

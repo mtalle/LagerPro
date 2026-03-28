@@ -1,4 +1,4 @@
-// File: /home/ubuntu/.openclaw/workspace/projects/lagerpro/frontend/src/app/mottak/page.tsx
+// File: /home/ubuntu/.openclaw/workspace/frontend/src/app/mottak/page.tsx
 import * as entry from '../../../../src/app/mottak/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

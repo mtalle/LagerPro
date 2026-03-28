@@ -42,7 +42,8 @@ public class GetAllLagerBeholdningHandler
                         x.SistOppdatert)).ToList());
             })
             .OrderBy(x => x.ArtikkelNr)
-            .ToList();
+            .ToList()
+            .AsReadOnly();
 
         return grouped;
     }

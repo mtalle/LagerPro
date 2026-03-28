@@ -6,7 +6,36 @@
 - Martin lives in Ålfoten, Bremanger and works in Svelgen, Bremanger.
 - Martin's timezone is Europe/Oslo.
 
-## Projects
+## LagerPro Focus Areas
+- Sub-agents → Frontend (Blazor/Razor Pages)
+- Steve (main agent) → Unit testing, code review, backend
+- All sub-agents must commit every 30 min, build+test must pass
+
+## LagerPro Tech Stack
+- .NET 8, Clean Architecture, EF Core + SQL Server
+- Backend: src/LagerPro.Api, Application, Domain, Infrastructure, Contracts
+- Frontend: frontend/ (Next.js, started by sub-agent)
+- Tests: tests/ (xUnit + Moq)
+
+## LagerPro Status (2026-03-28)
+- Backend build: 0 errors, 0 warnings ✅
+- Unit tests: **74 passing** ✅ (ArticleTests 15, KunderTests 9, LeverandorerTests 9, MottakTests 10, LagerTests 7, ProduksjonTests 14, LeveringTests 7, SmokeTests 1)
+- Frontend: started by sub-agent (Next.js based)
+- Credits ran out 2026-03-28 ~04:00 UTC, refilled ~06:00 UTC
+
+## Backend fixes applied (2026-03-28)
+- Repository interface mismatch (ILager, IMottak, ILevering, IProduksjonsOrdre, IArtikkel)
+- Lagt til manglende repository-metoder i interfaces og implementasjoner
+- Lagt til IUnitOfWork i DI
+- Lagt til alle repositories i DI (ikke bare IArtikkelRepository)
+- Kallet AddApplication() i Program.cs (manglede)
+- InventoryController: stub → ekte implementasjon med GetAllLagerBeholdningHandler
+- ReceiptsController: stub → ekte implementasjon
+- ShippingController: stub → ekte implementasjon (CreateLevering med riktige feltnavn)
+- LeveringDto: lagt til Linjer-felt + Kunde/Artikkel includes i repository
+- GetAllLagerBeholdningHandler: fikset nullable warning
+- DeleteArticleHandler: lagt til await
+- Articles.razor: async-task uten await → void
 - Current main project: LagerPro.
 - I am the main programmer responsible for LagerPro.
 - I take ownership of all programming for the app unless Martin કહે otherwise.

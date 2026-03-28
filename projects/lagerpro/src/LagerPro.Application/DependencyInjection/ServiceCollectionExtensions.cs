@@ -8,6 +8,8 @@ using LagerPro.Application.Features.Kunder.Commands;
 using LagerPro.Application.Features.Kunder.Queries.GetAllKunder;
 using LagerPro.Application.Features.Kunder.Queries.GetKundeById;
 using LagerPro.Application.Features.Lager.Queries.GetAllLagerBeholdning;
+using LagerPro.Application.Features.Lager.Queries.GetLagerBeholdningByArtikkel;
+using LagerPro.Application.Features.Lager.Queries.GetLagerBeholdningByLotNr;
 using LagerPro.Application.Features.Leverandorer;
 using LagerPro.Application.Features.Leverandorer.Commands;
 using LagerPro.Application.Features.Leverandorer.Queries.GetAllLeverandorer;
@@ -26,8 +28,11 @@ using LagerPro.Application.Features.Produksjon.Commands.UpdateProduksjonsOrdreSt
 using LagerPro.Application.Features.Produksjon.Queries.GetAllProduksjonsOrdre;
 using LagerPro.Application.Features.Produksjon.Queries.GetProduksjonsOrdreById;
 using LagerPro.Application.Features.Resepter.Commands.CreateResept;
+using LagerPro.Application.Features.Resepter.Commands.UpdateResept;
+using LagerPro.Application.Features.Resepter.Commands.DeleteResept;
 using LagerPro.Application.Features.Resepter.Queries.GetAllResepter;
 using LagerPro.Application.Features.Resepter.Queries.GetReseptById;
+using LagerPro.Application.Features.Traceability.Queries.GetTraceabilityByLot;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LagerPro.Application.DependencyInjection;
@@ -65,6 +70,8 @@ public static class ServiceCollectionExtensions
 
         // Lager
         services.AddScoped<GetAllLagerBeholdningHandler>();
+        services.AddScoped<GetLagerBeholdningByArtikkelHandler>();
+        services.AddScoped<GetLagerBeholdningByLotNrHandler>();
 
         // Produksjon
         services.AddScoped<GetAllProduksjonsOrdreHandler>();
@@ -83,6 +90,11 @@ public static class ServiceCollectionExtensions
         services.AddScoped<GetAllResepterHandler>();
         services.AddScoped<GetReseptByIdHandler>();
         services.AddScoped<CreateReseptHandler>();
+        services.AddScoped<UpdateReseptHandler>();
+        services.AddScoped<DeleteReseptHandler>();
+
+        // Traceability
+        services.AddScoped<GetTraceabilityByLotHandler>();
 
         return services;
     }

@@ -3,6 +3,36 @@
 ## Mål
 Få en første brukertestbar MVP av LagerPro så fort som mulig.
 
+## Backend-status (2026-03-28) ✅
+**Ferdig:** Artikler, Kunder, Leverandører, Resepter, Mottak, Produksjon, Levering, Lager, Sporbarhet
+**Tester:** 73+ passing
+**Alle API-endepunkt på plass og pushet til GitHub**
+
+---
+
+## Frontend MVP — Nytt fokusområde
+
+### Prioritert rekkefølge (sub-agent oppdrag)
+
+#### Fase 1: Fiks eksisterande sider
+- [ ] **Lageroversikt** → Bruk `/api/lager`
+- [ ] **Mottak** → Bruk `/api/mottak`
+- [ ] **Produksjon** → Bruk `/api/produksjon`
+- [ ] **Levering** → Bruk `/api/levering`
+- [ ] Alle knappar og skjema må fungere (les, lag, oppdater)
+
+#### Fase 2: Nye sider + organisering
+- [ ] **Artikklar** → vis alle + rediger (Varelager)
+- [ ] **Innstillingar** → Kunder + Leverandører (CRUD)
+- [ ] **Resepter** → liste + legg til + rediger
+
+#### Fase 3: Avansert
+- [ ] **Sporing** → spor artikkel/lotje via `/api/traceability/lot/{lotNr}`
+- [ ] **Dashboard** → enkel oversikt (artiklar, lager, produksjon)
+- [ ] **Rapporter** → enkle nedlastningar
+
+---
+
 ## MVP-scope
 Kun det som trengs for å teste kjerneflyten:
 - Registrere artikkel

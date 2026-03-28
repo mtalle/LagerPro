@@ -25,4 +25,14 @@ public class LeverandorRepository : ILeverandorRepository
         await _dbContext.Leverandorer.AddAsync(leverandor, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    public void Update(Leverandor leverandor)
+    {
+        _dbContext.Leverandorer.Update(leverandor);
+    }
+
+    public void Delete(Leverandor leverandor)
+    {
+        _dbContext.Leverandorer.Remove(leverandor);
+    }
 }

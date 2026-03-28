@@ -26,6 +26,13 @@ public class GetAllLeveringHandler
             l.Status.ToString(),
             l.Kommentar,
             l.LevertAv,
-            l.OpprettetDato)).ToList();
+            l.OpprettetDato,
+            l.Linjer.Select(linje => new LagerPro.Contracts.Dtos.Levering.LeveringLinjeDto(
+                linje.Id,
+                linje.ArtikkelId,
+                linje.Artikkel?.Navn,
+                linje.LotNr,
+                linje.Mengde,
+                linje.Enhet)).ToList())).ToList();
     }
 }

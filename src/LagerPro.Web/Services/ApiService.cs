@@ -194,4 +194,12 @@ public class ApiService
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<List<Leverandor>>() ?? new();
     }
+
+    // Resepter
+    public async Task<List<Resept>> GetResepterAsync()
+    {
+        var response = await _http.GetAsync("/api/resepter");
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<List<Resept>>() ?? new();
+    }
 }

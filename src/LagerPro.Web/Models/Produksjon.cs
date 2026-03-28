@@ -39,3 +39,13 @@ public class CreateProduksjonsOrdreRequest
     public DateTime PlanlagtDato { get; set; } = DateTime.Now;
     public string? Kommentar { get; set; }
 }
+
+public class Resept
+{
+    public int Id { get; set; }
+    public string Navn { get; set; } = string.Empty;
+    public int FerdigvareId { get; set; }
+    public string? FerdigvareNavn { get; set; }
+    public decimal AntallPortjoner { get; set; }
+    public bool Aktiv { get; set; }
+}

@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { ProduksjonsOrdre, get, patch } from '../../lib/api';
+import { ProduksjonsOrdre, Resept, get, post, patch } from '../../lib/api';
 
 const STATUS_MAP: Record<string, string> = {
   Planlagt: 'badge-planlagt',
@@ -11,13 +11,44 @@ const STATUS_MAP: Record<string, string> = {
 
 export default function ProduksjonPage() {
   const [ordre, setOrdre] = useState<ProduksjonsOrdre[]>([]);
+  const [resepter, setResepter] = useState<Resept[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+
+  const [form, setForm] = useState({
+    reseptId: 0, ordreNr: '', planlagtDato: new Date().toISOString().slice(0, 10),
+    kommentar: '',
+  });
 
   useEffect(() => { load(); }, []);
   async function load() {
-    try { setOrdre(await get<ProduksjonsOrdre[]>('/production')); }
-    catch (e) { console.error(e); }
+    try {
+      const [o, r] = await Promise.all([
+        get<ProduksjonsOrdre[]>('/production'),
+        get<Resept[]>('/recipes'),
+      ]);
+      setOrdre(o);
+      setResepter(r);
+    } catch (e) { console.error(e); }
     finally { setLoading(false); }
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (form.reseptId === 0) { alert('Velg en resept.'); return; }
+    try {
+      await post('/production', {
+        ...form,
+        planlagtDato: new Date(form.planlagtDato).toISOString(),
+      });
+      setShowModal(false);
+      resetForm();
+      load();
+    } catch (e) { alert('Feil: ' + (e as Error).message); }
+  }
+
+  function resetForm() {
+    setForm({ reseptId: 0, ordreNr: '', planlagtDato: new Date().toISOString().slice(0, 10), kommentar: '' });
   }
 
   async function setStatus(id: number, status: string) {
@@ -29,7 +60,11 @@ export default function ProduksjonPage() {
 
   return (
     <>
-      <div className="page-header"><h1>🏗 Produksjon</h1></div>
+      <div className="page-header">
+        <h1>🏗 Produksjon</h1>
+        <button className="btn btn-primary" onClick={() => setShowModal(true)}>+ Ny produksjonsordre</button>
+      </div>
+
       <table>
         <thead>
           <tr><th>OrdreNr</th><th>Resept</th><th>Planlagt</th><th>Ferdigmeldt</th><th>Antall</th><th>Lot</th><th>Status</th><th>Utfort</th><th></th></tr>
@@ -56,6 +91,41 @@ export default function ProduksjonPage() {
           ))}
         </tbody>
       </table>
+
+      {showModal && (
+        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 500 }}>
+            <h2>Ny produksjonsordre</h2>
+            <form onSubmit={handleSubmit}>
+              <div className="form-grid">
+                <div className="form-group">
+                  <label>Resept *</label>
+                  <select required value={form.reseptId} onChange={e => setForm({ ...form, reseptId: parseInt(e.target.value) })}>
+                    <option value={0}>Velg resept...</option>
+                    {resepter.map(r => <option key={r.id} value={r.id}>{r.navn} ({r.antallPortjoner} porsjoner)</option>)}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Ordrenummer</label>
+                  <input value={form.ordreNr} onChange={e => setForm({ ...form, ordreNr: e.target.value })} placeholder="Auto hvis tom" />
+                </div>
+                <div className="form-group">
+                  <label>Planlagt dato</label>
+                  <input type="date" value={form.planlagtDato} onChange={e => setForm({ ...form, planlagtDato: e.target.value })} />
+                </div>
+              </div>
+              <div className="form-group">
+                <label>Kommentar</label>
+                <textarea rows={2} value={form.kommentar} onChange={e => setForm({ ...form, kommentar: e.target.value })} />
+              </div>
+              <div className="form-actions">
+                <button type="button" className="btn btn-secondary" onClick={() => { setShowModal(false); resetForm(); }}>Avbryt</button>
+                <button type="submit" className="btn btn-primary">Opprett</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 }

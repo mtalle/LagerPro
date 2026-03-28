@@ -34,36 +34,26 @@ public class UpdateLeveringStatusHandler
         if (!Enum.TryParse<LeveringStatus>(command.Status, ignoreCase: true, out var newStatus))
             return false;
 
-        // Lager trekkes ved levering (CreateLevering setter Planlagt og trekker lager).
-        // Kun ved status=Planlagt → Levert skal vi bekrefte endelig lagerreduksjon
-        // (allerede gjort i Create, så vi logger kun transaksjonen på nytt for sporbarhet).
+        // Lager ble allerede reservert ved opprettelse (CreateLevering).
+        // Ved levert — logg kun ferdig bekreftelse (ikke ny reduksjon).
         if (newStatus == LeveringStatus.Levert && levering.Status == LeveringStatus.Planlagt)
         {
             foreach (var linje in levering.Linjer)
             {
-                var beholdning = await _lagerRepository.GetByArtikkelOgLotAsync(
-                    linje.ArtikkelId, linje.LotNr, cancellationToken);
-
-                // Beholdning ble allerede redusert i CreateLevering — oppdater kun tidsstempel
-                if (beholdning is not null)
-                {
-                    beholdning.SistOppdatert = DateTime.UtcNow;
-                }
-
-                var transaksjon = new LagerTransaksjon
+                await _transaksjonRepository.AddAsync(new LagerTransaksjon
                 {
                     ArtikkelId = linje.ArtikkelId,
                     LotNr = linje.LotNr,
                     Type = TransaksjonsType.Levering,
-                    Mengde = -linje.Mengde,
-                    BeholdningEtter = beholdning?.Mengde ?? 0,
+                    Mengde = linje.Mengde,
+                    BeholdningEtter = (await _lagerRepository.GetByArtikkelOgLotAsync(
+                        linje.ArtikkelId, linje.LotNr, cancellationToken))?.Mengde ?? 0,
                     Kilde = "Levering",
                     KildeId = levering.Id,
                     Kommentar = $"Levering #{levering.Id} levert",
                     UtfortAv = levering.LevertAv,
                     Tidspunkt = DateTime.UtcNow
-                };
-                await _transaksjonRepository.AddAsync(transaksjon, cancellationToken);
+                }, cancellationToken);
             }
         }
 

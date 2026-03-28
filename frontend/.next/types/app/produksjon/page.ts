@@ -1,4 +1,4 @@
-// File: /home/ubuntu/.openclaw/workspace/projects/lagerpro/frontend/src/app/produksjon/page.tsx
+// File: /home/ubuntu/.openclaw/workspace/frontend/src/app/produksjon/page.tsx
 import * as entry from '../../../../src/app/produksjon/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
