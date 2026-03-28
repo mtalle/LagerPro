@@ -64,8 +64,8 @@ public class LeveringTests
         Assert.Equal(LeveringStatus.Planlagt, captured!.Status);
         Assert.Single(captured.Linjer);
 
-        // Lager skal trekkes
-        _lagerRepoMock.Verify(r => r.GetByArtikkelOgLotAsync(10, "LOT-001", It.IsAny<CancellationToken>()), Times.Once);
+        // Lager skal trekkes (GetByArtikkelOgLotAsync kalles 2x: pre-check + faktisk trekk)
+        _lagerRepoMock.Verify(r => r.GetByArtikkelOgLotAsync(10, "LOT-001", It.IsAny<CancellationToken>()), Times.Exactly(2));
         _transaksjonRepoMock.Verify(r => r.AddAsync(
             It.Is<LagerTransaksjon>(t => t.Type == TransaksjonsType.Levering && t.Mengde == 5 && t.LotNr == "LOT-001"),
             It.IsAny<CancellationToken>()), Times.Once);
@@ -127,6 +127,10 @@ public class LeveringTests
         await handler.Handle(command, CancellationToken.None);
 
         Assert.Equal(2, captured!.Linjer.Count);
+        // Hver linje kaller GetByArtikkelOgLotAsync 2x (pre-check + trek)
+        _lagerRepoMock.Verify(r => r.GetByArtikkelOgLotAsync(
+            It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Exactly(4));
+        // Én transaksjon per linje
         _transaksjonRepoMock.Verify(r => r.AddAsync(
             It.Is<LagerTransaksjon>(t => t.ArtikkelId == 10 && t.LotNr == "LOT-A"),
             It.IsAny<CancellationToken>()), Times.Once);
@@ -188,9 +192,9 @@ public class LeveringTests
         Assert.True(result);
         Assert.Equal(LeveringStatus.Levert, levering.Status);
 
-        // Skal logge transaksjon (allerede gjort i Create, men Update LagerStatus logger på nytt)
+        // Skal logge transaksjon (bekreftelse, ikke ny reduksjon)
         _transaksjonRepoMock.Verify(r => r.AddAsync(
-            It.Is<LagerTransaksjon>(t => t.Type == TransaksjonsType.Levering && t.Mengde == -5),
+            It.Is<LagerTransaksjon>(t => t.Type == TransaksjonsType.Levering && t.Mengde == 5),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
