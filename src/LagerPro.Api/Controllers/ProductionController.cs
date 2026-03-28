@@ -2,6 +2,7 @@ using LagerPro.Application.Features.Produksjon.Commands.CreateProduksjonsOrdre;
 using LagerPro.Application.Features.Produksjon.Commands.FerdigmeldProduksjonsOrdre;
 using LagerPro.Application.Features.Produksjon.Commands.UpdateProduksjonsOrdreStatus;
 using LagerPro.Application.Features.Produksjon.Queries.GetAllProduksjonsOrdre;
+using LagerPro.Application.Features.Produksjon.Queries.GetPlukkliste;
 using LagerPro.Application.Features.Produksjon.Queries.GetProduksjonsOrdreById;
 using LagerPro.Contracts.Requests.Produksjon;
 using Microsoft.AspNetCore.Mvc;
@@ -17,19 +18,22 @@ public class ProductionController : ControllerBase
     private readonly CreateProduksjonsOrdreHandler _createHandler;
     private readonly FerdigmeldProduksjonsOrdreHandler _ferdigmeldHandler;
     private readonly UpdateProduksjonsOrdreStatusHandler _updateStatusHandler;
+    private readonly GetPlukklisteHandler _plukklisteHandler;
 
     public ProductionController(
         GetAllProduksjonsOrdreHandler getAllHandler,
         GetProduksjonsOrdreByIdHandler getByIdHandler,
         CreateProduksjonsOrdreHandler createHandler,
         FerdigmeldProduksjonsOrdreHandler ferdigmeldHandler,
-        UpdateProduksjonsOrdreStatusHandler updateStatusHandler)
+        UpdateProduksjonsOrdreStatusHandler updateStatusHandler,
+        GetPlukklisteHandler plukklisteHandler)
     {
         _getAllHandler = getAllHandler;
         _getByIdHandler = getByIdHandler;
         _createHandler = createHandler;
         _ferdigmeldHandler = ferdigmeldHandler;
         _updateStatusHandler = updateStatusHandler;
+        _plukklisteHandler = plukklisteHandler;
     }
 
     [HttpGet]
@@ -67,6 +71,13 @@ public class ProductionController : ControllerBase
         var success = await _updateStatusHandler.Handle(new UpdateProduksjonsOrdreStatusCommand(id, request.Status), cancellationToken);
         if (!success) return NotFound(new { message = $"Produksjonsordre with id {id} not found or invalid status." });
         return Ok(new { id, status = request.Status });
+    }
+
+    [HttpGet("plukkliste")]
+    public async Task<IActionResult> GetPlukkliste(CancellationToken cancellationToken)
+    {
+        var plukkliste = await _plukklisteHandler.Handle(new GetPlukklisteQuery(), cancellationToken);
+        return Ok(plukkliste);
     }
 
     [HttpPost("{id}/ferdigmeld")]

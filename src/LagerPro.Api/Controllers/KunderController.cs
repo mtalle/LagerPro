@@ -82,7 +82,8 @@ public class KunderController : ControllerBase
                 request.Postnr,
                 request.Poststed,
                 request.OrgNr,
-                request.Kommentar),
+                request.Kommentar,
+                request.Aktiv),
             cancellationToken);
 
         if (!success) return NotFound(new { message = $"Kunde with id {id} not found." });

@@ -9,4 +9,5 @@ public record UpdateLeverandorRequest(
     string? Postnr,
     string? Poststed,
     string? OrgNr,
-    string? Kommentar);
+    string? Kommentar,
+    bool Aktiv);

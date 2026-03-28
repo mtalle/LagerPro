@@ -30,6 +30,7 @@ public class UpdateKundeHandler
         kunde.Poststed = command.Poststed;
         kunde.OrgNr = command.OrgNr;
         kunde.Kommentar = command.Kommentar;
+        kunde.Aktiv = command.Aktiv;
 
         _repository.Update(kunde);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

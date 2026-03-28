@@ -28,7 +28,7 @@ public class CreateProduksjonsOrdreHandler
             throw new InvalidOperationException($"Resept with id {command.ReseptId} not found.");
 
         var ordreNr = string.IsNullOrWhiteSpace(command.OrdreNr)
-            ? $"PO-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString()[..6].ToUpper()}"
+            ? await GenerateOrdreNrAsync(cancellationToken)
             : command.OrdreNr;
 
         var produksjonsOrdre = new ProduksjonsOrdre
@@ -46,5 +46,25 @@ public class CreateProduksjonsOrdreHandler
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return produksjonsOrdre.Id;
+    }
+
+    private async Task<string> GenerateOrdreNrAsync(CancellationToken cancellationToken)
+    {
+        var today = DateTime.UtcNow.ToString("yyyyMMdd");
+        var prefix = $"PROD-{today}-";
+
+        // Hent alle ordre for i dag for å finne høgaste nummer
+        var allOrdre = await _repository.GetAllAsync(cancellationToken);
+        if (allOrdre is null || allOrdre.Count == 0)
+            return $"{prefix}001";
+
+        var todayOrdre = allOrdre
+            .Where(o => o.OrdreNr.StartsWith(prefix))
+            .Select(o => int.TryParse(o.OrdreNr.Length > prefix.Length ? o.OrdreNr[prefix.Length..] : "0", out var n) ? n : 0)
+            .DefaultIfEmpty(0)
+            .Max();
+
+        var nextNr = todayOrdre + 1;
+        return $"{prefix}{nextNr:D3}";
     }
 }

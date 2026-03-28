@@ -10,4 +10,5 @@ public record UpdateLeverandorCommand(
     string? Postnr,
     string? Poststed,
     string? OrgNr,
-    string? Kommentar);
+    string? Kommentar,
+    bool Aktiv);
