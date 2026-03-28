@@ -42,6 +42,6 @@ public class LagerTransaksjonRepository : ILagerTransaksjonRepository
     public async Task AddAsync(LagerTransaksjon transaksjon, CancellationToken cancellationToken = default)
     {
         await _dbContext.LagerTransaksjoner.AddAsync(transaksjon, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        // SaveChanges kun via UnitOfWork
     }
 }

@@ -25,6 +25,6 @@ public class ReseptRepository : IReseptRepository
     public async Task AddAsync(Resept resept, CancellationToken cancellationToken = default)
     {
         await _dbContext.Resepter.AddAsync(resept, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        // SaveChanges kun via UnitOfWork
     }
 }

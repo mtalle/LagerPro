@@ -25,4 +25,14 @@ public class KundeRepository : IKundeRepository
         await _dbContext.Kunder.AddAsync(kunde, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    public void Update(Kunde kunde)
+    {
+        _dbContext.Kunder.Update(kunde);
+    }
+
+    public void Delete(Kunde kunde)
+    {
+        _dbContext.Kunder.Remove(kunde);
+    }
 }

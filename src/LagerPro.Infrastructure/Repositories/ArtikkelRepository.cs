@@ -29,12 +29,12 @@ public class ArtikkelRepository : IArtikkelRepository
     public async Task AddAsync(Artikkel artikkel, CancellationToken cancellationToken = default)
     {
         await _dbContext.Artikler.AddAsync(artikkel, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        // SaveChanges kun via UnitOfWork
     }
 
     public void Delete(Artikkel artikkel)
     {
         _dbContext.Artikler.Remove(artikkel);
-        _dbContext.SaveChanges();
+        // SaveChanges via UnitOfWork
     }
 }

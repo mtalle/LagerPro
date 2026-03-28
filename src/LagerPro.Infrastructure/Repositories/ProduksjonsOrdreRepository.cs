@@ -30,12 +30,13 @@ public class ProduksjonsOrdreRepository : IProduksjonsOrdreRepository
     public async Task AddAsync(ProduksjonsOrdre produksjonsOrdre, CancellationToken cancellationToken = default)
     {
         await _dbContext.ProduksjonsOrdre.AddAsync(produksjonsOrdre, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        // SaveChanges kun via UnitOfWork
     }
 
-    public async Task UpdateAsync(ProduksjonsOrdre produksjonsOrdre, CancellationToken cancellationToken = default)
+    public Task UpdateAsync(ProduksjonsOrdre produksjonsOrdre, CancellationToken cancellationToken = default)
     {
         _dbContext.ProduksjonsOrdre.Update(produksjonsOrdre);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        // SaveChanges kun via UnitOfWork
+        return Task.CompletedTask;
     }
 }

@@ -30,12 +30,13 @@ public class LeveringRepository : ILeveringRepository
     public async Task AddAsync(Levering levering, CancellationToken cancellationToken = default)
     {
         await _dbContext.Leveringer.AddAsync(levering, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        // SaveChanges kun via UnitOfWork
     }
 
-    public async Task UpdateAsync(Levering levering, CancellationToken cancellationToken = default)
+    public Task UpdateAsync(Levering levering, CancellationToken cancellationToken = default)
     {
         _dbContext.Leveringer.Update(levering);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        // SaveChanges kun via UnitOfWork
+        return Task.CompletedTask;
     }
 }

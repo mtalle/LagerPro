@@ -27,4 +27,10 @@ public class ProduksjonsOrdreRepository : IProduksjonsOrdreRepository
         await _dbContext.ProduksjonsOrdre.AddAsync(produksjonsOrdre, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task UpdateAsync(ProduksjonsOrdre produksjonsOrdre, CancellationToken cancellationToken = default)
+    {
+        _dbContext.ProduksjonsOrdre.Update(produksjonsOrdre);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
 }

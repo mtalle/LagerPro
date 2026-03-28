@@ -27,4 +27,10 @@ public class LeveringRepository : ILeveringRepository
         await _dbContext.Leveringer.AddAsync(levering, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task UpdateAsync(Levering levering, CancellationToken cancellationToken = default)
+    {
+        _dbContext.Leveringer.Update(levering);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
 }

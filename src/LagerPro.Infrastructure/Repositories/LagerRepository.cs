@@ -38,14 +38,20 @@ public class LagerRepository : ILagerRepository
             .ThenBy(x => x.LotNr)
             .ToListAsync(cancellationToken);
 
-    public async Task UpsertAsync(LagerBeholdning beholdning, CancellationToken cancellationToken = default)
+    public Task UpsertAsync(LagerBeholdning beholdning, CancellationToken cancellationToken = default)
     {
-        var existing = await _dbContext.LagerBeholdninger
-            .FirstOrDefaultAsync(x => x.ArtikkelId == beholdning.ArtikkelId && x.LotNr == beholdning.LotNr, cancellationToken);
+        var existing = _dbContext.LagerBeholdninger.Local
+            .FirstOrDefault(x => x.ArtikkelId == beholdning.ArtikkelId && x.LotNr == beholdning.LotNr);
 
         if (existing is null)
         {
-            await _dbContext.LagerBeholdninger.AddAsync(beholdning, cancellationToken);
+            existing = _dbContext.LagerBeholdninger
+                .FirstOrDefault(x => x.ArtikkelId == beholdning.ArtikkelId && x.LotNr == beholdning.LotNr);
+        }
+
+        if (existing is null)
+        {
+            _dbContext.LagerBeholdninger.Add(beholdning);
         }
         else
         {
@@ -55,7 +61,7 @@ public class LagerRepository : ILagerRepository
             if (beholdning.BestForDato.HasValue) existing.BestForDato = beholdning.BestForDato;
         }
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        return Task.CompletedTask;
     }
 
     public async Task AddAsync(LagerBeholdning beholdning, CancellationToken cancellationToken = default)
