@@ -28,9 +28,9 @@ export default function LeveringPage() {
   async function load() {
     try {
       const [l, k, b] = await Promise.all([
-        get<Levering[]>('/shipping'),
-        get<Kunde[]>('/customers'),
-        get<LagerBeholdning[]>('/inventory'),
+        get<Levering[]>('/levering'),
+        get<Kunde[]>('/kunder'),
+        get<LagerBeholdning[]>('/lager'),
       ]);
       setLeveringer(l);
       setKunder(k);
@@ -58,7 +58,7 @@ export default function LeveringPage() {
     if (form.kundeId === 0) { alert('Velg en kunde.'); return; }
     if (form.linjer.some(l => l.artikkelId === 0 || !l.lotNr)) { alert('Alle linjer må ha artikkel og lotnr.'); return; }
     try {
-      await post('/shipping', {
+      await post('/levering', {
         ...form,
         leveringsDato: new Date(form.leveringsDato).toISOString(),
         linjer: form.linjer.map(l => ({ artikkelId: l.artikkelId, lotNr: l.lotNr, mengde: l.mengde, enhet: l.enhet })),
@@ -74,7 +74,7 @@ export default function LeveringPage() {
   }
 
   async function setStatus(id: number, status: string) {
-    try { await patch(`/shipping/${id}/status`, { status }); load(); }
+    try { await patch(`/levering/${id}/status`, { status }); load(); }
     catch (e) { alert('Feil: ' + (e as Error).message); }
   }
 

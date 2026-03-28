@@ -26,6 +26,7 @@ public class GetKundeByIdHandler
             kunde.Poststed,
             kunde.OrgNr,
             kunde.Kommentar,
+            kunde.Aktiv,
             kunde.OpprettetDato);
     }
 }

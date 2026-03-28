@@ -1,13 +1,15 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Mottak, Article, get, post, patch } from '../../lib/api';
+import { Mottak, Article, Leverandor, get, post, patch } from '../../lib/api';
 
 export default function MottakPage() {
   const [mottak, setMottak] = useState<Mottak[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
+  const [leverandorer, setLeverandorer] = useState<Leverandor[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [expanded, setExpanded] = useState<number | null>(null);
+  const [error, setError] = useState('');
 
   const [form, setForm] = useState({
     leverandorId: 0, mottaksDato: new Date().toISOString().slice(0, 10),
@@ -19,9 +21,14 @@ export default function MottakPage() {
 
   async function loadData() {
     try {
-      const [m, a] = await Promise.all([get<Mottak[]>('/receipts'), get<Article[]>('/articles')]);
+      const [m, a, l] = await Promise.all([
+        get<Mottak[]>('/mottak'),
+        get<Article[]>('/articles'),
+        get<Leverandor[]>('/leverandorer'),
+      ]);
       setMottak(m);
       setArticles(a);
+      setLeverandorer(l);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   }
@@ -42,21 +49,36 @@ export default function MottakPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!form.leverandorId) { setError('Velg en leverandør.'); return; }
+    if (form.linjer.some(l => !l.artikkelId)) { setError('Velg artikkel på alle linjer.'); return; }
+    setError('');
     try {
-      await post('/receipts', {
-        ...form,
+      await post('/mottak', {
+        leverandorId: form.leverandorId,
         mottaksDato: new Date(form.mottaksDato).toISOString(),
-        bestForDato: undefined,
-        linjer: form.linjer.map(l => ({ ...l, bestForDato: l.bestForDato ? new Date(l.bestForDato).toISOString() : null })),
+        referanse: form.referanse,
+        kommentar: form.kommentar,
+        mottattAv: form.mottattAv,
+        linjer: form.linjer.map(l => ({
+          artikkelId: l.artikkelId,
+          lotNr: l.lotNr,
+          mengde: l.mengde,
+          enhet: l.enhet,
+          bestForDato: l.bestForDato ? new Date(l.bestForDato).toISOString() : null,
+          temperatur: l.temperatur,
+          strekkode: l.strekkode,
+          avvik: l.avvik,
+          kommentar: l.kommentar,
+        })),
       });
       setShowModal(false);
       loadData();
-    } catch (e) { alert('Feil: ' + (e as Error).message); }
+    } catch (e) { setError('Feil: ' + (e as Error).message); }
   }
 
   async function updateStatus(id: number, status: string) {
     try {
-      await patch(`/receipts/${id}/status`, { status });
+      await patch(`/mottak/${id}/status`, { status });
       loadData();
     } catch (e) { alert('Feil: ' + (e as Error).message); }
   }
@@ -75,8 +97,10 @@ export default function MottakPage() {
     <>
       <div className="page-header">
         <h1>📥 Mottak</h1>
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}>+ Nytt mottak</button>
+        <button className="btn btn-primary" onClick={() => { setForm({ leverandorId: 0, mottaksDato: new Date().toISOString().slice(0, 10), referanse: '', kommentar: '', mottattAv: '', linjer: [{ artikkelId: 0, lotNr: '', mengde: 1, enhet: 'STK', bestForDato: '', temperatur: 0, strekkode: '', avvik: '', kommentar: '' }] }); setShowModal(true); }}>+ Nytt mottak</button>
       </div>
+
+      {error && <div className="alert alert-error">{error}</div>}
 
       <table>
         <thead>
@@ -121,8 +145,11 @@ export default function MottakPage() {
             <form onSubmit={handleSubmit}>
               <div className="form-grid">
                 <div className="form-group">
-                  <label>Leverandør ID *</label>
-                  <input type="number" min="1" required value={form.leverandorId || ''} onChange={e => setForm({ ...form, leverandorId: parseInt(e.target.value) })} />
+                  <label>Leverandør *</label>
+                  <select required value={form.leverandorId} onChange={e => setForm({ ...form, leverandorId: parseInt(e.target.value) })}>
+                    <option value={0}>Velg leverandør...</option>
+                    {leverandorer.map(lv => <option key={lv.id} value={lv.id}>{lv.navn}</option>)}
+                  </select>
                 </div>
                 <div className="form-group">
                   <label>Mottaksdato</label>
@@ -143,13 +170,13 @@ export default function MottakPage() {
               </div>
               <hr style={{ margin: '1rem 0' }} />
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                <strong>L战jer</strong>
+                <strong>Linjer</strong>
                 <button type="button" className="btn btn-sm btn-secondary" onClick={addLine}>+ Linje</button>
               </div>
               {form.linjer.map((linje, i) => (
                 <div key={i} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'end' }}>
                   <div className="form-group">
-                    <label>Artikkel ID</label>
+                    <label>Artikkel</label>
                     <select value={linje.artikkelId} onChange={e => {
                       const a = articles.find(x => x.id === parseInt(e.target.value));
                       updateLine(i, 'artikkelId', parseInt(e.target.value));
@@ -168,12 +195,13 @@ export default function MottakPage() {
                     <input type="number" step="0.001" min="0" value={linje.mengde} onChange={e => updateLine(i, 'mengde', parseFloat(e.target.value))} />
                   </div>
                   <div className="form-group">
-                    <label>Enhet</label>
-                    <input value={linje.enhet} onChange={e => updateLine(i, 'enhet', e.target.value)} />
+                    <label>Best-før</label>
+                    <input type="date" value={linje.bestForDato} onChange={e => updateLine(i, 'bestForDato', e.target.value)} />
                   </div>
                   <button type="button" className="btn btn-sm btn-danger" onClick={() => removeLine(i)}>✕</button>
                 </div>
               ))}
+              {error && <div className="alert alert-error" style={{ marginTop: '0.5rem' }}>{error}</div>}
               <div className="form-actions" style={{ marginTop: '1rem' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Avbryt</button>
                 <button type="submit" className="btn btn-primary">Opprett mottak</button>

@@ -167,6 +167,20 @@ export interface Kunde {
   aktiv: boolean;
 }
 
+export interface Leverandor {
+  id: number;
+  navn: string;
+  kontaktperson?: string;
+  telefon?: string;
+  epost?: string;
+  adresse?: string;
+  postnr?: string;
+  poststed?: string;
+  orgNr?: string;
+  kommentar?: string;
+  aktiv: boolean;
+}
+
 export interface Resept {
   id: number;
   navn: string;

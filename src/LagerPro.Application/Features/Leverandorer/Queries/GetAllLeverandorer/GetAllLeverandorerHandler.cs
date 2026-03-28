@@ -23,6 +23,7 @@ public class GetAllLeverandorerHandler
             l.Poststed,
             l.OrgNr,
             l.Kommentar,
+            l.Aktiv,
             l.OpprettetDato)).ToList();
     }
 }
