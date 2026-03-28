@@ -18,7 +18,4 @@ public record MottakLinjeCommand(
     string? Strekkode,
     string? Avvik,
     string? Kommentar,
-    // Godkjent settes automatisk i CreateMottakHandler basert på Avvik-feltet.
-    // true hvis Avvik er null/empty (inntakskontroll bestått).
-    // false hvis Avvik er angitt (krever manuell godkjenning via UpdateMottakStatus).
     bool Godkjent = false);

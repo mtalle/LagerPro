@@ -32,10 +32,10 @@ public class UpdateMottakStatusHandler
         if (!Enum.TryParse<MottakStatus>(command.Status, ignoreCase: true, out var newStatus))
             return false;
 
-        var oldStatus = mottak.Status;
+        mottak.Status = newStatus;
 
-        // Kun ved Godkjent: oppdater lager én gang (ikke igjen hvis allerede godkjent)
-        if (newStatus == MottakStatus.Godkjent && oldStatus != MottakStatus.Godkjent)
+        // Kun godkjennings-steget skal oppdatere lager — og kun én gang (kun hvis ikke allerede godkjent)
+        if (newStatus == MottakStatus.Godkjent && mottak.Status != MottakStatus.Godkjent)
         {
             foreach (var linje in mottak.Linjer.Where(l => l.Godkjent))
             {
@@ -70,38 +70,6 @@ public class UpdateMottakStatusHandler
             }
         }
 
-        // Ved Avvist: gjenopprett lager for alle godkjente linjer
-        if (newStatus == MottakStatus.Avvist && oldStatus != MottakStatus.Avvist)
-        {
-            foreach (var linje in mottak.Linjer.Where(l => l.Godkjent))
-            {
-                var beholdning = await _lagerRepository.GetByArtikkelOgLotAsync(
-                    linje.ArtikkelId, linje.LotNr, cancellationToken);
-
-                if (beholdning is not null)
-                {
-                    beholdning.Mengde -= linje.Mengde;
-                    beholdning.SistOppdatert = DateTime.UtcNow;
-                }
-
-                await _transaksjonRepository.AddAsync(new LagerTransaksjon
-                {
-                    ArtikkelId = linje.ArtikkelId,
-                    LotNr = linje.LotNr,
-                    Type = TransaksjonsType.Svinn,
-                    Mengde = -linje.Mengde,
-                    BeholdningEtter = (await _lagerRepository.GetByArtikkelOgLotAsync(
-                        linje.ArtikkelId, linje.LotNr, cancellationToken))?.Mengde ?? 0,
-                    Kilde = "Mottak",
-                    KildeId = mottak.Id,
-                    Kommentar = $"Mottak #{mottak.Id} avvist – lager justert",
-                    UtfortAv = mottak.MottattAv,
-                    Tidspunkt = DateTime.UtcNow
-                }, cancellationToken);
-            }
-        }
-
-        mottak.Status = newStatus;
         await _mottakRepository.UpdateAsync(mottak, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return true;
