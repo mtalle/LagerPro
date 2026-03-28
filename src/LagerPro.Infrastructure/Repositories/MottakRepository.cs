@@ -14,14 +14,14 @@ public class MottakRepository : IMottakRepository
         _dbContext = dbContext;
     }
 
-    public async Task<Mottak?> GetByIdAsync(int id, CancellationToken cancellationToken)
+    public async Task<Mottak?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         => await _dbContext.Mottak
             .Include(x => x.Linjer)
             .ThenInclude(l => l.Artikkel)
             .Include(x => x.Leverandor)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
-    public async Task<IReadOnlyList<Mottak>> GetAllAsync(CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<Mottak>> GetAllAsync(CancellationToken cancellationToken = default)
         => await _dbContext.Mottak
             .Include(x => x.Linjer)
             .ThenInclude(l => l.Artikkel)
@@ -29,13 +29,13 @@ public class MottakRepository : IMottakRepository
             .OrderByDescending(x => x.OpprettetDato)
             .ToListAsync(cancellationToken);
 
-    public async Task AddAsync(Mottak mottak, CancellationToken cancellationToken)
+    public async Task AddAsync(Mottak mottak, CancellationToken cancellationToken = default)
     {
         await _dbContext.Mottak.AddAsync(mottak, cancellationToken);
         // SaveChanges kun via UnitOfWork
     }
 
-    public Task UpdateAsync(Mottak mottak, CancellationToken cancellationToken)
+    public Task UpdateAsync(Mottak mottak, CancellationToken cancellationToken = default)
     {
         _dbContext.Mottak.Update(mottak);
         // SaveChanges kun via UnitOfWork
