@@ -17,6 +17,46 @@
 - [x] **Råvarerapport** → kva råvarer går i kvar ferdigvare-batch (via /batch endpoint)
 - [x] **Kundesporing** → kva kunde fekk kvar batch (via /kunde endpoint)
 
+### 🟠 Kritisk: Produksjonsflyt (detaljert)
+- [ ] **Resepter** → Admin oppretter resept med ferdigvare + råvarer (artikkel + mengde)
+- [ ] **Produksjonsordre** → Admin eller Produksjon oppretter ordre basert på resept
+  - OrdreID autogenereres (PROD-YYYYMMDD-NNN)
+  - System foreslår antal basert på resept
+- [ ] **Plukkliste** → Kan skrivast ut (PDF) med: OrdreID, artikkelnamn, lot-nr, antal
+- [ ] **Ferdigmelding** → Kan gjerast av Admin eller Produksjon
+  - Automatisk fylt ut frå resept + gjeldande lager
+  - **Kan endre:** varer, råvarer, lot-nr, antal ved ferdigmelding
+  - Ved ferdigmelding → Lager oppdaterast automatisk
+- [ ] **Ordreliste** → Alle produksjonsordrer i liste, klikk for å ferdigmelde
+
+### Produksjonsflyt steg-for-steg
+
+**1. Opprette resept (Admin)**
+- Resept = ferdigvare-artikkel + liste med råvarer (artikkel + mengde)
+- Lot-nr velgast ved produksjon (ikkje i resept)
+
+**2. Opprette produksjonsordre**
+- Vel resept → System foreslår antal
+- OrdreID autogenereres (PROD-YYYYMMDD-NNN)
+- Neste steg: Plukkliste
+
+**3. Plukkliste (valfri)**
+- Viser kva råvarer som må plukkast
+- Artikkelnamn | Lot-nr | Antal
+- Synleg OrdreID
+- Kan skrivast ut
+
+**4. Ferdigmelding**
+- Kan endre kva som faktisk vart brukt (lot + antal)
+- Automatisk fylt ut frå resept + gjeldande lager
+- Admin eller Produksjon kan ferdigmelde
+- Ved ferdigmelding:
+  - Lager: `ProduksjonUttak` (trekk råvarer)
+  - Lager: `ProduksjonInn` (legg til ferdigvare)
+  - Produksjonsordre → Ferdig
+
+---
+
 ### 🟡 Viktig: Kvalitetssikring + Brukarrettar
 - [x] **Input-validering** → alle requests sjekka for gyldige verdiar (i handlers)
 - [x] **Feilhandsaming** → kva skjer ved ugyldig data? (logg + 400 Bad Request)
