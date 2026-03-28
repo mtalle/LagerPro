@@ -64,7 +64,7 @@ public class KunderTests
 
         Kunde? captured = null;
         _repositoryMock.Setup(r => r.AddAsync(It.IsAny<Kunde>(), It.IsAny<CancellationToken>()))
-            .Callback<Kunde, CancellationToken>((k, _) => captured = k)
+            .Callback<Kunde, CancellationToken>((k, _) => { captured = k; typeof(BaseEntity).GetProperty("Id")!.SetValue(k, 42); })
             .Returns(Task.CompletedTask);
         _unitOfWorkMock.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
@@ -72,7 +72,7 @@ public class KunderTests
 
         var result = await handler.Handle(command, CancellationToken.None);
 
-        Assert.True(result > 0);
+        Assert.Equal(42, result);
     }
 
     #endregion

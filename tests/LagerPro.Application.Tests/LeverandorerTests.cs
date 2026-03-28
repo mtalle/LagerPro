@@ -64,7 +64,7 @@ public class LeverandorerTests
 
         Leverandor? captured = null;
         _repositoryMock.Setup(r => r.AddAsync(It.IsAny<Leverandor>(), It.IsAny<CancellationToken>()))
-            .Callback<Leverandor, CancellationToken>((l, _) => captured = l)
+            .Callback<Leverandor, CancellationToken>((l, _) => { captured = l; typeof(BaseEntity).GetProperty("Id")!.SetValue(l, 99); })
             .Returns(Task.CompletedTask);
         _unitOfWorkMock.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
@@ -72,7 +72,7 @@ public class LeverandorerTests
 
         var result = await handler.Handle(command, CancellationToken.None);
 
-        Assert.True(result > 0);
+        Assert.Equal(99, result);
     }
 
     #endregion
