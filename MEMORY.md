@@ -17,9 +17,9 @@
 - Frontend: frontend/ (Next.js, started by sub-agent)
 - Tests: tests/ (xUnit + Moq)
 
-## LagerPro Status (2026-03-28 - fikset idag)
+## LagerPro Status (2026-03-28)
 - Backend build: 0 errors, 0 warnings ✅
-- Unit tests: 2 passing (smoke tests) ✅
+- Unit tests: **74 passing** ✅ (ArticleTests 15, KunderTests 9, LeverandorerTests 9, MottakTests 10, LagerTests 7, ProduksjonTests 14, LeveringTests 7, SmokeTests 1)
 - Frontend: started by sub-agent (Next.js based)
 - Credits ran out 2026-03-28 ~04:00 UTC, refilled ~06:00 UTC
 

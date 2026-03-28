@@ -280,7 +280,7 @@ public class ArticleTests
 
         // Assert
         Assert.True(result);
-        _repositoryMock.Verify(r => r.Delete(article), Times.Once);
+        _repositoryMock.Verify(r => r.Delete(article, It.IsAny<CancellationToken>()), Times.Once);
         _unitOfWorkMock.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -298,7 +298,7 @@ public class ArticleTests
 
         // Assert
         Assert.False(result);
-        _repositoryMock.Verify(r => r.Delete(It.IsAny<Artikkel>()), Times.Never);
+        _repositoryMock.Verify(r => r.Delete(It.IsAny<Artikkel>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     #endregion

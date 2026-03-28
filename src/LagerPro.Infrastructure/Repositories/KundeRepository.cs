@@ -14,13 +14,13 @@ public class KundeRepository : IKundeRepository
         _dbContext = dbContext;
     }
 
-    public Task<Kunde?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    public Task<Kunde?> GetByIdAsync(int id, CancellationToken cancellationToken)
         => _dbContext.Kunder.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
-    public Task<IReadOnlyList<Kunde>> GetAllAsync(CancellationToken cancellationToken = default)
+    public Task<IReadOnlyList<Kunde>> GetAllAsync(CancellationToken cancellationToken)
         => _dbContext.Kunder.OrderBy(x => x.Navn).ToListAsync(cancellationToken).ContinueWith(t => (IReadOnlyList<Kunde>)t.Result, cancellationToken);
 
-    public async Task AddAsync(Kunde kunde, CancellationToken cancellationToken = default)
+    public async Task AddAsync(Kunde kunde, CancellationToken cancellationToken)
     {
         await _dbContext.Kunder.AddAsync(kunde, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);

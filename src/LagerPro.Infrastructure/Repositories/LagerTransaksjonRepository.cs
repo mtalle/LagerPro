@@ -14,13 +14,13 @@ public class LagerTransaksjonRepository : ILagerTransaksjonRepository
         _dbContext = dbContext;
     }
 
-    public async Task<IReadOnlyList<LagerTransaksjon>> GetByArtikkelAndLotAsync(int artikkelId, string lotNr, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<LagerTransaksjon>> GetByArtikkelAndLotAsync(int artikkelId, string lotNr, CancellationToken cancellationToken)
         => await _dbContext.LagerTransaksjoner
             .Where(x => x.ArtikkelId == artikkelId && x.LotNr == lotNr)
             .OrderBy(x => x.Tidspunkt)
             .ToListAsync(cancellationToken);
 
-    public async Task AddAsync(LagerTransaksjon transaksjon, CancellationToken cancellationToken = default)
+    public async Task AddAsync(LagerTransaksjon transaksjon, CancellationToken cancellationToken)
     {
         await _dbContext.LagerTransaksjoner.AddAsync(transaksjon, cancellationToken);
         // SaveChanges kun via UnitOfWork

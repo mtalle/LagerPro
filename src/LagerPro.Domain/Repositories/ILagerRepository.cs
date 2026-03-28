@@ -4,10 +4,10 @@ namespace LagerPro.Domain.Repositories;
 
 public interface ILagerRepository
 {
-    Task<LagerBeholdning?> GetByArtikkelOgLotAsync(int artikkelId, string lotNr, CancellationToken cancellationToken = default);
-    Task<IReadOnlyList<LagerBeholdning>> GetByArtikkelAsync(int artikkelId, CancellationToken cancellationToken = default);
-    Task<LagerBeholdning?> GetByLotNrAsync(string lotNr, CancellationToken cancellationToken = default);
-    Task<IReadOnlyList<LagerBeholdning>> GetAllAsync(CancellationToken cancellationToken = default);
-    Task UpsertAsync(LagerBeholdning beholdning, CancellationToken cancellationToken = default);
-    Task AddAsync(LagerBeholdning beholdning, CancellationToken cancellationToken = default);
+    Task<LagerBeholdning?> GetByArtikkelOgLotAsync(int artikkelId, string lotNr, CancellationToken cancellationToken);
+    Task<IReadOnlyList<LagerBeholdning>> GetByArtikkelAsync(int artikkelId, CancellationToken cancellationToken);
+    Task<LagerBeholdning?> GetByLotNrAsync(string lotNr, CancellationToken cancellationToken);
+    Task<IReadOnlyList<LagerBeholdning>> GetAllAsync(CancellationToken cancellationToken);
+    Task UpsertAsync(LagerBeholdning beholdning, CancellationToken cancellationToken);
+    Task AddAsync(LagerBeholdning beholdning, CancellationToken cancellationToken);
 }

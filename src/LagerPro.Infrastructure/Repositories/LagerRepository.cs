@@ -14,31 +14,31 @@ public class LagerRepository : ILagerRepository
         _dbContext = dbContext;
     }
 
-    public async Task<LagerBeholdning?> GetByArtikkelOgLotAsync(int artikkelId, string lotNr, CancellationToken cancellationToken = default)
+    public async Task<LagerBeholdning?> GetByArtikkelOgLotAsync(int artikkelId, string lotNr, CancellationToken cancellationToken)
         => await _dbContext.LagerBeholdninger
             .Include(x => x.Artikkel)
             .FirstOrDefaultAsync(x => x.ArtikkelId == artikkelId && x.LotNr == lotNr, cancellationToken);
 
-    public async Task<IReadOnlyList<LagerBeholdning>> GetByArtikkelAsync(int artikkelId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<LagerBeholdning>> GetByArtikkelAsync(int artikkelId, CancellationToken cancellationToken)
         => await _dbContext.LagerBeholdninger
             .Include(x => x.Artikkel)
             .Where(x => x.ArtikkelId == artikkelId)
             .OrderBy(x => x.LotNr)
             .ToListAsync(cancellationToken);
 
-    public async Task<LagerBeholdning?> GetByLotNrAsync(string lotNr, CancellationToken cancellationToken = default)
+    public async Task<LagerBeholdning?> GetByLotNrAsync(string lotNr, CancellationToken cancellationToken)
         => await _dbContext.LagerBeholdninger
             .Include(x => x.Artikkel)
             .FirstOrDefaultAsync(x => x.LotNr == lotNr, cancellationToken);
 
-    public async Task<IReadOnlyList<LagerBeholdning>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<LagerBeholdning>> GetAllAsync(CancellationToken cancellationToken)
         => await _dbContext.LagerBeholdninger
             .Include(x => x.Artikkel)
             .OrderBy(x => x.Artikkel!.ArtikkelNr)
             .ThenBy(x => x.LotNr)
             .ToListAsync(cancellationToken);
 
-    public Task UpsertAsync(LagerBeholdning beholdning, CancellationToken cancellationToken = default)
+    public Task UpsertAsync(LagerBeholdning beholdning, CancellationToken cancellationToken)
     {
         var existing = _dbContext.LagerBeholdninger.Local
             .FirstOrDefault(x => x.ArtikkelId == beholdning.ArtikkelId && x.LotNr == beholdning.LotNr);
@@ -64,6 +64,6 @@ public class LagerRepository : ILagerRepository
         return Task.CompletedTask;
     }
 
-    public async Task AddAsync(LagerBeholdning beholdning, CancellationToken cancellationToken = default)
+    public async Task AddAsync(LagerBeholdning beholdning, CancellationToken cancellationToken)
         => await _dbContext.LagerBeholdninger.AddAsync(beholdning, cancellationToken);
 }
