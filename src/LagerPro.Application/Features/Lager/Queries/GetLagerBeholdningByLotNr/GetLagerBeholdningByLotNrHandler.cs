@@ -27,6 +27,7 @@ public class GetLagerBeholdningByLotNrHandler
             beholdning.Enhet,
             beholdning.Lokasjon,
             beholdning.BestForDato,
-            beholdning.SistOppdatert);
+            beholdning.SistOppdatert,
+            beholdning.Artikkel?.MinBeholdning);
     }
 }

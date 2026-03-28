@@ -22,6 +22,7 @@ public class LeveringRepository : ILeveringRepository
 
     public async Task<IReadOnlyList<Levering>> GetAllAsync(CancellationToken cancellationToken = default)
         => await _dbContext.Leveringer
+            .Include(x => x.Kunde)
             .Include(x => x.Linjer)
             .ThenInclude(l => l.Artikkel)
             .OrderByDescending(x => x.LeveringsDato)

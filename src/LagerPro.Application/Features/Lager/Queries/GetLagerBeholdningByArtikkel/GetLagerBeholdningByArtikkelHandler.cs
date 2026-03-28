@@ -26,6 +26,7 @@ public class GetLagerBeholdningByArtikkelHandler
             x.Enhet,
             x.Lokasjon,
             x.BestForDato,
-            x.SistOppdatert)).ToList();
+            x.SistOppdatert,
+            x.Artikkel?.MinBeholdning)).ToList();
     }
 }
