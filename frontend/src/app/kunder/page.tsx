@@ -14,7 +14,7 @@ export default function KunderPage() {
 
   const [form, setForm] = useState({
     navn: '', kontaktperson: '', telefon: '', epost: '',
-    adresse: '', postnr: '', poststed: '', orgNr: '', kommentar: '',
+    adresse: '', postnr: '', poststed: '', orgNr: '', kommentar: '', aktiv: true,
   });
 
   useEffect(() => { load(); }, []);
@@ -39,7 +39,7 @@ export default function KunderPage() {
 
   function openCreate() {
     setEditKunde(null);
-    setForm({ navn: '', kontaktperson: '', telefon: '', epost: '', adresse: '', postnr: '', poststed: '', orgNr: '', kommentar: '' });
+    setForm({ navn: '', kontaktperson: '', telefon: '', epost: '', adresse: '', postnr: '', poststed: '', orgNr: '', kommentar: '', aktiv: true });
     setError('');
     setShowModal(true);
   }
@@ -56,6 +56,7 @@ export default function KunderPage() {
       poststed: k.poststed ?? '',
       orgNr: k.orgNr ?? '',
       kommentar: k.kommentar ?? '',
+      aktiv: k.aktiv,
     });
     setError('');
     setShowModal(true);

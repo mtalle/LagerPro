@@ -14,7 +14,7 @@ export default function LeverandorerPage() {
 
   const [form, setForm] = useState({
     navn: '', kontaktperson: '', telefon: '', epost: '',
-    adresse: '', postnr: '', poststed: '', orgNr: '', kommentar: '',
+    adresse: '', postnr: '', poststed: '', orgNr: '', kommentar: '', aktiv: true,
   });
 
   useEffect(() => { load(); }, []);
@@ -39,7 +39,7 @@ export default function LeverandorerPage() {
 
   function openCreate() {
     setEditLev(null);
-    setForm({ navn: '', kontaktperson: '', telefon: '', epost: '', adresse: '', postnr: '', poststed: '', orgNr: '', kommentar: '' });
+    setForm({ navn: '', kontaktperson: '', telefon: '', epost: '', adresse: '', postnr: '', poststed: '', orgNr: '', kommentar: '', aktiv: true });
     setError('');
     setShowModal(true);
   }
@@ -56,6 +56,7 @@ export default function LeverandorerPage() {
       poststed: l.poststed ?? '',
       orgNr: l.orgNr ?? '',
       kommentar: l.kommentar ?? '',
+      aktiv: l.aktiv,
     });
     setError('');
     setShowModal(true);
