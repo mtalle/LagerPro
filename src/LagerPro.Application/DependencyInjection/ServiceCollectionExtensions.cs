@@ -30,6 +30,7 @@ using LagerPro.Application.Features.Produksjon.Queries.GetProduksjonsOrdreById;
 using LagerPro.Application.Features.Resepter.Commands.CreateResept;
 using LagerPro.Application.Features.Resepter.Queries.GetAllResepter;
 using LagerPro.Application.Features.Resepter.Queries.GetReseptById;
+using LagerPro.Application.Features.Traceability.Queries.GetTraceabilityByLot;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LagerPro.Application.DependencyInjection;
@@ -87,6 +88,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<GetAllResepterHandler>();
         services.AddScoped<GetReseptByIdHandler>();
         services.AddScoped<CreateReseptHandler>();
+
+        // Traceability
+        services.AddScoped<GetTraceabilityByLotHandler>();
 
         return services;
     }

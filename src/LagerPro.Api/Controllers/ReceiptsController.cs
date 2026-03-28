@@ -1,4 +1,6 @@
+using LagerPro.Application.Features.Mottak.Commands.UpdateMottakStatus;
 using LagerPro.Application.Features.Mottak.Queries.GetAllMottak;
+using LagerPro.Application.Features.Mottak.Queries.GetMottakById;
 using LagerPro.Application.Features.Mottak.Commands.CreateMottak;
 using LagerPro.Contracts.Requests.Mottak;
 using Microsoft.AspNetCore.Mvc;
@@ -10,18 +12,30 @@ namespace LagerPro.Api.Controllers;
 public class ReceiptsController : ControllerBase
 {
     private readonly GetAllMottakHandler _getAllHandler;
+    private readonly GetMottakByIdHandler _getByIdHandler;
     private readonly CreateMottakHandler _createHandler;
+    private readonly UpdateMottakStatusHandler _updateStatusHandler;
 
-    public ReceiptsController(GetAllMottakHandler getAllHandler, CreateMottakHandler createHandler)
+    public ReceiptsController(GetAllMottakHandler getAllHandler, GetMottakByIdHandler getByIdHandler, CreateMottakHandler createHandler, UpdateMottakStatusHandler updateStatusHandler)
     {
         _getAllHandler = getAllHandler;
+        _getByIdHandler = getByIdHandler;
         _createHandler = createHandler;
+        _updateStatusHandler = updateStatusHandler;
     }
 
     [HttpGet]
     public async Task<IActionResult> Get(CancellationToken cancellationToken)
     {
         var mottak = await _getAllHandler.Handle(new GetAllMottakQuery(), cancellationToken);
+        return Ok(mottak);
+    }
+
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
+    {
+        var mottak = await _getByIdHandler.Handle(new GetMottakByIdQuery(id), cancellationToken);
+        if (mottak is null) return NotFound(new { message = $"Mottak with id {id} not found." });
         return Ok(mottak);
     }
 
@@ -46,6 +60,14 @@ public class ReceiptsController : ControllerBase
                     l.Avvik,
                     l.Kommentar)).ToList()),
             cancellationToken);
-        return CreatedAtAction(nameof(Get), new { id }, new { id });
+        return CreatedAtAction(nameof(GetById), new { id }, new { id });
+    }
+
+    [HttpPut("{id}/status")]
+    public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateMottakStatusRequest request, CancellationToken cancellationToken)
+    {
+        var success = await _updateStatusHandler.Handle(new UpdateMottakStatusCommand(id, request.Status), cancellationToken);
+        if (!success) return NotFound(new { message = $"Mottak with id {id} not found." });
+        return Ok(new { id, status = request.Status });
     }
 }

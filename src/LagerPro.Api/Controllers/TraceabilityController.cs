@@ -1,3 +1,5 @@
+using LagerPro.Application.Features.Traceability.Queries.GetTraceabilityByLot;
+using LagerPro.Contracts.Dtos.Traceability;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LagerPro.Api.Controllers;
@@ -6,14 +8,19 @@ namespace LagerPro.Api.Controllers;
 [Route("api/[controller]")]
 public class TraceabilityController : ControllerBase
 {
-    [HttpGet("lot/{lotNr}")]
-    public IActionResult GetByLot(string lotNr)
+    private readonly GetTraceabilityByLotHandler _handler;
+
+    public TraceabilityController(GetTraceabilityByLotHandler handler)
     {
-        return Ok(new
-        {
-            LotNr = lotNr,
-            Status = "Placeholder",
-            Message = "Sporbarhetskjeden kobles til database senere."
-        });
+        _handler = handler;
+    }
+
+    [HttpGet("lot/{lotNr}")]
+    public async Task<IActionResult> GetByLot(string lotNr, CancellationToken cancellationToken)
+    {
+        var result = await _handler.Handle(new GetTraceabilityByLotQuery(lotNr), cancellationToken);
+        if (result is null)
+            return NotFound(new { message = $"Ingen beholdning funnet for lot {lotNr}." });
+        return Ok(result);
     }
 }
