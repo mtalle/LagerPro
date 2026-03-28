@@ -28,6 +28,8 @@ using LagerPro.Application.Features.Produksjon.Commands.UpdateProduksjonsOrdreSt
 using LagerPro.Application.Features.Produksjon.Queries.GetAllProduksjonsOrdre;
 using LagerPro.Application.Features.Produksjon.Queries.GetProduksjonsOrdreById;
 using LagerPro.Application.Features.Resepter.Commands.CreateResept;
+using LagerPro.Application.Features.Resepter.Commands.UpdateResept;
+using LagerPro.Application.Features.Resepter.Commands.DeleteResept;
 using LagerPro.Application.Features.Resepter.Queries.GetAllResepter;
 using LagerPro.Application.Features.Resepter.Queries.GetReseptById;
 using LagerPro.Application.Features.Traceability.Queries.GetTraceabilityByLot;
@@ -88,6 +90,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<GetAllResepterHandler>();
         services.AddScoped<GetReseptByIdHandler>();
         services.AddScoped<CreateReseptHandler>();
+        services.AddScoped<UpdateReseptHandler>();
+        services.AddScoped<DeleteReseptHandler>();
 
         // Traceability
         services.AddScoped<GetTraceabilityByLotHandler>();

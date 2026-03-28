@@ -221,6 +221,10 @@ public class MottakTests
                     Kommentar: null, Godkjent: false),
             });
 
+        // Mock artikkel lookup for validation
+        _artikkelRepoMock.Setup(r => r.GetByIdAsync(10, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Mock.Of<Artikkel>(a => a.Id == 10 && a.Navn == "Test" && a.Enhet == "kg"));
+
         Mottak? capturedMottak = null;
         _mottakRepoMock.Setup(r => r.AddAsync(It.IsAny<Mottak>(), It.IsAny<CancellationToken>()))
             .Callback<Mottak, CancellationToken>((m, _) => capturedMottak = m)

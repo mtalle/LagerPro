@@ -32,4 +32,10 @@ public class ReseptRepository : IReseptRepository
         await _dbContext.Resepter.AddAsync(resept, cancellationToken);
         // SaveChanges kun via UnitOfWork
     }
+
+    public void Delete(Resept resept)
+    {
+        _dbContext.Resepter.Remove(resept);
+        // SaveChanges via UnitOfWork
+    }
 }

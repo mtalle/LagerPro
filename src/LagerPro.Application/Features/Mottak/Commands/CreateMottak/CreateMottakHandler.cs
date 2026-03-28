@@ -44,12 +44,16 @@ public class CreateMottakHandler
 
         foreach (var linjeCommand in command.Linjer)
         {
+            var artikkel = await _artikkelRepository.GetByIdAsync(linjeCommand.ArtikkelId, cancellationToken);
+            if (artikkel is null)
+                throw new InvalidOperationException($"Artikkel with id {linjeCommand.ArtikkelId} not found.");
+
             var linje = new DomainMottakLinje
             {
                 ArtikkelId = linjeCommand.ArtikkelId,
                 LotNr = linjeCommand.LotNr,
                 Mengde = linjeCommand.Mengde,
-                Enhet = linjeCommand.Enhet,
+                Enhet = artikkel.Enhet,
                 BestForDato = linjeCommand.BestForDato,
                 Temperatur = linjeCommand.Temperatur,
                 Strekkode = linjeCommand.Strekkode,
@@ -63,17 +67,15 @@ public class CreateMottakHandler
         await _mottakRepository.AddAsync(mottak, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // Oppdater lager-beholdning og transaksjoner for godkjente linjer
+        // Direkte lager-oppdatering ved registrering for godkjente linjer
         foreach (var linje in mottak.Linjer.Where(l => l.Godkjent))
         {
-            var artikkel = await _artikkelRepository.GetByIdAsync(linje.ArtikkelId, cancellationToken);
-
             await _lagerRepository.UpsertAsync(new LagerBeholdning
             {
                 ArtikkelId = linje.ArtikkelId,
                 LotNr = linje.LotNr,
                 Mengde = linje.Mengde,
-                Enhet = artikkel?.Enhet ?? linje.Enhet,
+                Enhet = linje.Enhet,
                 BestForDato = linje.BestForDato,
                 SistOppdatert = DateTime.UtcNow
             }, cancellationToken);
