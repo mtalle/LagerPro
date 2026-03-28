@@ -1,3 +1,5 @@
+using LagerPro.Domain.Entities;
+
 namespace LagerPro.Contracts.Dtos.Levering;
 
 public record LeveringDto(
@@ -10,7 +12,8 @@ public record LeveringDto(
     string Status,
     string? Kommentar,
     string? LevertAv,
-    DateTime OpprettetDato);
+    DateTime OpprettetDato,
+    List<LeveringLinjeDto> Linjer);
 
 public record LeveringDetaljerDto(
     LeveringDto Levering,

@@ -33,14 +33,15 @@ public class ShippingController : ControllerBase
                 request.KundeId,
                 request.LeveringsDato,
                 request.Referanse,
-                request.Fraktseddel,
+                request.FraktBrev,
                 request.Kommentar,
-                request.LevertAv,
+                null, // LevertAv settes ved levering
                 request.Linjer.Select(l => new LeveringLinjeCommand(
                     l.ArtikkelId,
                     l.LotNr,
                     l.Mengde,
-                    l.Enhet)).ToList()),
+                    l.Enhet,
+                    null)).ToList()),
             cancellationToken);
         return CreatedAtAction(nameof(Get), new { id }, new { id });
     }
