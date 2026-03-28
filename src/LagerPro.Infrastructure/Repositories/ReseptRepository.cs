@@ -16,8 +16,7 @@ public class ReseptRepository : IReseptRepository
 
     public Task<Resept?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         => _dbContext.Resepter
-            .Include(x => x.Linjer).ThenInclude(l => l.Ravare)
-            .Include(x => x.Ferdigvare)
+            .Include(x => x.Linjer)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
     public async Task<IReadOnlyList<Resept>> GetAllAsync(CancellationToken cancellationToken = default)
