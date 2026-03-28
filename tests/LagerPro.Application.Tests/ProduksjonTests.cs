@@ -192,11 +192,11 @@ public class ProduksjonTests
             _lagerRepoMock.Object, _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
 
         var result = await handler.Handle(
-            new UpdateProduksjonsOrdreStatusCommand(1, "UnderArbeid"),
+            new UpdateProduksjonsOrdreStatusCommand(1, "IProduksjon"),
             CancellationToken.None);
 
         Assert.True(result);
-        Assert.Equal(ProdOrdreStatus.UnderArbeid, ordre.Status);
+        Assert.Equal(ProdOrdreStatus.IProduksjon, ordre.Status);
     }
 
     [Fact]
@@ -228,7 +228,7 @@ public class ProduksjonTests
             _lagerRepoMock.Object, _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
 
         var result = await handler.Handle(
-            new UpdateProduksjonsOrdreStatusCommand(999, "UnderArbeid"),
+            new UpdateProduksjonsOrdreStatusCommand(999, "IProduksjon"),
             CancellationToken.None);
 
         Assert.False(result);
@@ -243,7 +243,7 @@ public class ProduksjonTests
     {
         var resept = CreateTestResept(1, "Brødresept");
         resept.AntallPortjoner = 10;
-        var ordre = CreateTestOrdre(1, "PO-001", ProdOrdreStatus.UnderArbeid);
+        var ordre = CreateTestOrdre(1, "PO-001", ProdOrdreStatus.IProduksjon);
         ordre.Resept = resept;
         ordre.ReseptId = 1;
 
