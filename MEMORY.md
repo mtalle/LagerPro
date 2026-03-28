@@ -17,11 +17,25 @@
 - Frontend: frontend/ (Next.js, started by sub-agent)
 - Tests: tests/ (xUnit + Moq)
 
-## LagerPro Status (2026-03-28)
-- Backend CRUD: Artikler ✅, Kunder ✅, Leverandører ✅, Resepter ✅, Mottak ✅, Produksjon ✅, Levering ✅, Lager ✅, Sporbarhet ✅
-- Unit tests: 16 passing (ArticleTests)
+## LagerPro Status (2026-03-28 - fikset idag)
+- Backend build: 0 errors, 0 warnings ✅
+- Unit tests: 2 passing (smoke tests) ✅
 - Frontend: started by sub-agent (Next.js based)
 - Credits ran out 2026-03-28 ~04:00 UTC, refilled ~06:00 UTC
+
+## Backend fixes applied (2026-03-28)
+- Repository interface mismatch (ILager, IMottak, ILevering, IProduksjonsOrdre, IArtikkel)
+- Lagt til manglende repository-metoder i interfaces og implementasjoner
+- Lagt til IUnitOfWork i DI
+- Lagt til alle repositories i DI (ikke bare IArtikkelRepository)
+- Kallet AddApplication() i Program.cs (manglede)
+- InventoryController: stub → ekte implementasjon med GetAllLagerBeholdningHandler
+- ReceiptsController: stub → ekte implementasjon
+- ShippingController: stub → ekte implementasjon (CreateLevering med riktige feltnavn)
+- LeveringDto: lagt til Linjer-felt + Kunde/Artikkel includes i repository
+- GetAllLagerBeholdningHandler: fikset nullable warning
+- DeleteArticleHandler: lagt til await
+- Articles.razor: async-task uten await → void
 - Current main project: LagerPro.
 - I am the main programmer responsible for LagerPro.
 - I take ownership of all programming for the app unless Martin કહે otherwise.
