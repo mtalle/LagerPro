@@ -86,7 +86,7 @@ export default function MottakPage() {
   const statusBadge = (s: string) => {
     const map: Record<string, string> = {
       Registrert: 'badge-registrert', Mottatt: 'badge-aktiv', Godkjent: 'badge-aktiv',
-      'Delvis mottatt': 'badge-planlagt', Kansellert: 'badge-kansellert',
+      'Delvis mottatt': 'badge-planlagt', Kansellert: 'badge-kansellert', Avvist: 'badge-kansellert',
     };
     return <span className={`badge ${map[s] ?? ''}`}>{s}</span>;
   };
@@ -106,7 +106,7 @@ export default function MottakPage() {
           <td>
             {m.status === 'Registrert' && <button className="btn btn-sm btn-primary" style={{ marginRight: 4 }} onClick={e => { e.stopPropagation(); updateStatus(m.id, 'Mottatt'); }}>Mottatt</button>}
             {m.status === 'Mottatt' && <button className="btn btn-sm btn-primary" style={{ marginRight: 4 }} onClick={e => { e.stopPropagation(); updateStatus(m.id, 'Godkjent'); }}>Godkjenn</button>}
-            {m.status !== 'Godkjent' && m.status !== 'Kansellert' && <button className="btn btn-sm btn-danger" onClick={e => { e.stopPropagation(); updateStatus(m.id, 'Kansellert'); }}>Kanseller</button>}
+            {m.status !== 'Godkjent' && m.status !== 'Avvist' && <button className="btn btn-sm btn-danger" onClick={e => { e.stopPropagation(); updateStatus(m.id, 'Avvist'); }}>Avvis</button>}
           </td>
         </tr>
         {expanded === m.id && m.linjer.map(l => (
@@ -139,7 +139,7 @@ export default function MottakPage() {
         </thead>
         <tbody>
           {mottak.length === 0 ? (
-            <tr><td colSpan={7} style={{ textAlign: 'center', color: '#9ca3af', padding: '2rem' }}>Ingen mottak</td></tr>
+            <tr><td colSpan={8} style={{ textAlign: 'center', color: '#9ca3af', padding: '2rem' }}>Ingen mottak</td></tr>
           ) : renderMottakRows()}
         </tbody>
       </table>
