@@ -14,6 +14,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <span className="logo">📦 LagerPro</span>
           <div className="nav-links">
             <a href="/">Artikler</a>
+            <a href="/kunder">Kunder</a>
             <a href="/lager">Lager</a>
             <a href="/mottak">Mottak</a>
             <a href="/produksjon">Produksjon</a>
