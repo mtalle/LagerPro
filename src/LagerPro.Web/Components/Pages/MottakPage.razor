@@ -99,6 +99,16 @@ else
                                 }
                             </select>
                         </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label>Mottaksdato</label>
+                                <input class="form-control" type="date" @bind="newMottak.MottaksDato" />
+                            </div>
+                            <div class="col">
+                                <label>Mottatt av</label>
+                                <input class="form-control" placeholder="Navn" @bind="newMottak.MottattAv" />
+                            </div>
+                        </div>
                         <h6>Linjer</h6>
                         @foreach (var linje in newMottak.Linjer)
                         {
