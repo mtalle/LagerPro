@@ -1,3 +1,4 @@
+using LagerPro.Contracts.Dtos.Kunder;
 using LagerPro.Domain.Repositories;
 
 namespace LagerPro.Application.Features.Kunder.Queries.GetAllKunder;
@@ -8,6 +9,20 @@ public class GetAllKunderHandler
 
     public GetAllKunderHandler(IKundeRepository repository) => _repository = repository;
 
-    public Task<IReadOnlyList<Domain.Entities.Kunde>> Handle(GetAllKunderQuery query, CancellationToken cancellationToken = default)
-        => _repository.GetAllAsync(cancellationToken);
+    public async Task<IReadOnlyList<KundeDto>> Handle(GetAllKunderQuery query, CancellationToken cancellationToken = default)
+    {
+        var kunder = await _repository.GetAllAsync(cancellationToken);
+        return kunder.Select(k => new KundeDto(
+            k.Id,
+            k.Navn,
+            k.Kontaktperson,
+            k.Telefon,
+            k.Epost,
+            k.Adresse,
+            k.Postnr,
+            k.Poststed,
+            k.OrgNr,
+            k.Kommentar,
+            k.OpprettetDato)).ToList();
+    }
 }
