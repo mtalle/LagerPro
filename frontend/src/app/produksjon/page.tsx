@@ -13,6 +13,7 @@ export default function ProduksjonPage() {
   const [ordre, setOrdre] = useState<ProduksjonsOrdre[]>([]);
   const [resepter, setResepter] = useState<Resept[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [ferdigmeldOrdre, setFerdigmeldOrdre] = useState<ProduksjonsOrdre | null>(null);
   const [ferdigmeldResept, setFerdigmeldResept] = useState<Resept | null>(null);
@@ -99,6 +100,15 @@ export default function ProduksjonPage() {
 
   if (loading) return <div className="loading">Laster produksjonsordrer...</div>;
 
+  const filtered = ordre.filter(o => {
+    const q = search.toLowerCase();
+    return (
+      o.ordreNr.toLowerCase().includes(q) ||
+      (o.reseptNavn ?? '').toLowerCase().includes(q) ||
+      (o.utfortAv ?? '').toLowerCase().includes(q)
+    );
+  });
+
   return (
     <>
       <div className="page-header">
@@ -106,14 +116,23 @@ export default function ProduksjonPage() {
         <button className="btn btn-primary" onClick={() => setShowModal(true)}>+ Ny produksjonsordre</button>
       </div>
 
+      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
+        <input
+          placeholder="Søk ordrenr, resept..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={{ padding: '0.4rem 0.8rem', border: '1px solid #d1d5db', borderRadius: 6, width: 300, fontSize: '0.9rem' }}
+        />
+      </div>
+
       <table>
         <thead>
           <tr><th>OrdreNr</th><th>Resept</th><th>Planlagt</th><th>Ferdigmeldt</th><th>Antall</th><th>Lot</th><th>Status</th><th>Utfort</th><th></th></tr>
         </thead>
         <tbody>
-          {ordre.length === 0 ? (
-            <tr><td colSpan={9} style={{ textAlign: 'center', color: '#9ca3af', padding: '2rem' }}>Ingen produksjonsordrer</td></tr>
-          ) : ordre.map(o => (
+          {filtered.length === 0 ? (
+            <tr><td colSpan={9} style={{ textAlign: 'center', color: '#9ca3af', padding: '2rem' }}>{ordre.length === 0 ? 'Ingen produksjonsordrer' : 'Ingen resultater'}</td></tr>
+          ) : filtered.map(o => (
             <tr key={o.id}>
               <td><code>{o.ordreNr}</code></td>
               <td>{o.reseptNavn ?? `Resept.ID ${o.reseptId}`}</td>

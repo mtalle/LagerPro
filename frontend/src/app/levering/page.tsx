@@ -15,6 +15,7 @@ export default function LeveringPage() {
   const [kunder, setKunder] = useState<Kunde[]>([]);
   const [lager, setLager] = useState<LagerBeholdning[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
   const [expanded, setExpanded] = useState<number | null>(null);
   const [showModal, setShowModal] = useState(false);
 
@@ -89,6 +90,16 @@ export default function LeveringPage() {
 
   if (loading) return <div className="loading">Laster leveringer...</div>;
 
+  const filtered = leveringer.filter(l => {
+    const q = search.toLowerCase();
+    return (
+      (l.kundeNavn ?? '').toLowerCase().includes(q) ||
+      (l.referanse ?? '').toLowerCase().includes(q) ||
+      (l.fraktBrev ?? '').toLowerCase().includes(q) ||
+      l.id.toString().includes(q)
+    );
+  });
+
   return (
     <>
       <div className="page-header">
@@ -96,14 +107,23 @@ export default function LeveringPage() {
         <button className="btn btn-primary" onClick={() => setShowModal(true)}>+ Ny levering</button>
       </div>
 
+      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
+        <input
+          placeholder="Søk kunde, referanse, fraktbrev..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={{ padding: '0.4rem 0.8rem', border: '1px solid #d1d5db', borderRadius: 6, width: 300, fontSize: '0.9rem' }}
+        />
+      </div>
+
       <table>
         <thead>
           <tr><th>ID</th><th>Dato</th><th>Kunde</th><th>Referanse</th><th>Fraktbrev</th><th>Status</th><th></th></tr>
         </thead>
         <tbody>
-          {leveringer.length === 0 ? (
-            <tr><td colSpan={7} style={{ textAlign: 'center', color: '#9ca3af', padding: '2rem' }}>Ingen leveringer</td></tr>
-          ) : leveringer.map(l => (
+          {filtered.length === 0 ? (
+            <tr><td colSpan={7} style={{ textAlign: 'center', color: '#9ca3af', padding: '2rem' }}>{leveringer.length === 0 ? 'Ingen leveringer' : 'Ingen resultater'}</td></tr>
+          ) : filtered.map(l => (
             <tr key={l.id} style={{ cursor: 'pointer' }} onClick={() => setExpanded(expanded === l.id ? null : l.id)}>
               <td>#{l.id}</td>
               <td>{new Date(l.leveringsDato).toLocaleDateString('no-NO')}</td>
