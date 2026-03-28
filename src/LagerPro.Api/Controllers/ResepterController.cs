@@ -13,6 +13,7 @@ namespace LagerPro.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Route("api/recipes", Order = 1)]
 public class ResepterController : ControllerBase
 {
     private readonly GetAllResepterHandler _getAllHandler;

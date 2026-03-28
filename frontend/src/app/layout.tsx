@@ -15,10 +15,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="nav-links">
             <a href="/">Artikler</a>
             <a href="/kunder">Kunder</a>
+            <a href="/leverandorer">Leverandører</a>
             <a href="/lager">Lager</a>
             <a href="/mottak">Mottak</a>
             <a href="/produksjon">Produksjon</a>
             <a href="/levering">Levering</a>
+            <a href="/resepter">Resepter</a>
           </div>
         </nav>
         <main className="container">{children}</main>

@@ -34,8 +34,33 @@ public class UpdateLeveringStatusHandler
         if (!Enum.TryParse<LeveringStatus>(command.Status, ignoreCase: true, out var newStatus))
             return false;
 
-        // Ved Plukket: Trekk faktisk lager ( CreateLevering validerer bare, trekker ikke )
-        if (newStatus == LeveringStatus.Plukket && levering.Status == LeveringStatus.Planlagt)
+        // Plukket: Lager ble allerede reservert ved opprettelse (CreateLevering).
+        // Oppdater kun status uten å endre lager på nytt.
+        // Ved Levert: Logg bekreftelse med egen transaksjonstype.
+        if (newStatus == LeveringStatus.Levert && levering.Status != LeveringStatus.Levert)
+        {
+            foreach (var linje in levering.Linjer)
+            {
+                await _transaksjonRepository.AddAsync(new LagerTransaksjon
+                {
+                    ArtikkelId = linje.ArtikkelId,
+                    LotNr = linje.LotNr,
+                    Type = TransaksjonsType.LeveringBekreftet,
+                    Mengde = linje.Mengde,
+                    BeholdningEtter = (await _lagerRepository.GetByArtikkelOgLotAsync(
+                        linje.ArtikkelId, linje.LotNr, cancellationToken))?.Mengde ?? 0,
+                    Kilde = "Levering",
+                    KildeId = levering.Id,
+                    Kommentar = $"Levering #{levering.Id} levert og bekreftet",
+                    UtfortAv = Environment.UserName,
+                    Tidspunkt = DateTime.UtcNow
+                }, cancellationToken);
+            }
+            levering.LevertAv ??= Environment.UserName;
+        }
+
+        // Kansellert: Gjenopprett lager hvis det var plukket
+        if (newStatus == LeveringStatus.Kansellert && levering.Status == LeveringStatus.Plukket)
         {
             foreach (var linje in levering.Linjer)
             {
@@ -43,7 +68,7 @@ public class UpdateLeveringStatusHandler
                     linje.ArtikkelId, linje.LotNr, cancellationToken);
                 if (beholdning is not null)
                 {
-                    beholdning.Mengde -= linje.Mengde;
+                    beholdning.Mengde += linje.Mengde;
                     beholdning.SistOppdatert = DateTime.UtcNow;
                 }
 
@@ -51,41 +76,17 @@ public class UpdateLeveringStatusHandler
                 {
                     ArtikkelId = linje.ArtikkelId,
                     LotNr = linje.LotNr,
-                    Type = TransaksjonsType.Levering,
+                    Type = TransaksjonsType.Justering,
                     Mengde = linje.Mengde,
-                    BeholdningEtter = beholdning?.Mengde ?? 0,
+                    BeholdningEtter = (await _lagerRepository.GetByArtikkelOgLotAsync(
+                        linje.ArtikkelId, linje.LotNr, cancellationToken))?.Mengde ?? 0,
                     Kilde = "Levering",
                     KildeId = levering.Id,
-                    Kommentar = $"Levering #{levering.Id} plukket",
+                    Kommentar = $"Levering #{levering.Id} kansellert — lager gjenopprettet",
                     UtfortAv = Environment.UserName,
                     Tidspunkt = DateTime.UtcNow
                 }, cancellationToken);
             }
-        }
-
-        // Ved Levert: Kun bekreft og logg — lager er allerede trukket ved Plukket
-        if (newStatus == LeveringStatus.Levert)
-        {
-            foreach (var linje in levering.Linjer)
-            {
-                var beholdning = await _lagerRepository.GetByArtikkelOgLotAsync(
-                    linje.ArtikkelId, linje.LotNr, cancellationToken);
-
-                await _transaksjonRepository.AddAsync(new LagerTransaksjon
-                {
-                    ArtikkelId = linje.ArtikkelId,
-                    LotNr = linje.LotNr,
-                    Type = TransaksjonsType.Levering,
-                    Mengde = linje.Mengde,
-                    BeholdningEtter = beholdning?.Mengde ?? 0,
-                    Kilde = "Levering",
-                    KildeId = levering.Id,
-                    Kommentar = $"Levering #{levering.Id} levert",
-                    UtfortAv = Environment.UserName,
-                    Tidspunkt = DateTime.UtcNow
-                }, cancellationToken);
-            }
-            levering.LevertAv ??= Environment.UserName;
         }
 
         levering.Status = newStatus;

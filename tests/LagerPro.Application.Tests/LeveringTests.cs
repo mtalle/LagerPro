@@ -194,7 +194,7 @@ public class LeveringTests
 
         // Skal logge transaksjon (bekreftelse, ikke ny reduksjon)
         _transaksjonRepoMock.Verify(r => r.AddAsync(
-            It.Is<LagerTransaksjon>(t => t.Type == TransaksjonsType.Levering && t.Mengde == 5),
+            It.Is<LagerTransaksjon>(t => t.Type == TransaksjonsType.LeveringBekreftet && t.Mengde == 5),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 

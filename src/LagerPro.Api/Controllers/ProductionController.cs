@@ -11,6 +11,7 @@ namespace LagerPro.Api.Controllers;
 
 [ApiController]
 [Route("api/produksjon")]
+[Route("api/production", Order = 1)]
 public class ProductionController : ControllerBase
 {
     private readonly GetAllProduksjonsOrdreHandler _getAllHandler;
