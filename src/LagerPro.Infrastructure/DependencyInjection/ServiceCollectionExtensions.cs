@@ -18,16 +18,19 @@ public static class ServiceCollectionExtensions
         services.AddDbContext<LagerProDbContext>(options =>
             options.UseSqlServer(connectionString));
 
+        // Unit of Work
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        // Repositories
         services.AddScoped<IArtikkelRepository, ArtikkelRepository>();
         services.AddScoped<IKundeRepository, KundeRepository>();
         services.AddScoped<ILeverandorRepository, LeverandorRepository>();
         services.AddScoped<ILagerRepository, LagerRepository>();
         services.AddScoped<ILagerTransaksjonRepository, LagerTransaksjonRepository>();
-        services.AddScoped<IReseptRepository, ReseptRepository>();
-        services.AddScoped<IProduksjonsOrdreRepository, ProduksjonsOrdreRepository>();
-        services.AddScoped<ILeveringRepository, LeveringRepository>();
         services.AddScoped<IMottakRepository, MottakRepository>();
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<ILeveringRepository, LeveringRepository>();
+        services.AddScoped<IProduksjonsOrdreRepository, ProduksjonsOrdreRepository>();
+        services.AddScoped<IReseptRepository, ReseptRepository>();
 
         return services;
     }

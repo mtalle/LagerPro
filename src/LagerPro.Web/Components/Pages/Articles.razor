@@ -1,0 +1,294 @@
+@page "/articles"
+@using LagerPro.Web.Models
+@using LagerPro.Web.Services
+@inject ApiService Api
+
+<h3>Artikler</h3>
+
+@if (loading)
+{
+    <p>Laster...</p>
+}
+else if (error != null)
+{
+    <p class="text-danger">@error</p>
+}
+else
+{
+    <button class="btn btn-primary mb-3" @onclick="ShowCreateModal">Ny artikkel</button>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ArtikkelNr</th>
+                <th>Navn</th>
+                <th>Enhet</th>
+                <th>Type</th>
+                <th>Innpris</th>
+                <th>Utpris</th>
+                <th>MinBeholdning</th>
+                <th>Aktiv</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var article in articles)
+            {
+                <tr>
+                    <td>@article.ArtikkelNr</td>
+                    <td>@article.Navn</td>
+                    <td>@article.Enhet</td>
+                    <td>@article.Type</td>
+                    <td>@article.Innpris.ToString("N2")</td>
+                    <td>@article.Utpris.ToString("N2")</td>
+                    <td>@article.MinBeholdning</td>
+                    <td>@(article.Aktiv ? "Ja" : "Nei")</td>
+                    <td>
+                        <button class="btn btn-sm btn-secondary" @onclick="() => ShowEditModal(article)">Rediger</button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteArticle(article.Id)">Slett</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (showModal)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(isEdit ? "Rediger artikkel" : "Ny artikkel")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    @if (!isEdit)
+                    {
+                        <div class="mb-2">
+                            <label>ArtikkelNr</label>
+                            <input class="form-control" @bind="editArticle.ArtikkelNr" />
+                        </div>
+                    }
+                    <div class="mb-2">
+                        <label>Navn</label>
+                        <input class="form-control" @bind="editArticle.Navn" />
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col">
+                            <label>Enhet</label>
+                            <input class="form-control" @bind="editArticle.Enhet" />
+                        </div>
+                        <div class="col">
+                            <label>Type</label>
+                            <input class="form-control" @bind="editArticle.Type" />
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label>Beskrivelse</label>
+                        <input class="form-control" @bind="editArticle.Beskrivelse" />
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col">
+                            <label>Strekkode</label>
+                            <input class="form-control" @bind="editArticle.Strekkode" />
+                        </div>
+                        <div class="col">
+                            <label>Kategori</label>
+                            <input class="form-control" @bind="editArticle.Kategori" />
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col">
+                            <label>Innpris</label>
+                            <input class="form-control" type="number" step="0.01" @bind="editArticle.Innpris" />
+                        </div>
+                        <div class="col">
+                            <label>Utpris</label>
+                            <input class="form-control" type="number" step="0.01" @bind="editArticle.Utpris" />
+                        </div>
+                        <div class="col">
+                            <label>MinBeholdning</label>
+                            <input class="form-control" type="number" @bind="editArticle.MinBeholdning" />
+                        </div>
+                    </div>
+                    @if (isEdit)
+                    {
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" @bind="editArticle.Aktiv" />
+                            <label class="form-check-label">Aktiv</label>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Avbryt</button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveArticle">Lagre</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop show"></div>
+}
+
+@if (showDeleteConfirm)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Bekreft sletting</h5>
+                    <button type="button" class="btn-close" @onclick="CancelDelete"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Er du sikker på at du vil slette denne artikkelen?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CancelDelete">Avbryt</button>
+                    <button type="button" class="btn btn-danger" @onclick="ConfirmDelete">Slett</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop show"></div>
+}
+
+@code {
+    private List<Article> articles = new();
+    private bool loading = true;
+    private string? error;
+    private bool showModal = false;
+    private bool isEdit = false;
+    private bool showDeleteConfirm = false;
+    private int? deleteId;
+    private Article editArticle = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadArticles();
+    }
+
+    private async Task LoadArticles()
+    {
+        loading = true;
+        error = null;
+        try
+        {
+            articles = await Api.GetArticlesAsync();
+        }
+        catch (Exception ex)
+        {
+            error = $"Kunne ikke laste artikler: {ex.Message}";
+        }
+        loading = false;
+    }
+
+    private void ShowCreateModal()
+    {
+        editArticle = new Article { Enhet = "stk", Type = "Ferdigvare", Aktiv = true };
+        isEdit = false;
+        showModal = true;
+    }
+
+    private void ShowEditModal(Article article)
+    {
+        editArticle = new Article
+        {
+            Id = article.Id,
+            ArtikkelNr = article.ArtikkelNr,
+            Navn = article.Navn,
+            Enhet = article.Enhet,
+            Type = article.Type,
+            Beskrivelse = article.Beskrivelse,
+            Strekkode = article.Strekkode,
+            Kategori = article.Kategori,
+            Innpris = article.Innpris,
+            Utpris = article.Utpris,
+            MinBeholdning = article.MinBeholdning,
+            Aktiv = article.Aktiv
+        };
+        isEdit = true;
+        showModal = true;
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+    }
+
+    private async Task SaveArticle()
+    {
+        try
+        {
+            if (isEdit)
+            {
+                var request = new UpdateArticleRequest
+                {
+                    Navn = editArticle.Navn,
+                    Enhet = editArticle.Enhet,
+                    Type = editArticle.Type,
+                    Beskrivelse = editArticle.Beskrivelse,
+                    Strekkode = editArticle.Strekkode,
+                    Kategori = editArticle.Kategori,
+                    Innpris = editArticle.Innpris,
+                    Utpris = editArticle.Utpris,
+                    MinBeholdning = editArticle.MinBeholdning,
+                    Aktiv = editArticle.Aktiv
+                };
+                await Api.UpdateArticleAsync(editArticle.Id, request);
+            }
+            else
+            {
+                var request = new CreateArticleRequest
+                {
+                    ArtikkelNr = editArticle.ArtikkelNr,
+                    Navn = editArticle.Navn,
+                    Enhet = editArticle.Enhet,
+                    Type = editArticle.Type,
+                    Beskrivelse = editArticle.Beskrivelse,
+                    Strekkode = editArticle.Strekkode,
+                    Kategori = editArticle.Kategori,
+                    Innpris = editArticle.Innpris,
+                    Utpris = editArticle.Utpris,
+                    MinBeholdning = editArticle.MinBeholdning
+                };
+                await Api.CreateArticleAsync(request);
+            }
+            CloseModal();
+            await LoadArticles();
+        }
+        catch (Exception ex)
+        {
+            error = $"Feil ved lagring: {ex.Message}";
+        }
+    }
+
+    private void DeleteArticle(int id)
+    {
+        showDeleteConfirm = true;
+        deleteId = id;
+    }
+
+    private async Task ConfirmDelete()
+    {
+        if (deleteId.HasValue)
+        {
+            try
+            {
+                await Api.DeleteArticleAsync(deleteId.Value);
+                await LoadArticles();
+            }
+            catch (Exception ex)
+            {
+                error = $"Feil ved sletting: {ex.Message}";
+            }
+        }
+        showDeleteConfirm = false;
+        deleteId = null;
+    }
+
+    private void CancelDelete()
+    {
+        showDeleteConfirm = false;
+        deleteId = null;
+    }
+}

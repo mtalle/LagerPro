@@ -28,7 +28,14 @@ public class GetLeveringByIdHandler
                 levering.Status.ToString(),
                 levering.Kommentar,
                 levering.LevertAv,
-                levering.OpprettetDato),
+                levering.OpprettetDato,
+                levering.Linjer.Select(l => new LagerPro.Contracts.Dtos.Levering.LeveringLinjeDto(
+                    l.Id,
+                    l.ArtikkelId,
+                    l.Artikkel?.Navn,
+                    l.LotNr,
+                    l.Mengde,
+                    l.Enhet)).ToList()),
             levering.Linjer.Select(l => new LeveringLinjeDto(
                 l.Id,
                 l.ArtikkelId,

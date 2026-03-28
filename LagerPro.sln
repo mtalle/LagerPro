@@ -1,4 +1,4 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -15,6 +15,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LagerPro.Domain.Tests", "tests\LagerPro.Domain.Tests\LagerPro.Domain.Tests.csproj", "{C5A2D2C7-D2E8-4B75-B9A3-27E7D4F8F412}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LagerPro.Application.Tests", "tests\LagerPro.Application.Tests\LagerPro.Application.Tests.csproj", "{5B4D0CB7-BE7F-4F3A-9A62-08C3D2F8370E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{3E085920-55AF-45EF-88CA-3FCEEB1D70F1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LagerPro.Web", "src\LagerPro.Web\LagerPro.Web.csproj", "{90D52A9D-B9BB-47AC-9A78-75936286D2C1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -50,8 +54,15 @@ Global
 		{5B4D0CB7-BE7F-4F3A-9A62-08C3D2F8370E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5B4D0CB7-BE7F-4F3A-9A62-08C3D2F8370E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5B4D0CB7-BE7F-4F3A-9A62-08C3D2F8370E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{90D52A9D-B9BB-47AC-9A78-75936286D2C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{90D52A9D-B9BB-47AC-9A78-75936286D2C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{90D52A9D-B9BB-47AC-9A78-75936286D2C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{90D52A9D-B9BB-47AC-9A78-75936286D2C1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{90D52A9D-B9BB-47AC-9A78-75936286D2C1} = {3E085920-55AF-45EF-88CA-3FCEEB1D70F1}
 	EndGlobalSection
 EndGlobal

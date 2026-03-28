@@ -20,7 +20,7 @@ public class DeleteArticleHandler
         if (article is null)
             return false;
 
-        _repository.Delete(article);
+        await _repository.Delete(article, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return true;
     }
