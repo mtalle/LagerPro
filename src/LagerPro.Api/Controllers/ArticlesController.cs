@@ -56,12 +56,12 @@ public class ArticlesController : ControllerBase
                 request.Navn,
                 request.Enhet,
                 request.Type,
-                null,
-                null,
-                null,
-                0,
-                0,
-                0),
+                request.Beskrivelse,
+                request.Strekkode,
+                request.Kategori,
+                request.Innpris,
+                request.Utpris,
+                request.MinBeholdning),
             cancellationToken);
 
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
