@@ -4,51 +4,58 @@
       "static/chunks/webpack-8658fdbc42bfbbae.js",
       "static/chunks/fd9d1056-9f91b5e418130764.js",
       "static/chunks/117-9bcfe95f89d4b2e1.js",
-      "static/chunks/main-app-1c728f87840d3c67.js",
+      "static/chunks/main-app-543ece67e8e89e30.js",
       "static/chunks/app/_not-found/page-32c70da5a397ed57.js"
     ],
     "/layout": [
       "static/chunks/webpack-8658fdbc42bfbbae.js",
       "static/chunks/fd9d1056-9f91b5e418130764.js",
       "static/chunks/117-9bcfe95f89d4b2e1.js",
-      "static/chunks/main-app-1c728f87840d3c67.js",
+      "static/chunks/main-app-543ece67e8e89e30.js",
       "static/css/e9ba59c635b70636.css",
-      "static/chunks/app/layout-4d02eb51b4a450f7.js"
+      "static/chunks/app/layout-e0bf75abc5e9ca27.js"
     ],
     "/lager/page": [
       "static/chunks/webpack-8658fdbc42bfbbae.js",
       "static/chunks/fd9d1056-9f91b5e418130764.js",
       "static/chunks/117-9bcfe95f89d4b2e1.js",
-      "static/chunks/main-app-1c728f87840d3c67.js",
-      "static/chunks/app/lager/page-3fd427d2323e93e0.js"
+      "static/chunks/main-app-543ece67e8e89e30.js",
+      "static/chunks/app/lager/page-b0d750322a2d6c94.js"
+    ],
+    "/artikler/page": [
+      "static/chunks/webpack-8658fdbc42bfbbae.js",
+      "static/chunks/fd9d1056-9f91b5e418130764.js",
+      "static/chunks/117-9bcfe95f89d4b2e1.js",
+      "static/chunks/main-app-543ece67e8e89e30.js",
+      "static/chunks/app/artikler/page-4e62ba69915419dd.js"
     ],
     "/levering/page": [
       "static/chunks/webpack-8658fdbc42bfbbae.js",
       "static/chunks/fd9d1056-9f91b5e418130764.js",
       "static/chunks/117-9bcfe95f89d4b2e1.js",
-      "static/chunks/main-app-1c728f87840d3c67.js",
-      "static/chunks/app/levering/page-c2f191764aa14190.js"
+      "static/chunks/main-app-543ece67e8e89e30.js",
+      "static/chunks/app/levering/page-9e4aa962ac68092b.js"
     ],
     "/mottak/page": [
       "static/chunks/webpack-8658fdbc42bfbbae.js",
       "static/chunks/fd9d1056-9f91b5e418130764.js",
       "static/chunks/117-9bcfe95f89d4b2e1.js",
-      "static/chunks/main-app-1c728f87840d3c67.js",
-      "static/chunks/app/mottak/page-b8c0012b3714a9c5.js"
+      "static/chunks/main-app-543ece67e8e89e30.js",
+      "static/chunks/app/mottak/page-32eee572eedfdc24.js"
     ],
     "/page": [
       "static/chunks/webpack-8658fdbc42bfbbae.js",
       "static/chunks/fd9d1056-9f91b5e418130764.js",
       "static/chunks/117-9bcfe95f89d4b2e1.js",
-      "static/chunks/main-app-1c728f87840d3c67.js",
-      "static/chunks/app/page-7054489ba82866fd.js"
+      "static/chunks/main-app-543ece67e8e89e30.js",
+      "static/chunks/app/page-114390933dd939fa.js"
     ],
     "/produksjon/page": [
       "static/chunks/webpack-8658fdbc42bfbbae.js",
       "static/chunks/fd9d1056-9f91b5e418130764.js",
       "static/chunks/117-9bcfe95f89d4b2e1.js",
-      "static/chunks/main-app-1c728f87840d3c67.js",
-      "static/chunks/app/produksjon/page-41bfa41e3f658955.js"
+      "static/chunks/main-app-543ece67e8e89e30.js",
+      "static/chunks/app/produksjon/page-c9c88d99a535f51e.js"
     ]
   }
 }

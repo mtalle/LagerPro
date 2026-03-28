@@ -77,9 +77,8 @@ public class CreateLeveringHandler
         }
 
         await _leveringRepository.AddAsync(levering, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // Trekk fra lager ved opprettelse (reservert for levering)
+        // Trekk fra lager og logg transaksjoner i samme transaction
         foreach (var linje in levering.Linjer)
         {
             var beholdning = await _lagerRepository.GetByArtikkelOgLotAsync(

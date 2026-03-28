@@ -34,33 +34,61 @@ public class UpdateLeveringStatusHandler
         if (!Enum.TryParse<LeveringStatus>(command.Status, ignoreCase: true, out var newStatus))
             return false;
 
-        // Lager ble allerede reservert ved opprettelse (CreateLevering).
-        // Ved levert — logg kun ferdig bekreftelse (ikke ny reduksjon).
-        if (newStatus == LeveringStatus.Levert && levering.Status == LeveringStatus.Planlagt)
+        // Ved Plukket: Trekk faktisk lager ( CreateLevering validerer bare, trekker ikke )
+        if (newStatus == LeveringStatus.Plukket && levering.Status == LeveringStatus.Planlagt)
         {
             foreach (var linje in levering.Linjer)
             {
+                var beholdning = await _lagerRepository.GetByArtikkelOgLotAsync(
+                    linje.ArtikkelId, linje.LotNr, cancellationToken);
+                if (beholdning is not null)
+                {
+                    beholdning.Mengde -= linje.Mengde;
+                    beholdning.SistOppdatert = DateTime.UtcNow;
+                }
+
                 await _transaksjonRepository.AddAsync(new LagerTransaksjon
                 {
                     ArtikkelId = linje.ArtikkelId,
                     LotNr = linje.LotNr,
                     Type = TransaksjonsType.Levering,
                     Mengde = linje.Mengde,
-                    BeholdningEtter = (await _lagerRepository.GetByArtikkelOgLotAsync(
-                        linje.ArtikkelId, linje.LotNr, cancellationToken))?.Mengde ?? 0,
+                    BeholdningEtter = beholdning?.Mengde ?? 0,
                     Kilde = "Levering",
                     KildeId = levering.Id,
-                    Kommentar = $"Levering #{levering.Id} levert",
-                    UtfortAv = levering.LevertAv,
+                    Kommentar = $"Levering #{levering.Id} plukket",
+                    UtfortAv = Environment.UserName,
                     Tidspunkt = DateTime.UtcNow
                 }, cancellationToken);
             }
         }
 
-        levering.Status = newStatus;
-
+        // Ved Levert: Kun bekreft og logg — lager er allerede trukket ved Plukket
         if (newStatus == LeveringStatus.Levert)
+        {
+            foreach (var linje in levering.Linjer)
+            {
+                var beholdning = await _lagerRepository.GetByArtikkelOgLotAsync(
+                    linje.ArtikkelId, linje.LotNr, cancellationToken);
+
+                await _transaksjonRepository.AddAsync(new LagerTransaksjon
+                {
+                    ArtikkelId = linje.ArtikkelId,
+                    LotNr = linje.LotNr,
+                    Type = TransaksjonsType.Levering,
+                    Mengde = linje.Mengde,
+                    BeholdningEtter = beholdning?.Mengde ?? 0,
+                    Kilde = "Levering",
+                    KildeId = levering.Id,
+                    Kommentar = $"Levering #{levering.Id} levert",
+                    UtfortAv = Environment.UserName,
+                    Tidspunkt = DateTime.UtcNow
+                }, cancellationToken);
+            }
             levering.LevertAv ??= Environment.UserName;
+        }
+
+        levering.Status = newStatus;
 
         await _repository.UpdateAsync(levering, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

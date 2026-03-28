@@ -1,4 +1,4 @@
-// File: /home/ubuntu/.openclaw/workspace/frontend/src/app/levering/page.tsx
+// File: /home/ubuntu/.openclaw/workspace/projects/lagerpro/frontend/src/app/levering/page.tsx
 import * as entry from '../../../../src/app/levering/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
