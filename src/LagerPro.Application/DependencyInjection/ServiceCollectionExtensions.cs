@@ -8,6 +8,8 @@ using LagerPro.Application.Features.Kunder.Commands;
 using LagerPro.Application.Features.Kunder.Queries.GetAllKunder;
 using LagerPro.Application.Features.Kunder.Queries.GetKundeById;
 using LagerPro.Application.Features.Lager.Queries.GetAllLagerBeholdning;
+using LagerPro.Application.Features.Lager.Queries.GetLagerBeholdningByArtikkel;
+using LagerPro.Application.Features.Lager.Queries.GetLagerBeholdningByLotNr;
 using LagerPro.Application.Features.Leverandorer;
 using LagerPro.Application.Features.Leverandorer.Commands;
 using LagerPro.Application.Features.Leverandorer.Queries.GetAllLeverandorer;
@@ -65,6 +67,8 @@ public static class ServiceCollectionExtensions
 
         // Lager
         services.AddScoped<GetAllLagerBeholdningHandler>();
+        services.AddScoped<GetLagerBeholdningByArtikkelHandler>();
+        services.AddScoped<GetLagerBeholdningByLotNrHandler>();
 
         // Produksjon
         services.AddScoped<GetAllProduksjonsOrdreHandler>();
