@@ -21,7 +21,7 @@ export default function LeveringPage() {
 
   const [form, setForm] = useState({
     kundeId: 0, leveringsDato: new Date().toISOString().slice(0, 10),
-    referanse: '', fraktBrev: '', kommentar: '',
+    referanse: '', fraktBrev: '', kommentar: '', levertAv: '',
     linjer: [{ artikkelId: 0, lotNr: '', mengde: 1, enhet: 'STK' }],
   });
 
@@ -71,7 +71,7 @@ export default function LeveringPage() {
         leveringsDato: new Date(form.leveringsDato).toISOString(),
       });
       setShowModal(false);
-      setForm({ kundeId: 0, leveringsDato: new Date().toISOString().slice(0, 10), referanse: '', fraktBrev: '', kommentar: '', linjer: [{ artikkelId: 0, lotNr: '', mengde: 1, enhet: 'STK' }] });
+      setForm({ kundeId: 0, leveringsDato: new Date().toISOString().slice(0, 10), referanse: '', fraktBrev: '', kommentar: '', levertAv: '', linjer: [{ artikkelId: 0, lotNr: '', mengde: 1, enhet: 'STK' }] });
       load();
     } catch (e) { alert('Feil: ' + (e as Error).message); }
   }
@@ -170,6 +170,10 @@ export default function LeveringPage() {
                 <div className="form-group">
                   <label>Fraktbrev</label>
                   <input value={form.fraktBrev} onChange={e => setForm({ ...form, fraktBrev: e.target.value })} />
+                </div>
+                <div className="form-group">
+                  <label>Levert av</label>
+                  <input value={form.levertAv} onChange={e => setForm({ ...form, levertAv: e.target.value })} />
                 </div>
               </div>
               <div className="form-group" style={{ marginBottom: '1rem' }}>

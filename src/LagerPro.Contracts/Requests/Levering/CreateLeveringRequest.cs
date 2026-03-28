@@ -6,12 +6,14 @@ public record CreateLeveringRequest(
     string? Referanse,
     string? FraktBrev,
     string? Kommentar,
+    string? LevertAv,
     List<CreateLeveringLinjeRequest> Linjer);
 
 public record CreateLeveringLinjeRequest(
     int ArtikkelId,
     string LotNr,
     decimal Mengde,
-    string Enhet);
+    string Enhet,
+    string? Kommentar);
 
 public record UpdateLeveringStatusRequest(string Status);
