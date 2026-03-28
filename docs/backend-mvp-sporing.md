@@ -17,16 +17,47 @@
 - [ ] **Råvarerapport** → kva råvarer går i kvar ferdigvare-batch
 - [ ] **Kundesporing** → kva kunde fekk kvar batch
 
-### 🟡 Viktig: Kvalitetssikring
+### 🟡 Viktig: Kvalitetssikring + Brukarrettar
 - [ ] **Input-validering** → alle requests sjekka for gyldige verdiar
 - [ ] **Feilhandsaming** → kva skjer ved ugyldig data? (logg + 400 Bad Request)
 - [ ] **Lager-konsistens** → sjekk at lager aldri går i minus ved trekking
 - [ ] **Transaksjonssikring** → atomiske operasjonar (alt eller inkje)
+- [ ] **Brukarrettar (RBAC)** → admin vel kva kvar bruker ser
 
 ### 🟢 Bra å ha
 - [ ] **Audit log** → kven oppretta/endrea kva (operatør, tidspunkt)
 - [ ] **Batch-nummer autogenerering** → LOT-YYYYMMDD-NNN format
 - [ ] **Min/max lageralarm** → flagg når beholdning < minimum
+
+---
+
+## Brukarroller & Mobil-oppleving
+
+### Brukartypen
+| Rolle | Tilgang | Grensesnitt |
+|-------|--------|-------------|
+| **Admin** | Alt + brukarstyring | Web (full) |
+| **Varemottak** | Berre mottak | Mobil-vennleg (én knapp) |
+| **Produksjon** | Berre produksjon | Mobil-vennleg |
+| **Levering** | Berre levering | Mobil-vennleg |
+
+### Admin sine oppgåver
+- Opprette/redigere brukarar
+- Velje kva kvar brukar har tilgang til
+- Definere rollene
+
+### De på gulvet (mobil)
+- **KVART eit skjermbilde** — berre den funksjonen dei treng
+- **Éin-handta** — store knappar, lite tekst
+- **Offline-støtte** (framtidig) — kan registrere utan nett
+
+### Endepunkt for rettar
+| Metode | Endepunkt | Beskriving |
+|--------|-----------|-------------|
+| GET | `/api/brukere` | Alle brukarar |
+| POST | `/api/brukere` | Opprett brukar |
+| PUT | `/api/brukere/{id}/tilgang` | Oppdater tilgang |
+| DELETE | `/api/brukere/{id}` | Deaktiver brukar |
 
 ---
 

@@ -42,6 +42,31 @@ Få en første brukertestbar MVP av LagerPro så fort som mulig.
 
 ---
 
+## Brukarroller & Mobil-oppleving
+
+### Kjerneprinsipp
+**Brukarvennleg høgt opp** — appen skal vere enkel for alle, spesielt dei på gulvet.
+
+### Brukartypen
+| Rolle | Tilgang | Grensesnitt |
+|-------|--------|-------------|
+| **Admin** | Alt + brukarstyring | Web (full) |
+| **Varemottak** | Berre mottak | Mobil-vennleg (eitt skjerm) |
+| **Produksjon** | Berre produksjon | Mobil-vennleg |
+| **Levering** | Berre levering | Mobil-vennleg |
+
+### Admin sine oppgåver
+- Opprette/redigere brukarar
+- Velje kva kvar brukar har tilgang til
+- Definere rollene
+
+### De på gulvet (mobil)
+- **EITT skjermbilde** — berre den funksjonen dei treng
+- **Éin-handta** — store knappar, lite tekst
+- **Kun det dei treng** — zero distraksjon
+
+---
+
 ## MVP-scope
 Kun det som trengs for å teste kjerneflyten:
 - Registrere artikkel
