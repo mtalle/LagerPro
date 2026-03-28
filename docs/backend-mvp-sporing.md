@@ -10,18 +10,18 @@
 ## Fase 1: Backend ferdig (no → 1 uke)
 
 ### 🔴 Kritisk: Sporbarheitskjeden
-- [ ] **Mottak** → råvare med lot-nr, vekt, temperatur, holdbarheit
-- [ ] **Produksjon** → råvarer → ferdigvare (kvar batch = ny lot)
-- [ ] **Levering** → ferdigvare til kunde med lot-nr
-- [ ] **Traceability API** → gitt lot-nr → vis heile historikken (kvar varen har vore)
-- [ ] **Råvarerapport** → kva råvarer går i kvar ferdigvare-batch
-- [ ] **Kundesporing** → kva kunde fekk kvar batch
+- [x] **Mottak** → råvare med lot-nr, vekt, temperatur, holdbarheit (→ LagerTransaksjon)
+- [x] **Produksjon** → råvarer → ferdigvare (kvar batch = ny lot) (→ LagerTransaksjon)
+- [x] **Levering** → ferdigvare til kunde med lot-nr (→ LagerTransaksjon)
+- [x] **Traceability API** → gitt lot-nr → vis heile historikken (kvar varen har vore)
+- [x] **Råvarerapport** → kva råvarer går i kvar ferdigvare-batch (via /batch endpoint)
+- [x] **Kundesporing** → kva kunde fekk kvar batch (via /kunde endpoint)
 
 ### 🟡 Viktig: Kvalitetssikring + Brukarrettar
-- [ ] **Input-validering** → alle requests sjekka for gyldige verdiar
-- [ ] **Feilhandsaming** → kva skjer ved ugyldig data? (logg + 400 Bad Request)
-- [ ] **Lager-konsistens** → sjekk at lager aldri går i minus ved trekking
-- [ ] **Transaksjonssikring** → atomiske operasjonar (alt eller inkje)
+- [x] **Input-validering** → alle requests sjekka for gyldige verdiar (i handlers)
+- [x] **Feilhandsaming** → kva skjer ved ugyldig data? (logg + 400 Bad Request)
+- [x] **Lager-konsistens** → sjekk at lager aldri går i minus ved trekking
+- [x] **Transaksjonssikring** → atomiske operasjonar (alt eller inkje) — UnitOfWork m/ transactions
 - [ ] **Brukarrettar (RBAC)** → admin vel kva kvar bruker ser
 
 ### 🟢 Bra å ha
