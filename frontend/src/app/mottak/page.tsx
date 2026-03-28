@@ -63,7 +63,7 @@ export default function MottakPage() {
 
   const statusBadge = (s: string) => {
     const map: Record<string, string> = {
-      Registrert: 'badge-registrert', Mottatt: 'badge-aktiv', Kvalitetssjekket: 'badge-aktiv',
+      Registrert: 'badge-registrert', Mottatt: 'badge-aktiv', Godkjent: 'badge-aktiv',
       'Delvis mottatt': 'badge-planlagt', Kansellert: 'badge-kansellert',
     };
     return <span className={`badge ${map[s] ?? ''}`}>{s}</span>;
@@ -96,6 +96,7 @@ export default function MottakPage() {
                 <td>{m.mottattAv ?? '—'}</td>
                 <td>
                   {m.status === 'Registrert' && <button className="btn btn-sm btn-primary" onClick={e => { e.stopPropagation(); updateStatus(m.id, 'Mottatt'); }}>Mottatt</button>}
+                  {m.status === 'Mottatt' && <button className="btn btn-sm btn-primary" onClick={e => { e.stopPropagation(); updateStatus(m.id, 'Godkjent'); }}>Godkjenn</button>}
                 </td>
               </tr>
               {expanded === m.id && m.linjer.map(l => (
