@@ -21,15 +21,13 @@ Få en første brukertestbar MVP av LagerPro så fort som mulig.
 - [ ] **Levering** → Bruk `/api/levering`
 - [ ] Alle knappar og skjema må fungere (les, lag, oppdater)
 
-#### Fase 2: Nye sider
-- [ ] **Kunder** → liste + legg til + rediger
-- [ ] **Leverandører** → liste + legg til + rediger
+#### Fase 2: Nye sider + organisering
+- [ ] **Artikklar** → vis alle + rediger (Varelager)
+- [ ] **Innstillingar** → Kunder + Leverandører (CRUD)
 - [ ] **Resepter** → liste + legg til + rediger
-- [ ] **Artiklar** → rediger eksisterande (berre visning idag)
 
 #### Fase 3: Avansert
 - [ ] **Sporing** → spor artikkel/lotje via `/api/traceability/lot/{lotNr}`
-- [ ] **Rediger artiklar** → full edit-skjema
 - [ ] **Dashboard** → enkel oversikt (artiklar, lager, produksjon)
 - [ ] **Rapporter** → enkle nedlastningar
 
