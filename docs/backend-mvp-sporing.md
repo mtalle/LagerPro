@@ -17,7 +17,7 @@
 - [x] **Råvarerapport** → kva råvarer går i kvar ferdigvare-batch (via /batch endpoint)
 - [x] **Kundesporing** → kva kunde fekk kvar batch (via /kunde endpoint)
 
-### 🟠 Kritisk: Produksjonsflyt (detaljert)
+### 🟠 Kritisk: Produksjonsflyt
 - [ ] **Resepter** → Admin oppretter resept med ferdigvare + råvarer (artikkel + mengde)
 - [ ] **Produksjonsordre** → Admin eller Produksjon oppretter ordre basert på resept
   - OrdreID autogenereres (PROD-YYYYMMDD-NNN)
@@ -30,30 +30,43 @@
 - [ ] **Ordreliste** → Alle produksjonsordrer i liste, klikk for å ferdigmelde
 
 ### Produksjonsflyt steg-for-steg
+1. Opprette resept (Admin) → ferdigvare + råvarer (artikkel + mengde)
+2. Opprette produksjonsordre → vel resept, PROD-YYYYMMDD-NNN, system foreslår antal
+3. Plukkliste (valfri) → Artikkelnamn | Lot-nr | Antal | OrdreID synleg
+4. Ferdigmelding → endre lot/antal, lager oppdaterast
 
-**1. Opprette resept (Admin)**
-- Resept = ferdigvare-artikkel + liste med råvarer (artikkel + mengde)
-- Lot-nr velgast ved produksjon (ikkje i resept)
+---
 
-**2. Opprette produksjonsordre**
-- Vel resept → System foreslår antal
-- OrdreID autogenereres (PROD-YYYYMMDD-NNN)
-- Neste steg: Plukkliste
+### 🟡 Kritisk: Varelager / Artikklar
 
-**3. Plukkliste (valfri)**
-- Viser kva råvarer som må plukkast
-- Artikkelnamn | Lot-nr | Antal
-- Synleg OrdreID
-- Kan skrivast ut
+#### Hovudside (Artikkelliste)
+- [ ] **Vis alle artikklar** → komplett liste med artikkelnavn, artikkelnr, kategori, lagerstatus
+- [ ] **Filter** → på kategori, på lager, ikkje på lager
+- [ ] **Søk** → på navn, artikkelnummer, lot-nummer
 
-**4. Ferdigmelding**
-- Kan endre kva som faktisk vart brukt (lot + antal)
-- Automatisk fylt ut frå resept + gjeldande lager
-- Admin eller Produksjon kan ferdigmelde
-- Ved ferdigmelding:
-  - Lager: `ProduksjonUttak` (trekk råvarer)
-  - Lager: `ProduksjonInn` (legg til ferdigvare)
-  - Produksjonsordre → Ferdig
+#### Artikkeldetaljer (klikk på artikkel)
+- [ ] **Oversikt over alle lot-numre** + lagerstatus for kvar lot
+- [ ] Viser ALLE lot, òg dei med 0 i lager
+- [ ] Klikk på lot-nr → går vidare til sporingside for den lot
+
+#### Varetelling
+- [ ] **Start varetelling** → Send til alle brukarar eller bestemte brukarar
+- [ ] **Telleliste** → Éin linje per lot-nummer per artikkel
+  - Linje viser: lagertall (no) + ny status (ved telling)
+  - Linjer med 0 i antal visast IKKJE, men kan leggjast til
+  - Kan leggja til ekstra linje (ny vare eller vare som har 0)
+- [ ] **Ferdigmelding av telling** → Lager justerast automatisk basert på telling
+- [ ] **Avviksrapport** → kva vart telt vs kva som var i systemet
+
+#### Manuell justering
+- [ ] Velje ein eller fleire linjer
+- [ ] Endre antall ELLER lot-nummer
+- [ ] Med grunn/kommentar
+
+#### Historikk-fane (på kvar artikkel)
+- [ ] **Alle transaksjonar** lagra: varetelling, justering, mottak, levering, produksjon
+- [ ] Kven gjorde kva + tidspunkt
+- [ ] Éin samla historikk per artikkel
 
 ---
 
@@ -83,7 +96,7 @@
 
 ### Admin sine oppgåver
 - Opprette/redigere brukarar
-- Velje kva kvar brukar har tilgang til
+- Velja kva kvar brukar har tilgang til
 - Definere rollene
 
 ### De på gulvet (mobil)
@@ -123,6 +136,8 @@ Råvare (Mottak) → Lager → Produksjon (Forbruk + Ferdigvare) → Lager → L
 - `ProduksjonInn` — ferdigvare produsert
 - `ProduksjonUttak` — råvare brukt i produksjon
 - `Levering` — ferdigvare sendt til kunde
+- `Varetelling` — fysisk telling vs systemtall
+- `Justering` — manuell justering (med grunn + autorisering)
 - `Korrigering` — manuell justering (med grunn + autorisering)
 
 ---
