@@ -14,28 +14,28 @@ public class ArtikkelRepository : IArtikkelRepository
         _dbContext = dbContext;
     }
 
-    public async Task<Artikkel?> GetByIdAsync(int id, CancellationToken cancellationToken)
+    public async Task<Artikkel?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         return await _dbContext.Artikler.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
 
-    public async Task<IReadOnlyList<Artikkel>> GetAllAsync(CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<Artikkel>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return await _dbContext.Artikler
             .OrderBy(x => x.Navn)
             .ToListAsync(cancellationToken);
     }
 
-    public async Task AddAsync(Artikkel artikkel, CancellationToken cancellationToken)
+    public async Task AddAsync(Artikkel artikkel, CancellationToken cancellationToken = default)
     {
         await _dbContext.Artikler.AddAsync(artikkel, cancellationToken);
-        // SaveChanges via UnitOfWork
+        // SaveChanges kun via UnitOfWork
     }
 
-    public Task Delete(Artikkel artikkel, CancellationToken cancellationToken)
+    public Task Delete(Artikkel artikkel, CancellationToken cancellationToken = default)
     {
         _dbContext.Artikler.Remove(artikkel);
-        // SaveChanges via UnitOfWork
+        // SaveChanges kun via UnitOfWork
         return Task.CompletedTask;
     }
 }

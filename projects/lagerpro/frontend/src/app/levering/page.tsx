@@ -15,6 +15,7 @@ export default function LeveringPage() {
   const [kunder, setKunder] = useState<Kunde[]>([]);
   const [lager, setLager] = useState<LagerBeholdning[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
   const [expanded, setExpanded] = useState<number | null>(null);
   const [showModal, setShowModal] = useState(false);
 
@@ -28,9 +29,9 @@ export default function LeveringPage() {
   async function load() {
     try {
       const [l, k, b] = await Promise.all([
-        get<Levering[]>('/shipping'),
-        get<Kunde[]>('/customers'),
-        get<LagerBeholdning[]>('/inventory'),
+        get<Levering[]>('/levering'),
+        get<Kunde[]>('/kunder'),
+        get<LagerBeholdning[]>('/lager'),
       ]);
       setLeveringer(l);
       setKunder(k);
@@ -58,7 +59,7 @@ export default function LeveringPage() {
     if (form.kundeId === 0) { alert('Velg en kunde.'); return; }
     if (form.linjer.some(l => l.artikkelId === 0 || !l.lotNr)) { alert('Alle linjer må ha artikkel og lotnr.'); return; }
     try {
-      await post('/shipping', {
+      await post('/levering', {
         ...form,
         leveringsDato: new Date(form.leveringsDato).toISOString(),
         linjer: form.linjer.map(l => ({ artikkelId: l.artikkelId, lotNr: l.lotNr, mengde: l.mengde, enhet: l.enhet })),
@@ -74,7 +75,7 @@ export default function LeveringPage() {
   }
 
   async function setStatus(id: number, status: string) {
-    try { await patch(`/shipping/${id}/status`, { status }); load(); }
+    try { await patch(`/levering/${id}/status`, { status }); load(); }
     catch (e) { alert('Feil: ' + (e as Error).message); }
   }
 
@@ -89,6 +90,16 @@ export default function LeveringPage() {
 
   if (loading) return <div className="loading">Laster leveringer...</div>;
 
+  const filtered = leveringer.filter(l => {
+    const q = search.toLowerCase();
+    return (
+      (l.kundeNavn ?? '').toLowerCase().includes(q) ||
+      (l.referanse ?? '').toLowerCase().includes(q) ||
+      (l.fraktBrev ?? '').toLowerCase().includes(q) ||
+      l.id.toString().includes(q)
+    );
+  });
+
   return (
     <>
       <div className="page-header">
@@ -96,14 +107,23 @@ export default function LeveringPage() {
         <button className="btn btn-primary" onClick={() => setShowModal(true)}>+ Ny levering</button>
       </div>
 
+      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
+        <input
+          placeholder="Søk kunde, referanse, fraktbrev..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={{ padding: '0.4rem 0.8rem', border: '1px solid #d1d5db', borderRadius: 6, width: 300, fontSize: '0.9rem' }}
+        />
+      </div>
+
       <table>
         <thead>
           <tr><th>ID</th><th>Dato</th><th>Kunde</th><th>Referanse</th><th>Fraktbrev</th><th>Status</th><th></th></tr>
         </thead>
         <tbody>
-          {leveringer.length === 0 ? (
-            <tr><td colSpan={7} style={{ textAlign: 'center', color: '#9ca3af', padding: '2rem' }}>Ingen leveringer</td></tr>
-          ) : leveringer.map(l => (
+          {filtered.length === 0 ? (
+            <tr><td colSpan={7} style={{ textAlign: 'center', color: '#9ca3af', padding: '2rem' }}>{leveringer.length === 0 ? 'Ingen leveringer' : 'Ingen resultater'}</td></tr>
+          ) : filtered.map(l => (
             <tr key={l.id} style={{ cursor: 'pointer' }} onClick={() => setExpanded(expanded === l.id ? null : l.id)}>
               <td>#{l.id}</td>
               <td>{new Date(l.leveringsDato).toLocaleDateString('no-NO')}</td>
@@ -118,6 +138,19 @@ export default function LeveringPage() {
                 {l.status !== 'Levert' && l.status !== 'Kansellert' && <button className="btn btn-sm btn-danger" onClick={() => setStatus(l.id, 'Kansellert')}>Kanseller</button>}
               </td>
             </tr>
+            {expanded === l.id && l.linjer.map(function(linje) {
+              var a = linje.artikkelNavn ? linje.artikkelNavn : ('Art.ID ' + linje.artikkelId);
+              return (
+                <tr key={l.id + '-linje-' + linje.id} style={{ background: '#f9fafb', fontSize: '0.85rem' }}>
+                  <td colSpan={2}></td>
+                  <td><code>{a}</code></td>
+                  <td>Lot: <code>{linje.lotNr}</code></td>
+                  <td>{linje.mengde} {linje.enhet}</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              );
+            })}
           ))}
         </tbody>
       </table>

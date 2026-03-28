@@ -15,6 +15,8 @@ else if (error != null)
 }
 else
 {
+    <button class="btn btn-primary mb-3" @onclick="ShowCreateModal">Ny produksjonsordre</button>
+
     <table class="table table-striped">
         <thead>
             <tr>
@@ -67,8 +69,15 @@ else
                             <dd class="col-sm-9">@viewingOrdre.PlanlagtDato.ToString("yyyy-MM-dd")</dd>
                             <dt class="col-sm-3">FerdigmeldtDato</dt>
                             <dd class="col-sm-9">@(viewingOrdre.FerdigmeldtDato?.ToString("yyyy-MM-dd") ?? "-")</dd>
+                            <dt class="col-sm-3">FerdigvareLotNr</dt>
+                            <dd class="col-sm-9">@viewingOrdre.FerdigvareLotNr</dd>
+                            @if (!string.IsNullOrEmpty(viewingOrdre.Kommentar))
+                            {
+                                <dt class="col-sm-3">Kommentar</dt>
+                                <dd class="col-sm-9">@viewingOrdre.Kommentar</dd>
+                            }
                         </dl>
-                        
+
                         @if (viewingOrdreDetaljer?.Forbruk.Any() == true)
                         {
                             <h6>Forbruk</h6>
@@ -85,11 +94,38 @@ else
                     }
                     else
                     {
-                        <p>Opprett produksjonsordre via API.</p>
+                        <div class="mb-3">
+                            <label>Resept</label>
+                            <select class="form-select" @bind="newOrdre.ReseptId">
+                                <option value="0">Velg resept...</option>
+                                @foreach (var r in resepter)
+                                {
+                                    <option value="@r.Id">@r.Navn</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label>OrdreNr (valgfritt)</label>
+                                <input class="form-control" placeholder="Auto-genereres hvis tom" @bind="newOrdre.OrdreNr" />
+                            </div>
+                            <div class="col">
+                                <label>Planlagt dato</label>
+                                <input class="form-control" type="date" @bind="newOrdre.PlanlagtDato" />
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label>Kommentar</label>
+                            <input class="form-control" placeholder="Kommentar (valgfritt)" @bind="newOrdre.Kommentar" />
+                        </div>
                     }
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" @onclick="CloseModal">Lukk</button>
+                    @if (viewingOrdre == null)
+                    {
+                        <button type="button" class="btn btn-primary" @onclick="CreateOrdre">Opprett</button>
+                    }
                 </div>
             </div>
         </div>
@@ -99,11 +135,13 @@ else
 
 @code {
     private List<ProduksjonsOrdre> ordrer = new();
+    private List<Resept> resepter = new();
     private ProduksjonsOrdreDetaljer? viewingOrdreDetaljer;
     private bool loading = true;
     private string? error;
     private bool showModal = false;
     private ProduksjonsOrdre? viewingOrdre;
+    private CreateProduksjonsOrdreRequest newOrdre = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -117,12 +155,24 @@ else
         try
         {
             ordrer = await Api.GetProduksjonsOrdreAsync();
+            resepter = await Api.GetResepterAsync();
         }
         catch (Exception ex)
         {
             error = $"Kunne ikke laste data: {ex.Message}";
         }
         loading = false;
+    }
+
+    private void ShowCreateModal()
+    {
+        newOrdre = new CreateProduksjonsOrdreRequest
+        {
+            PlanlagtDato = DateTime.Today
+        };
+        viewingOrdre = null;
+        viewingOrdreDetaljer = null;
+        showModal = true;
     }
 
     private void CloseModal()
@@ -140,5 +190,24 @@ else
             viewingOrdreDetaljer = await Api.GetProduksjonsOrdreDetaljerAsync(id);
         }
         showModal = true;
+    }
+
+    private async Task CreateOrdre()
+    {
+        try
+        {
+            if (newOrdre.ReseptId == 0)
+            {
+                error = "Velg en resept.";
+                return;
+            }
+            await Api.CreateProduksjonsOrdreAsync(newOrdre);
+            CloseModal();
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            error = $"Feil ved opprettelse: {ex.Message}";
+        }
     }
 }

@@ -10,7 +10,8 @@ public record LagerBeholdningDto(
     string Enhet,
     string? Lokasjon,
     DateTime? BestForDato,
-    DateTime SistOppdatert);
+    DateTime SistOppdatert,
+    int? MinBeholdning);
 
 public record LageroversiktDto(
     int ArtikkelId,

@@ -23,6 +23,7 @@ public class GetAllKunderHandler
             k.Poststed,
             k.OrgNr,
             k.Kommentar,
+            k.Aktiv,
             k.OpprettetDato)).ToList();
     }
 }

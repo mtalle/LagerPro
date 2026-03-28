@@ -39,7 +39,8 @@ public class GetAllLagerBeholdningHandler
                         x.Enhet,
                         x.Lokasjon,
                         x.BestForDato,
-                        x.SistOppdatert)).ToList());
+                        x.SistOppdatert,
+                        first.Artikkel?.MinBeholdning)).ToList());
             })
             .OrderBy(x => x.ArtikkelNr)
             .ToList()

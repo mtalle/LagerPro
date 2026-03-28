@@ -35,6 +35,22 @@ public class CreateLeveringHandler
         if (kunde is null)
             throw new InvalidOperationException($"Kunde {command.KundeId} ble ikke funnet.");
 
+        // Sjekk lagerbeholdning før levering opprettes
+        foreach (var linjeCommand in command.Linjer)
+        {
+            var beholdning = await _lagerRepository.GetByArtikkelOgLotAsync(
+                linjeCommand.ArtikkelId, linjeCommand.LotNr, cancellationToken);
+
+            if (beholdning is null)
+                throw new InvalidOperationException(
+                    $"Fant ikke beholdning for artikkel {linjeCommand.ArtikkelId}, lot {linjeCommand.LotNr}.");
+
+            if (beholdning.Mengde < linjeCommand.Mengde)
+                throw new InvalidOperationException(
+                    $"Ikke nok beholdning for artikkel {linjeCommand.ArtikkelId} lot {linjeCommand.LotNr}: " +
+                    $"har {beholdning.Mengde} {linjeCommand.Enhet}, trenger {linjeCommand.Mengde}.");
+        }
+
         var levering = new DomainLevering
         {
             KundeId = command.KundeId,
@@ -61,32 +77,9 @@ public class CreateLeveringHandler
         }
 
         await _leveringRepository.AddAsync(levering, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // Trekk fra lager for hver linje
-        foreach (var linje in levering.Linjer)
-        {
-            var beholdning = await _lagerRepository.GetByArtikkelOgLotAsync(linje.ArtikkelId, linje.LotNr, cancellationToken);
-            if (beholdning is not null)
-            {
-                beholdning.Mengde -= linje.Mengde;
-                beholdning.SistOppdatert = DateTime.UtcNow;
-            }
-
-            await _lagerTransaksjonRepository.AddAsync(new LagerTransaksjon
-            {
-                ArtikkelId = linje.ArtikkelId,
-                LotNr = linje.LotNr,
-                Type = TransaksjonsType.Levering,
-                Mengde = linje.Mengde,
-                BeholdningEtter = beholdning?.Mengde ?? 0,
-                Kilde = "Levering",
-                KildeId = levering.Id,
-                Kommentar = linje.Kommentar,
-                UtfortAv = command.LevertAv,
-                Tidspunkt = DateTime.UtcNow
-            }, cancellationToken);
-        }
+        // Kun validering her — lager trekkes ved Plukket-status for å unngå dobbeltrekk.
+        // Plukket er den offisielle bekreftelsen på at varene er plukket fra lager.
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return levering.Id;

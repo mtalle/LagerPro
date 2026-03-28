@@ -10,7 +10,8 @@ public record LeveringDto(
     string Status,
     string? Kommentar,
     string? LevertAv,
-    DateTime OpprettetDato);
+    DateTime OpprettetDato,
+    List<LeveringLinjeDto> Linjer);
 
 public record LeveringDetaljerDto(
     LeveringDto Levering,

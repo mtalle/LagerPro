@@ -11,4 +11,5 @@ public record KundeDto(
     string? Poststed,
     string? OrgNr,
     string? Kommentar,
+    bool Aktiv,
     DateTime OpprettetDato);

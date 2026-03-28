@@ -8,6 +8,7 @@ using LagerPro.Application.Features.Kunder.Commands;
 using LagerPro.Application.Features.Kunder.Queries.GetAllKunder;
 using LagerPro.Application.Features.Kunder.Queries.GetKundeById;
 using LagerPro.Application.Features.Lager.Queries.GetAllLagerBeholdning;
+using LagerPro.Application.Features.Lager.Queries.GetAllLagerFlat;
 using LagerPro.Application.Features.Leverandorer;
 using LagerPro.Application.Features.Leverandorer.Commands;
 using LagerPro.Application.Features.Leverandorer.Queries.GetAllLeverandorer;
@@ -24,10 +25,15 @@ using LagerPro.Application.Features.Produksjon.Commands.CreateProduksjonsOrdre;
 using LagerPro.Application.Features.Produksjon.Commands.FerdigmeldProduksjonsOrdre;
 using LagerPro.Application.Features.Produksjon.Commands.UpdateProduksjonsOrdreStatus;
 using LagerPro.Application.Features.Produksjon.Queries.GetAllProduksjonsOrdre;
+using LagerPro.Application.Features.Produksjon.Queries.GetPlukkliste;
 using LagerPro.Application.Features.Produksjon.Queries.GetProduksjonsOrdreById;
 using LagerPro.Application.Features.Resepter.Commands.CreateResept;
 using LagerPro.Application.Features.Resepter.Queries.GetAllResepter;
 using LagerPro.Application.Features.Resepter.Queries.GetReseptById;
+using LagerPro.Application.Features.Traceability.Queries.GetTraceabilityByArtikkel;
+using LagerPro.Application.Features.Traceability.Queries.GetTraceabilityByBatch;
+using LagerPro.Application.Features.Traceability.Queries.GetTraceabilityByKunde;
+using LagerPro.Application.Features.Traceability.Queries.GetTraceabilityByLot;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LagerPro.Application.DependencyInjection;
@@ -65,6 +71,7 @@ public static class ServiceCollectionExtensions
 
         // Lager
         services.AddScoped<GetAllLagerBeholdningHandler>();
+        services.AddScoped<GetAllLagerFlatHandler>();
 
         // Produksjon
         services.AddScoped<GetAllProduksjonsOrdreHandler>();
@@ -72,6 +79,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<CreateProduksjonsOrdreHandler>();
         services.AddScoped<UpdateProduksjonsOrdreStatusHandler>();
         services.AddScoped<FerdigmeldProduksjonsOrdreHandler>();
+        services.AddScoped<GetPlukklisteHandler>();
 
         // Levering
         services.AddScoped<GetAllLeveringHandler>();
@@ -83,6 +91,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<GetAllResepterHandler>();
         services.AddScoped<GetReseptByIdHandler>();
         services.AddScoped<CreateReseptHandler>();
+
+        // Traceability
+        services.AddScoped<GetTraceabilityByLotHandler>();
+        services.AddScoped<GetTraceabilityByArtikkelHandler>();
+        services.AddScoped<GetTraceabilityByBatchHandler>();
+        services.AddScoped<GetTraceabilityByKundeHandler>();
 
         return services;
     }

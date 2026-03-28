@@ -64,11 +64,12 @@ public class LeveringTests
         Assert.Equal(LeveringStatus.Planlagt, captured!.Status);
         Assert.Single(captured.Linjer);
 
-        // Lager skal trekkes (GetByArtikkelOgLotAsync kalles 2x: pre-check + faktisk trekk)
-        _lagerRepoMock.Verify(r => r.GetByArtikkelOgLotAsync(10, "LOT-001", It.IsAny<CancellationToken>()), Times.Exactly(2));
+        // Lager valideres kun ved opprettelse (1x) — trekkes ved Plukket-status
+        _lagerRepoMock.Verify(r => r.GetByArtikkelOgLotAsync(10, "LOT-001", It.IsAny<CancellationToken>()), Times.Once);
+        // Ingen lagertransaksjon ved opprettelse — kun ved Plukket/Levert
         _transaksjonRepoMock.Verify(r => r.AddAsync(
             It.Is<LagerTransaksjon>(t => t.Type == TransaksjonsType.Levering && t.Mengde == 5 && t.LotNr == "LOT-001"),
-            It.IsAny<CancellationToken>()), Times.Once);
+            It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -127,16 +128,12 @@ public class LeveringTests
         await handler.Handle(command, CancellationToken.None);
 
         Assert.Equal(2, captured!.Linjer.Count);
-        // Hver linje kaller GetByArtikkelOgLotAsync 2x (pre-check + trek)
+        // Én GetByArtikkelOgLotAsync per linje ved validering — trekkes ved Plukket
         _lagerRepoMock.Verify(r => r.GetByArtikkelOgLotAsync(
-            It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Exactly(4));
-        // Én transaksjon per linje
+            It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
+        // Ingen lagertransaksjoner ved opprettelse
         _transaksjonRepoMock.Verify(r => r.AddAsync(
-            It.Is<LagerTransaksjon>(t => t.ArtikkelId == 10 && t.LotNr == "LOT-A"),
-            It.IsAny<CancellationToken>()), Times.Once);
-        _transaksjonRepoMock.Verify(r => r.AddAsync(
-            It.Is<LagerTransaksjon>(t => t.ArtikkelId == 11 && t.LotNr == "LOT-B"),
-            It.IsAny<CancellationToken>()), Times.Once);
+            It.IsAny<LagerTransaksjon>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     #endregion
@@ -194,7 +191,7 @@ public class LeveringTests
 
         // Skal logge transaksjon (bekreftelse, ikke ny reduksjon)
         _transaksjonRepoMock.Verify(r => r.AddAsync(
-            It.Is<LagerTransaksjon>(t => t.Type == TransaksjonsType.Levering && t.Mengde == 5),
+            It.Is<LagerTransaksjon>(t => t.Type == TransaksjonsType.LeveringBekreftet && t.Mengde == 5),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 

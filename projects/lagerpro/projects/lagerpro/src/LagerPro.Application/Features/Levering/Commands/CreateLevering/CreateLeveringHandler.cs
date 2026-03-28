@@ -35,6 +35,22 @@ public class CreateLeveringHandler
         if (kunde is null)
             throw new InvalidOperationException($"Kunde {command.KundeId} ble ikke funnet.");
 
+        // Sjekk lagerbeholdning før levering opprettes
+        foreach (var linjeCommand in command.Linjer)
+        {
+            var beholdning = await _lagerRepository.GetByArtikkelOgLotAsync(
+                linjeCommand.ArtikkelId, linjeCommand.LotNr, cancellationToken);
+
+            if (beholdning is null)
+                throw new InvalidOperationException(
+                    $"Fant ikke beholdning for artikkel {linjeCommand.ArtikkelId}, lot {linjeCommand.LotNr}.");
+
+            if (beholdning.Mengde < linjeCommand.Mengde)
+                throw new InvalidOperationException(
+                    $"Ikke nok beholdning for artikkel {linjeCommand.ArtikkelId} lot {linjeCommand.LotNr}: " +
+                    $"har {beholdning.Mengde} {linjeCommand.Enhet}, trenger {linjeCommand.Mengde}.");
+        }
+
         var levering = new DomainLevering
         {
             KundeId = command.KundeId,
@@ -63,10 +79,12 @@ public class CreateLeveringHandler
         await _leveringRepository.AddAsync(levering, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // Trekk fra lager for hver linje
+        // Trekk fra lager ved opprettelse (reservert for levering)
         foreach (var linje in levering.Linjer)
         {
-            var beholdning = await _lagerRepository.GetByArtikkelOgLotAsync(linje.ArtikkelId, linje.LotNr, cancellationToken);
+            var beholdning = await _lagerRepository.GetByArtikkelOgLotAsync(
+                linje.ArtikkelId, linje.LotNr, cancellationToken);
+
             if (beholdning is not null)
             {
                 beholdning.Mengde -= linje.Mengde;
@@ -82,7 +100,7 @@ public class CreateLeveringHandler
                 BeholdningEtter = beholdning?.Mengde ?? 0,
                 Kilde = "Levering",
                 KildeId = levering.Id,
-                Kommentar = linje.Kommentar,
+                Kommentar = linje.Kommentar ?? $"Levering #{levering.Id} opprettet",
                 UtfortAv = command.LevertAv,
                 Tidspunkt = DateTime.UtcNow
             }, cancellationToken);

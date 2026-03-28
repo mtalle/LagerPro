@@ -60,7 +60,7 @@ public class ShippingController : ControllerBase
         return CreatedAtAction(nameof(Get), new { id }, new { id });
     }
 
-    [HttpPut("{id}/status")]
+    [HttpPatch("{id}/status")]
     public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateLeveringStatusRequest request, CancellationToken cancellationToken)
     {
         var success = await _updateStatusHandler.Handle(new UpdateLeveringStatusCommand(id, request.Status), cancellationToken);

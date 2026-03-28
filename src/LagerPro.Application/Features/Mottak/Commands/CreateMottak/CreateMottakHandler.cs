@@ -42,10 +42,15 @@ public class CreateMottakHandler
             if (artikkel is null)
                 throw new InvalidOperationException($"Artikkel with id {linjeCommand.ArtikkelId} not found.");
 
+            // Auto-generer LotNr hvis ikke oppgitt: ART-<artikkelNr>-<timestamp>
+            var lotNr = string.IsNullOrWhiteSpace(linjeCommand.LotNr)
+                ? $"{artikkel.ArtikkelNr}-{DateTime.UtcNow:yyyyMMddHHmmss}"
+                : linjeCommand.LotNr;
+
             var linje = new DomainMottakLinje
             {
                 ArtikkelId = linjeCommand.ArtikkelId,
-                LotNr = linjeCommand.LotNr,
+                LotNr = lotNr,
                 Mengde = linjeCommand.Mengde,
                 Enhet = artikkel.Enhet,
                 BestForDato = linjeCommand.BestForDato,

@@ -30,6 +30,7 @@ public class UpdateLeverandorHandler
         leverandor.Poststed = command.Poststed;
         leverandor.OrgNr = command.OrgNr;
         leverandor.Kommentar = command.Kommentar;
+        leverandor.Aktiv = command.Aktiv;
 
         _repository.Update(leverandor);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

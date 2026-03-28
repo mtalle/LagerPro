@@ -169,7 +169,8 @@ public class LeverandorerTests
             Postnr: "6800",
             Poststed: "Nyby",
             OrgNr: "NEW123",
-            Kommentar: "Oppdatert");
+            Kommentar: "Oppdatert",
+            Aktiv: true);
 
         var result = await handler.Handle(command, CancellationToken.None);
 
@@ -189,7 +190,7 @@ public class LeverandorerTests
 
         var handler = new UpdateLeverandorHandler(_repositoryMock.Object, _unitOfWorkMock.Object);
 
-        var command = new UpdateLeverandorCommand(999, "Navn", null, null, null, null, null, null, null, null);
+        var command = new UpdateLeverandorCommand(999, "Navn", null, null, null, null, null, null, null, null, true);
 
         var result = await handler.Handle(command, CancellationToken.None);
 

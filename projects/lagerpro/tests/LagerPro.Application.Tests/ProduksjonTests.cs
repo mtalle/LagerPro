@@ -47,6 +47,7 @@ public class ProduksjonTests
         _ordreRepoMock.Setup(r => r.AddAsync(It.IsAny<ProduksjonsOrdre>(), It.IsAny<CancellationToken>()))
             .Callback<ProduksjonsOrdre, CancellationToken>((o, _) => { captured = o; typeof(BaseEntity).GetProperty("Id")!.SetValue(o, 7); })
             .Returns(Task.CompletedTask);
+        _ordreRepoMock.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(new List<ProduksjonsOrdre>());
         _reseptRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(resept);
         _unitOfWorkMock.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
@@ -59,7 +60,7 @@ public class ProduksjonTests
         Assert.NotNull(captured);
         Assert.Equal(ProdOrdreStatus.Planlagt, captured.Status);
         Assert.StartsWith("FG-", captured.FerdigvareLotNr);
-        Assert.StartsWith("PO-", captured.OrdreNr);
+        Assert.StartsWith("PROD-", captured.OrdreNr);
         Assert.Equal(1, captured.ReseptId);
     }
 

@@ -10,7 +10,7 @@ public record CreateMottakCommand(
 
 public record MottakLinjeCommand(
     int ArtikkelId,
-    string LotNr,
+    string? LotNr,
     decimal Mengde,
     string Enhet,
     DateTime? BestForDato,

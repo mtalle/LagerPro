@@ -104,8 +104,9 @@ export default function MottakPage() {
           <td>{statusBadge(m.status)}</td>
           <td>{m.mottattAv ?? '—'}</td>
           <td>
-            {m.status === 'Registrert' && <button className="btn btn-sm btn-primary" onClick={e => { e.stopPropagation(); updateStatus(m.id, 'Mottatt'); }}>Mottatt</button>}
-            {m.status === 'Mottatt' && <button className="btn btn-sm btn-primary" onClick={e => { e.stopPropagation(); updateStatus(m.id, 'Godkjent'); }}>Godkjenn</button>}
+            {m.status === 'Registrert' && <button className="btn btn-sm btn-primary" style={{ marginRight: 4 }} onClick={e => { e.stopPropagation(); updateStatus(m.id, 'Mottatt'); }}>Mottatt</button>}
+            {m.status === 'Mottatt' && <button className="btn btn-sm btn-primary" style={{ marginRight: 4 }} onClick={e => { e.stopPropagation(); updateStatus(m.id, 'Godkjent'); }}>Godkjenn</button>}
+            {m.status !== 'Godkjent' && m.status !== 'Kansellert' && <button className="btn btn-sm btn-danger" onClick={e => { e.stopPropagation(); updateStatus(m.id, 'Kansellert'); }}>Kanseller</button>}
           </td>
         </tr>
         {expanded === m.id && m.linjer.map(l => (
@@ -115,6 +116,7 @@ export default function MottakPage() {
             <td>Lot: <code>{l.lotNr}</code></td>
             <td>{l.mengde} {l.enhet}</td>
             <td><span className={`badge ${l.godkjent ? 'badge-aktiv' : 'badge-inactive'}`}>{l.godkjent ? 'Godkjent' : l.avvik ?? 'Avvik'}</span></td>
+            <td>{l.temperatur != null && l.temperatur !== 0 ? `${l.temperatur}°C` : ''}</td>
             <td>{l.bestForDato ? `BF: ${new Date(l.bestForDato).toLocaleDateString('no-NO')}` : ''}</td>
           </tr>
         ))}
@@ -178,7 +180,7 @@ export default function MottakPage() {
                 <button type="button" className="btn btn-sm btn-secondary" onClick={addLine}>+ Linje</button>
               </div>
               {form.linjer.map((linje, i) => (
-                <div key={i} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'end' }}>
+                <div key={i} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr 1fr auto', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'end' }}>
                   <div className="form-group">
                     <label>Artikkel</label>
                     <select value={linje.artikkelId} onChange={e => {
@@ -201,6 +203,14 @@ export default function MottakPage() {
                   <div className="form-group">
                     <label>Best-før</label>
                     <input type="date" value={linje.bestForDato} onChange={e => updateLine(i, 'bestForDato', e.target.value)} />
+                  </div>
+                  <div className="form-group">
+                    <label>Temp °C</label>
+                    <input type="number" step="0.1" value={linje.temperatur} onChange={e => updateLine(i, 'temperatur', parseFloat(e.target.value) || 0)} />
+                  </div>
+                  <div className="form-group">
+                    <label>Strekkode</label>
+                    <input value={linje.strekkode} onChange={e => updateLine(i, 'strekkode', e.target.value)} />
                   </div>
                   <button type="button" className="btn btn-sm btn-danger" onClick={() => removeLine(i)}>✕</button>
                 </div>

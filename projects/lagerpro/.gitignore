@@ -1,10 +1,22 @@
+# Build outputs
 bin/
 obj/
 .vs/
-.idea/
 .vscode/
 *.user
 *.suo
 *.swp
 *.tmp
 .DS_Store
+
+# Node (for Next.js frontend)
+node_modules/
+npm-debug.log*
+frontend/.next/
+
+# Nested project copies (keep only root)
+projects/
+*.log
+
+# IDE
+*.DotSettings.user

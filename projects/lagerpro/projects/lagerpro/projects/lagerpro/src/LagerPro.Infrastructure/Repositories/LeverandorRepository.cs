@@ -14,15 +14,25 @@ public class LeverandorRepository : ILeverandorRepository
         _dbContext = dbContext;
     }
 
-    public Task<Leverandor?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    public Task<Leverandor?> GetByIdAsync(int id, CancellationToken cancellationToken)
         => _dbContext.Leverandorer.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
-    public async Task<IReadOnlyList<Leverandor>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<Leverandor>> GetAllAsync(CancellationToken cancellationToken)
         => await _dbContext.Leverandorer.OrderBy(x => x.Navn).ToListAsync(cancellationToken);
 
-    public async Task AddAsync(Leverandor leverandor, CancellationToken cancellationToken = default)
+    public async Task AddAsync(Leverandor leverandor, CancellationToken cancellationToken)
     {
         await _dbContext.Leverandorer.AddAsync(leverandor, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public void Update(Leverandor leverandor)
+    {
+        _dbContext.Leverandorer.Update(leverandor);
+    }
+
+    public void Delete(Leverandor leverandor)
+    {
+        _dbContext.Leverandorer.Remove(leverandor);
     }
 }

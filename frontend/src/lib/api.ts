@@ -140,6 +140,7 @@ export interface Levering {
   fraktBrev?: string;
   kommentar?: string;
   status: string;
+  levertAv?: string;
   opprettetDato: string;
   linjer: LeveringLinje[];
 }
@@ -184,37 +185,6 @@ export interface Leverandor {
 export interface Resept {
   id: number;
   navn: string;
-  ferdigvareId: number;
-  ferdigvareNavn?: string;
   beskrivelse?: string;
-  antallPortjoner: number;
-  instruksjoner?: string;
   aktiv: boolean;
-  linjer: ReseptLinje[];
-}
-
-export interface ReseptLinje {
-  id: number;
-  ravareId: number;
-  ravareNavn?: string;
-  mengde: number;
-  enhet: string;
-  rekkefolge: number;
-  kommentar?: string;
-}
-
-export interface ForbrukLinje {
-  artikkelId: number;
-  lotNr: string;
-  mengdeBrukt: number;
-  enhet?: string;
-  overstyrt: boolean;
-  kommentar?: string;
-}
-
-export interface FerdigmeldRequest {
-  antallProdusert: number;
-  kommentar?: string;
-  utfortAv?: string;
-  forbruk?: ForbrukLinje[];
 }

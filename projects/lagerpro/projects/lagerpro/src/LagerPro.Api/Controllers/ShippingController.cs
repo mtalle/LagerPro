@@ -1,4 +1,6 @@
+using LagerPro.Application.Features.Levering.Commands.UpdateLeveringStatus;
 using LagerPro.Application.Features.Levering.Queries.GetAllLevering;
+using LagerPro.Application.Features.Levering.Queries.GetLeveringById;
 using LagerPro.Application.Features.Levering.Commands.CreateLevering;
 using LagerPro.Contracts.Requests.Levering;
 using Microsoft.AspNetCore.Mvc;
@@ -6,16 +8,28 @@ using Microsoft.AspNetCore.Mvc;
 namespace LagerPro.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/levering")]
 public class ShippingController : ControllerBase
 {
     private readonly GetAllLeveringHandler _getAllHandler;
+    private readonly GetLeveringByIdHandler _getByIdHandler;
     private readonly CreateLeveringHandler _createHandler;
+    private readonly UpdateLeveringStatusHandler _updateStatusHandler;
 
-    public ShippingController(GetAllLeveringHandler getAllHandler, CreateLeveringHandler createHandler)
+    public ShippingController(GetAllLeveringHandler getAllHandler, GetLeveringByIdHandler getByIdHandler, CreateLeveringHandler createHandler, UpdateLeveringStatusHandler updateStatusHandler)
     {
         _getAllHandler = getAllHandler;
+        _getByIdHandler = getByIdHandler;
         _createHandler = createHandler;
+        _updateStatusHandler = updateStatusHandler;
+    }
+
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
+    {
+        var levering = await _getByIdHandler.Handle(new GetLeveringByIdQuery(id), cancellationToken);
+        if (levering is null) return NotFound(new { message = $"Levering with id {id} not found." });
+        return Ok(levering);
     }
 
     [HttpGet]
@@ -35,7 +49,7 @@ public class ShippingController : ControllerBase
                 request.Referanse,
                 request.FraktBrev,
                 request.Kommentar,
-                null, // LevertAv settes ved levering
+                null,
                 request.Linjer.Select(l => new LeveringLinjeCommand(
                     l.ArtikkelId,
                     l.LotNr,
@@ -44,5 +58,13 @@ public class ShippingController : ControllerBase
                     null)).ToList()),
             cancellationToken);
         return CreatedAtAction(nameof(Get), new { id }, new { id });
+    }
+
+    [HttpPut("{id}/status")]
+    public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateLeveringStatusRequest request, CancellationToken cancellationToken)
+    {
+        var success = await _updateStatusHandler.Handle(new UpdateLeveringStatusCommand(id, request.Status), cancellationToken);
+        if (!success) return NotFound(new { message = $"Levering with id {id} not found." });
+        return Ok(new { id, status = request.Status });
     }
 }

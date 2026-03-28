@@ -55,3 +55,29 @@
 - Risks/blockers: anything that could delay the MVP.
 - Human context: travel, work, and weather considerations for Ålfoten/Svelgen.
 - Suggested deadline: one near-term deadline for the next concrete deliverable.
+
+## 2026-03-28 - Aktiv utviklingsdag
+
+### LagerPro framgang:
+- Backend: 82 tester, 0 errors ✅
+- Frontend: Blazor + Next.js, 10+ sider
+- Sporbarheits-API: 4 endepunkt (lot, artikkel, batch, kunde)
+- Produksjonsflyt: Resepter, Ordre, Plukkliste, Ferdigmelding
+- Varelager/Varetelling: Filter, Søk, Manuell justering
+- Brukarroller: Admin, Varemottak, Produksjon, Levering
+
+### Martin sin visjon:
+- Målgruppe: Matindustrien
+- Kjernefunksjon: Live lager + full sporing
+- Brukarroller med RBAC
+- Sentral Sporingsmodul (portal for all sporing)
+
+### Infrastruktur:
+- Docker SQL Server på port 14333
+- Connection string: Server=localhost,14333;Database=LagerProDb;User Id=sa;Password=LagerPro123!
+- Sub-agent cron: kvar time via OpenClaw
+- Deploy: DigitalOcean $8/mnd planlagt
+
+### Martin sin hardware:
+- Lenovo laptop (Ryzen 5 7520U, 16GB RAM, Radeon 610M)
+- Windows 11

@@ -10,7 +10,7 @@ public record CreateMottakRequest(
 
 public record CreateMottakLinjeRequest(
     int ArtikkelId,
-    string LotNr,
+    string? LotNr,
     decimal Mengde,
     string Enhet,
     DateTime? BestForDato,

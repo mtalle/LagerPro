@@ -32,10 +32,11 @@ public class UpdateMottakStatusHandler
         if (!Enum.TryParse<MottakStatus>(command.Status, ignoreCase: true, out var newStatus))
             return false;
 
+        var gammelStatus = mottak.Status;
         mottak.Status = newStatus;
 
-        // Kun godkjennings-steget skal oppdatere lager — og kun én gang (kun hvis ikke allerede godkjent)
-        if (newStatus == MottakStatus.Godkjent && mottak.Status != MottakStatus.Godkjent)
+        // Kun godkjent-status skal oppdatere lager — og kun én gang
+        if (newStatus == MottakStatus.Godkjent && gammelStatus != MottakStatus.Godkjent)
         {
             foreach (var linje in mottak.Linjer.Where(l => l.Godkjent))
             {

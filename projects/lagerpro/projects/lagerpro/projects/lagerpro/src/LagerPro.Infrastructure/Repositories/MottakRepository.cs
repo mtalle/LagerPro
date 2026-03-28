@@ -32,12 +32,13 @@ public class MottakRepository : IMottakRepository
     public async Task AddAsync(Mottak mottak, CancellationToken cancellationToken = default)
     {
         await _dbContext.Mottak.AddAsync(mottak, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        // SaveChanges kun via UnitOfWork
     }
 
-    public async Task UpdateAsync(Mottak mottak, CancellationToken cancellationToken = default)
+    public Task UpdateAsync(Mottak mottak, CancellationToken cancellationToken = default)
     {
         _dbContext.Mottak.Update(mottak);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        // SaveChanges kun via UnitOfWork
+        return Task.CompletedTask;
     }
 }

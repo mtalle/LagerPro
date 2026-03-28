@@ -14,23 +14,24 @@ public class ProduksjonsOrdreRepository : IProduksjonsOrdreRepository
         _dbContext = dbContext;
     }
 
-    public Task<ProduksjonsOrdre?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    public Task<ProduksjonsOrdre?> GetByIdAsync(int id, CancellationToken cancellationToken)
         => _dbContext.ProduksjonsOrdre
             .Include(x => x.Forbruk)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
-    public async Task<IReadOnlyList<ProduksjonsOrdre>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<ProduksjonsOrdre>> GetAllAsync(CancellationToken cancellationToken)
         => await _dbContext.ProduksjonsOrdre.OrderByDescending(x => x.PlanlagtDato).ToListAsync(cancellationToken);
 
-    public async Task AddAsync(ProduksjonsOrdre produksjonsOrdre, CancellationToken cancellationToken = default)
+    public async Task AddAsync(ProduksjonsOrdre produksjonsOrdre, CancellationToken cancellationToken)
     {
         await _dbContext.ProduksjonsOrdre.AddAsync(produksjonsOrdre, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        // SaveChanges kun via UnitOfWork
     }
 
-    public async Task UpdateAsync(ProduksjonsOrdre produksjonsOrdre, CancellationToken cancellationToken = default)
+    public Task UpdateAsync(ProduksjonsOrdre produksjonsOrdre, CancellationToken cancellationToken)
     {
         _dbContext.ProduksjonsOrdre.Update(produksjonsOrdre);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        // SaveChanges kun via UnitOfWork
+        return Task.CompletedTask;
     }
 }

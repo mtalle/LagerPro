@@ -151,3 +151,39 @@ export interface LeveringLinje {
   mengde: number;
   enhet: string;
 }
+
+export interface Kunde {
+  id: number;
+  navn: string;
+  kontaktperson?: string;
+  telefon?: string;
+  epost?: string;
+  adresse?: string;
+  postnr?: string;
+  poststed?: string;
+  orgNr?: string;
+  kommentar?: string;
+  aktiv: boolean;
+}
+
+export interface Resept {
+  id: number;
+  navn: string;
+  ferdigvareId: number;
+  ferdigvareNavn?: string;
+  beskrivelse?: string;
+  antallPortjoner: number;
+  instruksjoner?: string;
+  aktiv: boolean;
+  linjer: ReseptLinje[];
+}
+
+export interface ReseptLinje {
+  id: number;
+  ravareId: number;
+  ravareNavn?: string;
+  mengde: number;
+  enhet: string;
+  rekkefolge: number;
+  kommentar?: string;
+}
