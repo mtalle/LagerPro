@@ -17,6 +17,7 @@ export default function ProduksjonPage() {
   const [ferdigmeldOrdre, setFerdigmeldOrdre] = useState<ProduksjonsOrdre | null>(null);
 
   const [resepter, setResepter] = useState<Resept[]>([]);
+  const [search, setSearch] = useState('');
 
   const [createForm, setCreateForm] = useState({ reseptId: 0, planlagtDato: new Date().toISOString().slice(0, 10), kommentar: '' });
   const [ferdigmeldForm, setFerdigmeldForm] = useState({ antallProdusert: 1, kommentar: '', utfortAv: '', forbruk: [] as { artikkelId: number; lotNr: string; mengdeBrukt: number; enhet: string; overstyrt: boolean; kommentar: string }[] });

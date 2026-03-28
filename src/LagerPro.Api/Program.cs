@@ -1,4 +1,5 @@
 using LagerPro.Application.DependencyInjection;
+using LagerPro.Infrastructure.Data;
 using LagerPro.Infrastructure.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +20,17 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+}
+
+// Seed database on startup (idempotent)
+try
+{
+    await DbSeeder.SeedAsync(app.Services);
+}
+catch (Exception ex)
+{
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    logger.LogWarning(ex, "Database seeding failed — continuing anyway (database may not be available)");
 }
 
 app.UseHttpsRedirection();
