@@ -25,6 +25,9 @@ using LagerPro.Application.Features.Produksjon.Commands.FerdigmeldProduksjonsOrd
 using LagerPro.Application.Features.Produksjon.Commands.UpdateProduksjonsOrdreStatus;
 using LagerPro.Application.Features.Produksjon.Queries.GetAllProduksjonsOrdre;
 using LagerPro.Application.Features.Produksjon.Queries.GetProduksjonsOrdreById;
+using LagerPro.Application.Features.Resepter.Commands.CreateResept;
+using LagerPro.Application.Features.Resepter.Queries.GetAllResepter;
+using LagerPro.Application.Features.Resepter.Queries.GetReseptById;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LagerPro.Application.DependencyInjection;
@@ -75,6 +78,11 @@ public static class ServiceCollectionExtensions
         services.AddScoped<GetLeveringByIdHandler>();
         services.AddScoped<CreateLeveringHandler>();
         services.AddScoped<UpdateLeveringStatusHandler>();
+
+        // Resepter
+        services.AddScoped<GetAllResepterHandler>();
+        services.AddScoped<GetReseptByIdHandler>();
+        services.AddScoped<CreateReseptHandler>();
 
         return services;
     }
