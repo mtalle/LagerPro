@@ -70,10 +70,21 @@ public class ProductionController : ControllerBase
     }
 
     [HttpPost("{id}/ferdigmeld")]
-    public async Task<IActionResult> Ferdigmeld(int id, [FromBody] FerdigmeldProduksjonsOrdreCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> Ferdigmeld(int id, [FromBody] FerdigmeldProduksjonsOrdreRequest request, CancellationToken cancellationToken)
     {
         var resultId = await _ferdigmeldHandler.Handle(
-            new FerdigmeldProduksjonsOrdreCommand(id, command.AntallProdusert, command.Kommentar, command.UtfortAv, command.Forbruk),
+            new FerdigmeldProduksjonsOrdreCommand(
+                id,
+                request.AntallProdusert,
+                request.Kommentar,
+                request.UtfortAv,
+                request.Forbruk?.Select(f => new FerdigmeldForbrukLinjeCommand(
+                    f.ArtikkelId,
+                    f.LotNr,
+                    f.MengdeBrukt,
+                    f.Enhet ?? string.Empty,
+                    f.Overstyrt,
+                    f.Kommentar)).ToList()),
             cancellationToken);
         return Ok(new { id = resultId });
     }
