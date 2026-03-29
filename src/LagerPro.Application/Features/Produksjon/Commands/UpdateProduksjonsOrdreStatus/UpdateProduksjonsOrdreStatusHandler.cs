@@ -37,6 +37,13 @@ public class UpdateProduksjonsOrdreStatusHandler
 
         ordre.Status = newStatus;
 
+        if (newStatus == ProdOrdreStatus.IProduksjon && ordre.Status == ProdOrdreStatus.Planlagt)
+        {
+            if (ordre.Resept is null || !ordre.Resept.Aktiv)
+                throw new InvalidOperationException(
+                    $"Resept for produksjonsordre {ordre.OrdreNr} er inaktiv eller mangler. Kan ikke starte produksjon.");
+        }
+
         if (newStatus == ProdOrdreStatus.Ferdigmeldt)
         {
             ordre.FerdigmeldtDato = DateTime.UtcNow;

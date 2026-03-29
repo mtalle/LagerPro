@@ -1,0 +1,17 @@
+{
+  "lastChecks": {
+    "email": null,
+    "calendar": null,
+    "weather": null,
+    "lagerpro": 1743222000
+  },
+  "subagents": {
+    "mottak-levering": "running - wrapper up, clean state",
+    "produksjon": "running - fixing FerdigmeldPrefill endpoint"
+  },
+  "lagerpro": {
+    "tests": 104,
+    "build": "clean",
+    "lastCommit": "f07e611"
+  }
+}

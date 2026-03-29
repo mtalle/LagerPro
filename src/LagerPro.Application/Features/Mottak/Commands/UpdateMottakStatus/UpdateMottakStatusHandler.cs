@@ -35,14 +35,11 @@ public class UpdateMottakStatusHandler
         var gammelStatus = mottak.Status;
         mottak.Status = newStatus;
 
-        // Mottatt → varene flyttes til lager. Kvalitetssikring skjer via per-linje godkjenning,
-        // som lar operatøren godkjenne/avvise enkelte linjer først.
-        if (newStatus == MottakStatus.Mottatt && gammelStatus == MottakStatus.Registrert)
+        // Godkjent → kun godkjente linjer føres inn på lager. Avviste linjer får ingen beholdning
+        // (de kan håndteres manuelt som retur/svinn). Dette er kvalitetssikrings-punktesteget.
+        if (newStatus == MottakStatus.Godkjent && gammelStatus != MottakStatus.Godkjent)
         {
-            // Oppdater lager for ALLE mottatte linjer (varene er fysisk mottatt på lageret).
-            // Kvalitetsavvik følger med på linja, men beholdningen oppdateres uansett —
-            // avviste varer kan håndteres manuelt (f.eks. kassert) via lagerjustering.
-            foreach (var linje in mottak.Linjer)
+            foreach (var linje in mottak.Linjer.Where(l => l.Godkjent))
             {
                 var beholdning = new LagerBeholdning
                 {
@@ -67,12 +64,33 @@ public class UpdateMottakStatusHandler
                     BeholdningEtter = oppdatertBeholdning?.Mengde ?? linje.Mengde,
                     Kilde = "Mottak",
                     KildeId = mottak.Id,
-                    Kommentar = $"Mottak #{mottak.Id} mottatt" +
-                                (string.IsNullOrWhiteSpace(linje.Avvik) ? "" : $" | Avvik: {linje.Avvik}"),
+                    Kommentar = $"Mottak #{mottak.Id} godkjent",
                     UtfortAv = mottak.MottattAv,
                     Tidspunkt = DateTime.UtcNow
                 };
                 await _transaksjonRepository.AddAsync(transaksjon, cancellationToken);
+            }
+        }
+
+        // Avvist → logg eventuelle avviste linjer som svinn (ettersom de ble forsøkt mottatt)
+        if (newStatus == MottakStatus.Avvist && gammelStatus != MottakStatus.Avvist)
+        {
+            foreach (var linje in mottak.Linjer.Where(l => !l.Godkjent))
+            {
+                await _transaksjonRepository.AddAsync(new LagerTransaksjon
+                {
+                    ArtikkelId = linje.ArtikkelId,
+                    LotNr = linje.LotNr,
+                    Type = TransaksjonsType.Svinn,
+                    Mengde = 0,
+                    BeholdningEtter = (await _lagerRepository.GetByArtikkelOgLotAsync(
+                        linje.ArtikkelId, linje.LotNr, cancellationToken))?.Mengde ?? 0,
+                    Kilde = "Mottak",
+                    KildeId = mottak.Id,
+                    Kommentar = $"Mottak #{mottak.Id} avvist: {linje.Avvik ?? "Kvalitetsavvik"}",
+                    UtfortAv = mottak.MottattAv,
+                    Tidspunkt = DateTime.UtcNow
+                }, cancellationToken);
             }
         }
 
