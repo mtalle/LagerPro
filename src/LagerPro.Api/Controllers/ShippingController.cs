@@ -1,3 +1,4 @@
+using LagerPro.Application.Features.Levering.Commands.DeleteLevering;
 using LagerPro.Application.Features.Levering.Commands.UpdateLeveringStatus;
 using LagerPro.Application.Features.Levering.Queries.GetAllLevering;
 using LagerPro.Application.Features.Levering.Queries.GetLeveringById;
@@ -15,17 +16,20 @@ public class ShippingController : ControllerBase
     private readonly GetLeveringByIdHandler _getByIdHandler;
     private readonly CreateLeveringHandler _createHandler;
     private readonly UpdateLeveringStatusHandler _updateStatusHandler;
+    private readonly DeleteLeveringHandler _deleteHandler;
 
     public ShippingController(
         GetAllLeveringHandler getAllHandler,
         GetLeveringByIdHandler getByIdHandler,
         CreateLeveringHandler createHandler,
-        UpdateLeveringStatusHandler updateStatusHandler)
+        UpdateLeveringStatusHandler updateStatusHandler,
+        DeleteLeveringHandler deleteHandler)
     {
         _getAllHandler = getAllHandler;
         _getByIdHandler = getByIdHandler;
         _createHandler = createHandler;
         _updateStatusHandler = updateStatusHandler;
+        _deleteHandler = deleteHandler;
     }
 
     [HttpGet("{id:int}")]
@@ -79,5 +83,13 @@ public class ShippingController : ControllerBase
         {
             return BadRequest(new { message = ex.Message });
         }
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
+    {
+        var success = await _deleteHandler.Handle(new DeleteLeveringCommand(id), cancellationToken);
+        if (!success) return NotFound(new { message = $"Levering with id {id} not found." });
+        return NoContent();
     }
 }

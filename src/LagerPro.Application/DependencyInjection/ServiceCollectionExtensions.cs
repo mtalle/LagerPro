@@ -15,6 +15,7 @@ using LagerPro.Application.Features.Leverandorer.Commands;
 using LagerPro.Application.Features.Leverandorer.Queries.GetAllLeverandorer;
 using LagerPro.Application.Features.Leverandorer.Queries.GetLeverandorById;
 using LagerPro.Application.Features.Levering.Commands.CreateLevering;
+using LagerPro.Application.Features.Levering.Commands.DeleteLevering;
 using LagerPro.Application.Features.Levering.Commands.UpdateLeveringStatus;
 using LagerPro.Application.Features.Levering.Queries.GetAllLevering;
 using LagerPro.Application.Features.Levering.Queries.GetLeveringById;
@@ -103,6 +104,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<GetLeveringByIdHandler>();
         services.AddScoped<CreateLeveringHandler>();
         services.AddScoped<UpdateLeveringStatusHandler>();
+        services.AddScoped<DeleteLeveringHandler>();
 
         // Resepter
         services.AddScoped<GetAllResepterHandler>();
