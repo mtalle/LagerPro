@@ -75,6 +75,24 @@ public class LeverandorerTests
         Assert.Equal(99, result);
     }
 
+    [Fact]
+    public async Task CreateLeverandorHandler_DuplicateOrgNr_ThrowsInvalidOperationException()
+    {
+        var command = new CreateLeverandorCommand(
+            Navn: "Ny Lev", null, null, null, null, null, null, "112233445", null);
+
+        _repositoryMock.Setup(r => r.GetByOrgNrAsync("112233445", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Leverandor { Navn = "Eksisterande Lev", OrgNr = "112233445" });
+
+        var handler = new CreateLeverandorHandler(_repositoryMock.Object, _unitOfWorkMock.Object);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => handler.Handle(command, CancellationToken.None));
+
+        Assert.Contains("112233445", ex.Message);
+        _repositoryMock.Verify(r => r.AddAsync(It.IsAny<Leverandor>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
     #endregion
 
     #region GetAllLeverandorerHandler

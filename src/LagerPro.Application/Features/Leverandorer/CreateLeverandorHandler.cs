@@ -17,6 +17,13 @@ public class CreateLeverandorHandler
 
     public async Task<int> Handle(CreateLeverandorCommand command, CancellationToken cancellationToken = default)
     {
+        if (!string.IsNullOrWhiteSpace(command.OrgNr))
+        {
+            var eksisterende = await _repository.GetByOrgNrAsync(command.OrgNr, cancellationToken);
+            if (eksisterende is not null)
+                throw new InvalidOperationException($"Ein leverandør med organisasjonsnummer {command.OrgNr} finst allereie.");
+        }
+
         var leverandor = new Leverandor
         {
             Navn = command.Navn,

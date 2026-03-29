@@ -20,6 +20,9 @@ public class LeverandorRepository : ILeverandorRepository
     public async Task<IReadOnlyList<Leverandor>> GetAllAsync(CancellationToken cancellationToken)
         => await _dbContext.Leverandorer.OrderBy(x => x.Navn).ToListAsync(cancellationToken);
 
+    public Task<Leverandor?> GetByOrgNrAsync(string orgNr, CancellationToken cancellationToken = default)
+        => _dbContext.Leverandorer.FirstOrDefaultAsync(x => x.OrgNr == orgNr, cancellationToken);
+
     public async Task AddAsync(Leverandor leverandor, CancellationToken cancellationToken)
     {
         await _dbContext.Leverandorer.AddAsync(leverandor, cancellationToken);

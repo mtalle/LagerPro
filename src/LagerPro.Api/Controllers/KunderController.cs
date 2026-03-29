@@ -49,20 +49,27 @@ public class KunderController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateKundeRequest request, CancellationToken cancellationToken)
     {
-        var id = await _createHandler.Handle(
-            new CreateKundeCommand(
-                request.Navn,
-                request.Kontaktperson,
-                request.Telefon,
-                request.Epost,
-                request.Adresse,
-                request.Postnr,
-                request.Poststed,
-                request.OrgNr,
-                request.Kommentar),
-            cancellationToken);
+        try
+        {
+            var id = await _createHandler.Handle(
+                new CreateKundeCommand(
+                    request.Navn,
+                    request.Kontaktperson,
+                    request.Telefon,
+                    request.Epost,
+                    request.Adresse,
+                    request.Postnr,
+                    request.Poststed,
+                    request.OrgNr,
+                    request.Kommentar),
+                cancellationToken);
 
-        return CreatedAtAction(nameof(GetById), new { id }, new { id });
+            return CreatedAtAction(nameof(GetById), new { id }, new { id });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpPut("{id:int}")]
@@ -71,23 +78,30 @@ public class KunderController : ControllerBase
         var existing = await _getByIdHandler.Handle(new GetKundeByIdQuery(id), cancellationToken);
         if (existing is null) return NotFound(new { message = $"Kunde with id {id} not found." });
 
-        var success = await _updateHandler.Handle(
-            new UpdateKundeCommand(
-                id,
-                request.Navn,
-                request.Kontaktperson,
-                request.Telefon,
-                request.Epost,
-                request.Adresse,
-                request.Postnr,
-                request.Poststed,
-                request.OrgNr,
-                request.Kommentar,
-                request.Aktiv),
-            cancellationToken);
+        try
+        {
+            var success = await _updateHandler.Handle(
+                new UpdateKundeCommand(
+                    id,
+                    request.Navn,
+                    request.Kontaktperson,
+                    request.Telefon,
+                    request.Epost,
+                    request.Adresse,
+                    request.Postnr,
+                    request.Poststed,
+                    request.OrgNr,
+                    request.Kommentar,
+                    request.Aktiv),
+                cancellationToken);
 
-        if (!success) return NotFound(new { message = $"Kunde with id {id} not found." });
-        return Ok(new { id });
+            if (!success) return NotFound(new { message = $"Kunde with id {id} not found." });
+            return Ok(new { id });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpDelete("{id:int}")]
