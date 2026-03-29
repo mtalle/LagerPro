@@ -9,7 +9,6 @@ export default function ArtiklerPage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [visKunAktive, setVisKunAktive] = useState(true);
   const [typeFilter, setTypeFilter] = useState('');
   const [visInactive, setVisInactive] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -149,10 +148,6 @@ export default function ArtiklerPage() {
           <option value="">Alle typer</option>
           {uniqueTypes.map(t => <option key={t} value={t}>{t}</option>)}
         </select>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none', color: '#374151' }}>
-          <input type="checkbox" checked={!visKunAktive} onChange={e => setVisKunAktive(!e.target.checked)} />
-          Aktive
-        </label>
         <label style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none', color: '#374151' }}>
           <input type="checkbox" checked={visInactive} onChange={e => setVisInactive(e.target.checked)} />
           Vis inaktive

@@ -240,3 +240,28 @@ export interface Plukkliste {
   linjer: PlukklisteLinje[];
   totaltAntallLinjer: number;
 }
+
+// FerdigmeldPrefill types (from /production/{id}/ferdigmeld/prefill)
+export interface FerdigmeldLinje {
+  ravareId: number;
+  ravareNavn: string | null;
+  enhet: string | null;
+  oppskriftsMengde: number;
+  foreslattLotNr: string | null;
+  foreslattMengde: number | null;
+  tilgjengeligBeholdning: number | null;
+  harLager: boolean;
+}
+
+export interface FerdigmeldPrefill {
+  ordreId: number;
+  ordreNr: string;
+  reseptId: number;
+  reseptNavn: string | null;
+  ferdigvareId: number;
+  ferdigvareNavn: string | null;
+  antallPortjoner: number;
+  ferdigvareEnhet: string | null;
+  foreslattAntall: number;
+  reseptLinjer: FerdigmeldLinje[];
+}

@@ -98,7 +98,7 @@ export default function MottakPage() {
   const statusBadge = (s: string) => {
     const map: Record<string, string> = {
       Registrert: 'badge-registrert', Mottatt: 'badge-aktiv', Godkjent: 'badge-aktiv',
-      'Delvis mottatt': 'badge-planlagt', Kansellert: 'badge-kansellert', Avvist: 'badge-kansellert',
+      Kansellert: 'badge-kansellert', Avvist: 'badge-kansellert',
     };
     return <span className={`badge ${map[s] ?? ''}`}>{s}</span>;
   };
