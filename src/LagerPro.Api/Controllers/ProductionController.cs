@@ -1,4 +1,5 @@
 using LagerPro.Application.Features.Produksjon.Commands.CreateProduksjonsOrdre;
+using LagerPro.Application.Features.Produksjon.Commands.DeleteProduksjonsOrdre;
 using LagerPro.Application.Features.Produksjon.Commands.FerdigmeldProduksjonsOrdre;
 using LagerPro.Application.Features.Produksjon.Commands.UpdateProduksjonsOrdreStatus;
 using LagerPro.Application.Features.Produksjon.Queries.GetAllProduksjonsOrdre;
@@ -20,6 +21,7 @@ public class ProductionController : ControllerBase
     private readonly CreateProduksjonsOrdreHandler _createHandler;
     private readonly FerdigmeldProduksjonsOrdreHandler _ferdigmeldHandler;
     private readonly UpdateProduksjonsOrdreStatusHandler _updateStatusHandler;
+    private readonly DeleteProduksjonsOrdreHandler _deleteHandler;
     private readonly GetPlukklisteHandler _plukklisteHandler;
     private readonly GetFerdigmeldPrefillHandler _ferdigmeldPrefillHandler;
 
@@ -29,6 +31,7 @@ public class ProductionController : ControllerBase
         CreateProduksjonsOrdreHandler createHandler,
         FerdigmeldProduksjonsOrdreHandler ferdigmeldHandler,
         UpdateProduksjonsOrdreStatusHandler updateStatusHandler,
+        DeleteProduksjonsOrdreHandler deleteHandler,
         GetPlukklisteHandler plukklisteHandler,
         GetFerdigmeldPrefillHandler ferdigmeldPrefillHandler)
     {
@@ -37,6 +40,7 @@ public class ProductionController : ControllerBase
         _createHandler = createHandler;
         _ferdigmeldHandler = ferdigmeldHandler;
         _updateStatusHandler = updateStatusHandler;
+        _deleteHandler = deleteHandler;
         _plukklisteHandler = plukklisteHandler;
         _ferdigmeldPrefillHandler = ferdigmeldPrefillHandler;
     }
@@ -126,6 +130,21 @@ public class ProductionController : ControllerBase
                         f.Kommentar)).ToList()),
                 cancellationToken);
             return Ok(new { id = resultId });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var success = await _deleteHandler.Handle(new DeleteProduksjonsOrdreCommand(id), cancellationToken);
+            if (!success) return NotFound(new { message = $"Produksjonsordre med id {id} ble ikke funnet." });
+            return NoContent();
         }
         catch (InvalidOperationException ex)
         {

@@ -11,4 +11,5 @@ public interface IProduksjonsOrdreRepository
     Task<IReadOnlyList<ProduksjonsOrdre>> GetActivesWithForbrukAsync(CancellationToken cancellationToken = default);
     Task AddAsync(ProduksjonsOrdre produksjonsOrdre, CancellationToken cancellationToken = default);
     Task UpdateAsync(ProduksjonsOrdre produksjonsOrdre, CancellationToken cancellationToken = default);
+    Task DeleteAsync(ProduksjonsOrdre produksjonsOrdre, CancellationToken cancellationToken = default);
 }

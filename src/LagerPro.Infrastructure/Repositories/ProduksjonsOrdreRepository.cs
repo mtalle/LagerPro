@@ -64,4 +64,10 @@ public class ProduksjonsOrdreRepository : IProduksjonsOrdreRepository
         // SaveChanges kun via UnitOfWork
         return Task.CompletedTask;
     }
+
+    public Task DeleteAsync(ProduksjonsOrdre produksjonsOrdre, CancellationToken cancellationToken = default)
+    {
+        _dbContext.ProduksjonsOrdre.Remove(produksjonsOrdre);
+        return Task.CompletedTask;
+    }
 }
