@@ -38,7 +38,15 @@ public class UpdateMottakStatusHandler
         // Kun godkjent-status skal oppdatere lager — og kun én gang
         if (newStatus == MottakStatus.Godkjent && gammelStatus != MottakStatus.Godkjent)
         {
-            foreach (var linje in mottak.Linjer.Where(l => l.Godkjent))
+            var godkjenteLinjer = mottak.Linjer.Where(l => l.Godkjent).ToList();
+
+            // Hvis ingen linjer er explicit godkjent via per-linje-godkjenning, godta alle med mindre de har avvik
+            if (godkjenteLinjer.Count == 0)
+            {
+                godkjenteLinjer = mottak.Linjer.Where(l => string.IsNullOrWhiteSpace(l.Avvik)).ToList();
+            }
+
+            foreach (var linje in godkjenteLinjer)
             {
                 var beholdning = new LagerBeholdning
                 {
