@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { ProduksjonsOrdre, Resept, get, post, patch } from '../../lib/api';
+import { ProduksjonsOrdre, Resept, Plukkliste, get, post, patch } from '../../lib/api';
 
 const STATUS_MAP: Record<string, string> = {
   Planlagt: 'badge-planlagt',
@@ -38,6 +38,9 @@ export default function ProduksjonPage() {
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showFerdigmeldModal, setShowFerdigmeldModal] = useState(false);
+  const [showPlukklisteModal, setShowPlukklisteModal] = useState(false);
+  const [plukkliste, setPlukkliste] = useState<Plukkliste | null>(null);
+  const [plukklisteLoading, setPlukklisteLoading] = useState(false);
   const [ferdigmeldPrefill, setFerdigmeldPrefill] = useState<FerdigmeldPrefill | null>(null);
   const [search, setSearch] = useState('');
   const [error, setError] = useState('');
@@ -65,6 +68,17 @@ export default function ProduksjonPage() {
       setResepter(r);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
+  }
+
+  async function openPlukkliste() {
+    setShowPlukklisteModal(true);
+    if (plukkliste) return; // already loaded
+    setPlukklisteLoading(true);
+    try {
+      const data = await get<Plukkliste>('/production/plukkliste');
+      setPlukkliste(data);
+    } catch (e) { console.error(e); }
+    finally { setPlukklisteLoading(false); }
   }
 
   async function handleCreate(e: React.FormEvent) {
@@ -153,6 +167,7 @@ export default function ProduksjonPage() {
       <div className="page-header">
         <h1>🏗 Produksjon</h1>
         <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>+ Ny produksjonsordre</button>
+        <button className="btn btn-secondary" onClick={openPlukkliste}>📋 Plukkliste</button>
       </div>
 
       <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
@@ -318,6 +333,53 @@ export default function ProduksjonPage() {
                 <button type="submit" className="btn btn-primary">Ferdigmeld</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showPlukklisteModal && (
+        <div className="modal-overlay" onClick={() => setShowPlukklisteModal(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 900 }}>
+            <h2>📋 Plukkliste</h2>
+            {plukklisteLoading ? (
+              <div className="loading">Laster plukkliste...</div>
+            ) : plukkliste && plukkliste.linjer.length > 0 ? (
+              <>
+                <p style={{ color: '#6b7280', fontSize: '0.875rem', marginBottom: '1rem' }}>
+                  {plukkliste.linjer.length} linjer fra aktive produksjonsordrer
+                </p>
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', fontSize: '0.85rem' }}>
+                    <thead>
+                      <tr style={{ background: '#f3f4f6', textAlign: 'left' }}>
+                        <th>OrdreNr</th><th>Resept</th><th>Ferdigvare</th><th>Råvare</th><th>LotNr</th><th>Mengde</th><th>Enhet</th><th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {plukkliste.linjer.map((linje, i) => (
+                        <tr key={i} style={linje.lotNr === '-' ? { background: '#fef2f2' } : undefined}>
+                          <td><code>{linje.ordreNr}</code></td>
+                          <td>{linje.reseptNavn ?? `Resept.ID ${linje.reseptId}`}</td>
+                          <td>{linje.ferdigvareNavn}</td>
+                          <td>{linje.ravareNavn ?? `Råvare.ID ${linje.ravareId}`}</td>
+                          <td><code style={{ color: linje.lotNr === '-' ? '#dc2626' : undefined }}>{linje.lotNr}</code></td>
+                          <td>{linje.lotNr === '-' ? <span style={{ color: '#dc2626' }}>MANGLER</span> : linje.mengde}</td>
+                          <td>{linje.enhet}</td>
+                          <td><span className="badge badge-planlagt">{linje.status}</span></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            ) : (
+              <p style={{ color: '#6b7280', textAlign: 'center', padding: '2rem' }}>
+                Ingen aktive produksjonsordrer med reseptlinjer.
+              </p>
+            )}
+            <div className="form-actions" style={{ marginTop: '1rem' }}>
+              <button type="button" className="btn btn-secondary" onClick={() => setShowPlukklisteModal(false)}>Lukk</button>
+            </div>
           </div>
         </div>
       )}

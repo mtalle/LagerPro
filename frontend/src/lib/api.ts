@@ -203,3 +203,22 @@ export interface Resept {
   aktiv: boolean;
   linjer: ReseptLinje[];
 }
+
+export interface PlukklisteLinje {
+  ordreNr: string;
+  reseptId: number;
+  reseptNavn: string | null;
+  ferdigvareNavn: string;
+  planlagtAntall: number;
+  ravareId: number;
+  ravareNavn: string | null;
+  lotNr: string;
+  mengde: number;
+  enhet: string;
+  status: string;
+}
+
+export interface Plukkliste {
+  linjer: PlukklisteLinje[];
+  totaltAntallLinjer: number;
+}
