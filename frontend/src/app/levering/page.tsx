@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Fragment } from 'react';
 import { Levering, Kunde, LagerBeholdning, get, post, patch } from '../../lib/api';
 
 const STATUS_MAP: Record<string, string> = {
@@ -124,7 +124,7 @@ export default function LeveringPage() {
           {filtered.length === 0 ? (
             <tr><td colSpan={7} style={{ textAlign: 'center', color: '#9ca3af', padding: '2rem' }}>{leveringer.length === 0 ? 'Ingen leveringer' : 'Ingen resultater'}</td></tr>
           ) : filtered.map(l => (
-            <tbody key={l.id}>
+            <Fragment key={l.id}>
               <tr style={{ cursor: 'pointer' }} onClick={() => setExpanded(expanded === l.id ? null : l.id)}>
                 <td>#{l.id}</td>
                 <td>{new Date(l.leveringsDato).toLocaleDateString('no-NO')}</td>
@@ -148,7 +148,7 @@ export default function LeveringPage() {
                   <td></td>
                 </tr>
               ))}
-            </tbody>
+            </Fragment>
           ))}
         </tbody>
       </table>
@@ -200,7 +200,7 @@ export default function LeveringPage() {
                       <td>
                         <select required value={linje.lotNr} onChange={e => updateLine(i, 'lotNr', e.target.value)} style={{ minWidth: 200 }}>
                           <option value="">Velg LOT...</option>
-                          {beholdning.map(b => <option key={b.id} value={b.lotNr}>{b.artikkelNavn} ({b.artikkelNr}) — LOT: {b.lotNr}</option>)}
+                          {beholdning.map(b => <option key={b.id} value={b.lotNr}>{b.artikkelNavn} ({b.artikkelNr}) — LOT: {b.lotNr} [{b.mengde} {b.enhet} på lager]</option>)}
                         </select>
                       </td>
                       <td><input type="number" required min="0.01" step="0.01" value={linje.mengde} onChange={e => updateLine(i, 'mengde', parseFloat(e.target.value) || 0)} style={{ width: 80 }} /></td>

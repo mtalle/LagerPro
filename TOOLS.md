@@ -44,7 +44,7 @@ Skills are shared. Your setup is yours. Keeping them apart means you can update 
 
 ## Cron Jobs
 
-- `0 */2 * * *` → LagerPro status hver 2. time
+- `0 */1 * * *` → LagerPro MVP jobb (sub-agent, hver time)
 - `0 6 * * *` → Morgenbrief kl. 06:00
 - `0 8 * * *` → Dagsrapport kl. 08:00
 - `0 18 * * 2` → Tømmekalender påminnelse tirsdag kl. 18:00
