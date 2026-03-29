@@ -28,9 +28,9 @@ public class ReceiptsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> Get(CancellationToken cancellationToken)
+    public async Task<IActionResult> Get([FromQuery] string? status, CancellationToken cancellationToken)
     {
-        var mottak = await _getAllHandler.Handle(new GetAllMottakQuery(), cancellationToken);
+        var mottak = await _getAllHandler.Handle(new GetAllMottakQuery(status), cancellationToken);
         return Ok(mottak);
     }
 

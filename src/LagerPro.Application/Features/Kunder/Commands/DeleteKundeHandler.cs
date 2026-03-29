@@ -14,13 +14,18 @@ public class DeleteKundeHandler
         _unitOfWork = unitOfWork;
     }
 
+    /// <summary>
+    /// Soft-delete: deaktiverer kunden istedenfor å slette.
+    /// Kunden beholdes for sporbarhets skyld (koblet til leveranser).
+    /// </summary>
     public async Task<bool> Handle(DeleteKundeCommand command, CancellationToken cancellationToken = default)
     {
         var kunde = await _repository.GetByIdAsync(command.Id, cancellationToken);
         if (kunde is null)
             return false;
 
-        _repository.Delete(kunde);
+        kunde.Aktiv = false;
+        _repository.Update(kunde);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return true;
     }

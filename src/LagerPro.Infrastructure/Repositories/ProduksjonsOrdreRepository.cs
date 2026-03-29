@@ -29,11 +29,19 @@ public class ProduksjonsOrdreRepository : IProduksjonsOrdreRepository
             .Include(x => x.Resept).ThenInclude(r => r!.Linjer).ThenInclude(l => l.Ravare)
             .FirstOrDefaultAsync(x => x.OrdreNr == ordreNr, cancellationToken);
 
-    public async Task<IReadOnlyList<ProduksjonsOrdre>> GetAllAsync(CancellationToken cancellationToken = default)
-        => await _dbContext.ProduksjonsOrdre
+    public async Task<IReadOnlyList<ProduksjonsOrdre>> GetAllAsync(List<ProdOrdreStatus>? statusFilter = null, CancellationToken cancellationToken = default)
+    {
+        var query = _dbContext.ProduksjonsOrdre
             .Include(x => x.Resept).ThenInclude(r => r!.Ferdigvare)
+            .AsQueryable();
+
+        if (statusFilter is { Count: > 0 })
+            query = query.Where(o => statusFilter.Contains(o.Status));
+
+        return await query
             .OrderByDescending(x => x.PlanlagtDato)
             .ToListAsync(cancellationToken);
+    }
 
     public async Task<IReadOnlyList<ProduksjonsOrdre>> GetActivesWithForbrukAsync(CancellationToken cancellationToken = default)
         => await _dbContext.ProduksjonsOrdre

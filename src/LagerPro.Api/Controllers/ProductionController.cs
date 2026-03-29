@@ -42,9 +42,9 @@ public class ProductionController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> Get(CancellationToken cancellationToken)
+    public async Task<IActionResult> Get([FromQuery] string? status, CancellationToken cancellationToken)
     {
-        var ordre = await _getAllHandler.Handle(new GetAllProduksjonsOrdreQuery(), cancellationToken);
+        var ordre = await _getAllHandler.Handle(new GetAllProduksjonsOrdreQuery(status), cancellationToken);
         return Ok(ordre);
     }
 

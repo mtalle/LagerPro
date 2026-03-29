@@ -47,7 +47,7 @@ public class ProduksjonTests
         _ordreRepoMock.Setup(r => r.AddAsync(It.IsAny<ProduksjonsOrdre>(), It.IsAny<CancellationToken>()))
             .Callback<ProduksjonsOrdre, CancellationToken>((o, _) => { captured = o; typeof(BaseEntity).GetProperty("Id")!.SetValue(o, 7); })
             .Returns(Task.CompletedTask);
-        _ordreRepoMock.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(new List<ProduksjonsOrdre>());
+        _ordreRepoMock.Setup(r => r.GetAllAsync(It.IsAny<List<ProdOrdreStatus>>(), It.IsAny<CancellationToken>())).ReturnsAsync(new List<ProduksjonsOrdre>());
         _reseptRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(resept);
         _unitOfWorkMock.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
@@ -121,7 +121,7 @@ public class ProduksjonTests
             CreateTestOrdre(2, "PO-002", ProdOrdreStatus.Ferdigmeldt)
         };
 
-        _ordreRepoMock.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(ordre);
+        _ordreRepoMock.Setup(r => r.GetAllAsync(It.IsAny<List<ProdOrdreStatus>>(), It.IsAny<CancellationToken>())).ReturnsAsync(ordre);
 
         var handler = new GetAllProduksjonsOrdreHandler(_ordreRepoMock.Object);
 
@@ -133,7 +133,7 @@ public class ProduksjonTests
     [Fact]
     public async Task GetAllProduksjonsOrdreHandler_EmptyList_ReturnsEmpty()
     {
-        _ordreRepoMock.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
+        _ordreRepoMock.Setup(r => r.GetAllAsync(It.IsAny<List<ProdOrdreStatus>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<ProduksjonsOrdre>());
 
         var handler = new GetAllProduksjonsOrdreHandler(_ordreRepoMock.Object);

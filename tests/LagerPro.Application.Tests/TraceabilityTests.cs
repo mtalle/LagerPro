@@ -174,7 +174,7 @@ public class TraceabilityTests
     public async Task GetTraceabilityByBatchHandler_InvalidBatchNr_ReturnsNull()
     {
         _ordreRepoMock.Setup(r => r.GetByOrdreNrAsync("invalid", It.IsAny<CancellationToken>())).ReturnsAsync((ProduksjonsOrdre?)null);
-        _ordreRepoMock.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(new List<ProduksjonsOrdre>());
+        _ordreRepoMock.Setup(r => r.GetAllAsync(It.IsAny<List<ProdOrdreStatus>>(), It.IsAny<CancellationToken>())).ReturnsAsync(new List<ProduksjonsOrdre>());
 
         var handler = new GetTraceabilityByBatchHandler(_ordreRepoMock.Object, _transaksjonRepoMock.Object);
 
@@ -187,7 +187,7 @@ public class TraceabilityTests
     public async Task GetTraceabilityByBatchHandler_BatchNotFound_ReturnsNull()
     {
         _ordreRepoMock.Setup(r => r.GetByOrdreNrAsync("PO-999", It.IsAny<CancellationToken>())).ReturnsAsync((ProduksjonsOrdre?)null);
-        _ordreRepoMock.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(new List<ProduksjonsOrdre>());
+        _ordreRepoMock.Setup(r => r.GetAllAsync(It.IsAny<List<ProdOrdreStatus>>(), It.IsAny<CancellationToken>())).ReturnsAsync(new List<ProduksjonsOrdre>());
 
         var handler = new GetTraceabilityByBatchHandler(_ordreRepoMock.Object, _transaksjonRepoMock.Object);
 
@@ -211,7 +211,7 @@ public class TraceabilityTests
         };
 
         _kundeRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(kunde);
-        _leveringRepoMock.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(leveringer);
+        _leveringRepoMock.Setup(r => r.GetAllAsync(It.IsAny<List<LeveringStatus>>(), It.IsAny<CancellationToken>())).ReturnsAsync(leveringer);
 
         var handler = new GetTraceabilityByKundeHandler(_kundeRepoMock.Object, _leveringRepoMock.Object);
 

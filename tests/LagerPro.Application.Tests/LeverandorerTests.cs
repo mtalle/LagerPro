@@ -200,12 +200,12 @@ public class LeverandorerTests
 
     #endregion
 
-    #region DeleteLeverandorHandler
+    #region DeleteLeverandorHandler (soft-delete)
 
     [Fact]
-    public async Task DeleteLeverandorHandler_Existing_DeletesAndReturnsTrue()
+    public async Task DeleteLeverandorHandler_Existing_SoftDeletesAndReturnsTrue()
     {
-        var lev = CreateTestLeverandor(3, "Slett Meg");
+        var lev = CreateTestLeverandor(3, "Deaktiver Meg");
 
         _repositoryMock.Setup(r => r.GetByIdAsync(3, It.IsAny<CancellationToken>())).ReturnsAsync(lev);
         _unitOfWorkMock.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
@@ -215,7 +215,8 @@ public class LeverandorerTests
         var result = await handler.Handle(new DeleteLeverandorCommand(3), CancellationToken.None);
 
         Assert.True(result);
-        _repositoryMock.Verify(r => r.Delete(lev), Times.Once);
+        Assert.False(lev.Aktiv); // soft-delete: deaktiverer istedenfor å slette
+        _repositoryMock.Verify(r => r.Update(lev), Times.Once);
         _unitOfWorkMock.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -230,7 +231,7 @@ public class LeverandorerTests
         var result = await handler.Handle(new DeleteLeverandorCommand(999), CancellationToken.None);
 
         Assert.False(result);
-        _repositoryMock.Verify(r => r.Delete(It.IsAny<Leverandor>()), Times.Never);
+        _repositoryMock.Verify(r => r.Update(It.IsAny<Leverandor>()), Times.Never);
     }
 
     #endregion

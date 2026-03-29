@@ -27,7 +27,7 @@ public class GetTraceabilityByBatchHandler
         // If not found by OrdreNr, try to find by ferdigvare LotNr
         if (ordre is null)
         {
-            var alleOrdre = await _ordreRepository.GetAllAsync(cancellationToken);
+            var alleOrdre = await _ordreRepository.GetAllAsync(null, cancellationToken);
             ordre = alleOrdre.FirstOrDefault(o => o.FerdigvareLotNr == query.BatchNr);
         }
 

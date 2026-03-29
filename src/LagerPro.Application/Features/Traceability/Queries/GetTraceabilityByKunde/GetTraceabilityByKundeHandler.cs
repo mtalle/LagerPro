@@ -24,7 +24,7 @@ public class GetTraceabilityByKundeHandler
         var kunde = await _kundeRepository.GetByIdAsync(query.KundeId, cancellationToken);
         if (kunde is null) return null;
 
-        var leveringer = await _leveringRepository.GetAllAsync(cancellationToken);
+        var leveringer = await _leveringRepository.GetAllAsync(null, cancellationToken);
         var kundeLeveringer = leveringer.Where(l => l.KundeId == query.KundeId).ToList();
 
         var leveringDtos = kundeLeveringer.Select(l => new KundeLeveringDto(

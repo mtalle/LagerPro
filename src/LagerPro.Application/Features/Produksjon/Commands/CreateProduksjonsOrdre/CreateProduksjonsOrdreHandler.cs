@@ -54,7 +54,7 @@ public class CreateProduksjonsOrdreHandler
         var prefix = $"PROD-{today}-";
 
         // Hent alle ordre for i dag for å finne høgaste nummer
-        var allOrdre = await _repository.GetAllAsync(cancellationToken);
+        var allOrdre = await _repository.GetAllAsync(null, cancellationToken);
         if (allOrdre is null || allOrdre.Count == 0)
             return $"{prefix}001";
 

@@ -40,7 +40,7 @@ public class MottakTests
             CreateTestMottak(2, MottakStatus.Godkjent)
         };
 
-        _mottakRepoMock.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(mottakList);
+        _mottakRepoMock.Setup(r => r.GetAllAsync(It.IsAny<List<MottakStatus>>(), It.IsAny<CancellationToken>())).ReturnsAsync(mottakList);
 
         var handler = new GetAllMottakHandler(_mottakRepoMock.Object);
 
@@ -52,7 +52,7 @@ public class MottakTests
     [Fact]
     public async Task GetAllMottakHandler_EmptyList_ReturnsEmpty()
     {
-        _mottakRepoMock.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
+        _mottakRepoMock.Setup(r => r.GetAllAsync(It.IsAny<List<MottakStatus>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<Mottak>());
 
         var handler = new GetAllMottakHandler(_mottakRepoMock.Object);

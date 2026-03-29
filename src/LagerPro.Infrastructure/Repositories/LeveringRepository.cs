@@ -1,4 +1,5 @@
 using LagerPro.Domain.Entities;
+using LagerPro.Domain.Enums;
 using LagerPro.Domain.Repositories;
 using LagerPro.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -20,13 +21,21 @@ public class LeveringRepository : ILeveringRepository
             .ThenInclude(l => l.Artikkel)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
-    public async Task<IReadOnlyList<Levering>> GetAllAsync(CancellationToken cancellationToken = default)
-        => await _dbContext.Leveringer
+    public async Task<IReadOnlyList<Levering>> GetAllAsync(List<LeveringStatus>? statusFilter = null, CancellationToken cancellationToken = default)
+    {
+        var query = _dbContext.Leveringer
             .Include(x => x.Kunde)
             .Include(x => x.Linjer)
             .ThenInclude(l => l.Artikkel)
+            .AsQueryable();
+
+        if (statusFilter is { Count: > 0 })
+            query = query.Where(l => statusFilter.Contains(l.Status));
+
+        return await query
             .OrderByDescending(x => x.LeveringsDato)
             .ToListAsync(cancellationToken);
+    }
 
     public async Task AddAsync(Levering levering, CancellationToken cancellationToken = default)
     {

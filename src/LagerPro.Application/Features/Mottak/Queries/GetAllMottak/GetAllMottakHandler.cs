@@ -1,4 +1,5 @@
 using LagerPro.Contracts.Dtos.Mottak;
+using LagerPro.Domain.Enums;
 using LagerPro.Domain.Repositories;
 
 namespace LagerPro.Application.Features.Mottak.Queries.GetAllMottak;
@@ -14,7 +15,19 @@ public class GetAllMottakHandler
 
     public async Task<IReadOnlyList<MottakDto>> Handle(GetAllMottakQuery query, CancellationToken cancellationToken = default)
     {
-        var mottakList = await _repository.GetAllAsync(cancellationToken);
+        // Parse status filter if provided
+        List<MottakStatus>? statusFilter = null;
+        if (!string.IsNullOrWhiteSpace(query.Status))
+        {
+            statusFilter = new List<MottakStatus>();
+            foreach (var s in query.Status.Split(',', StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (Enum.TryParse<MottakStatus>(s.Trim(), ignoreCase: true, out var parsed))
+                    statusFilter.Add(parsed);
+            }
+        }
+
+        var mottakList = await _repository.GetAllAsync(statusFilter, cancellationToken);
         
         return mottakList.Select(m => new MottakDto(
             m.Id,

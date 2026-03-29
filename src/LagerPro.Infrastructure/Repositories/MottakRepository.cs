@@ -1,4 +1,5 @@
 using LagerPro.Domain.Entities;
+using LagerPro.Domain.Enums;
 using LagerPro.Domain.Repositories;
 using LagerPro.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -21,13 +22,21 @@ public class MottakRepository : IMottakRepository
             .Include(x => x.Leverandor)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
-    public async Task<IReadOnlyList<Mottak>> GetAllAsync(CancellationToken cancellationToken = default)
-        => await _dbContext.Mottak
+    public async Task<IReadOnlyList<Mottak>> GetAllAsync(List<MottakStatus>? statusFilter = null, CancellationToken cancellationToken = default)
+    {
+        var query = _dbContext.Mottak
             .Include(x => x.Linjer)
             .ThenInclude(l => l.Artikkel)
             .Include(x => x.Leverandor)
+            .AsQueryable();
+
+        if (statusFilter is { Count: > 0 })
+            query = query.Where(m => statusFilter.Contains(m.Status));
+
+        return await query
             .OrderByDescending(x => x.OpprettetDato)
             .ToListAsync(cancellationToken);
+    }
 
     public async Task AddAsync(Mottak mottak, CancellationToken cancellationToken = default)
     {

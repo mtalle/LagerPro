@@ -200,12 +200,12 @@ public class KunderTests
 
     #endregion
 
-    #region DeleteKundeHandler
+    #region DeleteKundeHandler (soft-delete)
 
     [Fact]
-    public async Task DeleteKundeHandler_Existing_DeletesAndReturnsTrue()
+    public async Task DeleteKundeHandler_Existing_SoftDeletesAndReturnsTrue()
     {
-        var kunde = CreateTestKunde(3, "Slett Meg");
+        var kunde = CreateTestKunde(3, "Deaktiver Meg");
 
         _repositoryMock.Setup(r => r.GetByIdAsync(3, It.IsAny<CancellationToken>())).ReturnsAsync(kunde);
         _unitOfWorkMock.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
@@ -215,7 +215,8 @@ public class KunderTests
         var result = await handler.Handle(new DeleteKundeCommand(3), CancellationToken.None);
 
         Assert.True(result);
-        _repositoryMock.Verify(r => r.Delete(kunde), Times.Once);
+        Assert.False(kunde.Aktiv); // soft-delete: deaktiverer istedenfor å slette
+        _repositoryMock.Verify(r => r.Update(kunde), Times.Once);
         _unitOfWorkMock.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -230,7 +231,7 @@ public class KunderTests
         var result = await handler.Handle(new DeleteKundeCommand(999), CancellationToken.None);
 
         Assert.False(result);
-        _repositoryMock.Verify(r => r.Delete(It.IsAny<Kunde>()), Times.Never);
+        _repositoryMock.Verify(r => r.Update(It.IsAny<Kunde>()), Times.Never);
     }
 
     #endregion
