@@ -136,18 +136,29 @@ export default function MottakPage() {
         </tr>
         {expanded === m.id && m.linjer.map(l => (
           <tr key={`${m.id}-linje-${l.id}`} style={{ background: '#f9fafb', fontSize: '0.85rem' }}>
-            <td colSpan={2}></td>
+            <td colSpan={3}></td>
             <td><code>{l.artikkelNavn ?? `Art.ID ${l.artikkelId}`}</code></td>
-            <td>Lot: <code>{l.lotNr}</code></td>
+            <td>Lot: <code>{l.lotNr || '—'}</code></td>
             <td>{l.mengde} {l.enhet}</td>
-            <td><span className={`badge ${l.godkjent ? 'badge-aktiv' : 'badge-inactive'}`}>{l.godkjent ? 'Godkjent' : l.avvik ?? '—'}</span></td>
-            <td>{l.temperatur != null && l.temperatur !== 0 ? `${l.temperatur}°C` : ''}</td>
+            <td>
+              {l.godkjent ? (
+                <span className="badge badge-aktiv">Godkjent</span>
+              ) : l.avvik ? (
+                <span className="badge badge-kansellert" title={l.avvik}>⚠ {l.avvik}</span>
+              ) : (
+                <span className="badge badge-inactive">Ikke sjekket</span>
+              )}
+            </td>
+            <td>{l.temperatur != null && l.temperatur !== 0 ? `${l.temperatur}°C` : '—'}</td>
             <td>{l.bestForDato ? new Date(l.bestForDato).toLocaleDateString('no-NO') : '—'}</td>
+            <td>
+              {l.kommentar ? <span title={l.kommentar}>💬 Ja</span> : '—'}
+            </td>
             <td>
               {m.status === 'Mottatt' && (
                 <>
                   <button className="btn btn-sm btn-primary" style={{ marginRight: 4 }} onClick={() => updateLinjeGodkjenning(m.id, l.id, true)}>Godkjenn</button>
-                  <button className="btn btn-sm btn-danger" onClick={() => { const a = prompt('Avvik:', l.avvik ?? ''); if (a !== null) updateLinjeGodkjenning(m.id, l.id, false, a); }}>Avvis</button>
+                  <button className="btn btn-sm btn-danger" onClick={() => { const a = prompt('Avvik:', l.avvik ?? ''); if (a !== null) updateLinjeGodkjenning(m.id, l.id, false, a || (l.avvik ?? '')); }}>Avvis</button>
                 </>
               )}
             </td>
@@ -277,8 +288,8 @@ export default function MottakPage() {
                     <input type="number" step="0.1" value={linje.temperatur} onChange={e => updateLine(i, 'temperatur', parseFloat(e.target.value) || 0)} />
                   </div>
                   <div className="form-group">
-                    <label>Strekkode</label>
-                    <input value={linje.strekkode} onChange={e => updateLine(i, 'strekkode', e.target.value)} />
+                    <label>Kommentar</label>
+                    <input value={linje.kommentar ?? ''} onChange={e => updateLine(i, 'kommentar', e.target.value)} placeholder="Merknad..." />
                   </div>
                   <button type="button" className="btn btn-sm btn-danger" onClick={() => removeLine(i)}>✕</button>
                 </div>

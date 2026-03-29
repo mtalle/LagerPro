@@ -114,6 +114,7 @@ export default function LeveringPage() {
           onChange={e => setSearch(e.target.value)}
           style={{ padding: '0.4rem 0.8rem', border: '1px solid #d1d5db', borderRadius: 6, width: 300, fontSize: '0.9rem' }}
         />
+        <span style={{ marginLeft: 'auto', fontSize: '0.85rem', color: '#6b7280' }}>{filtered.length} av {leveringer.length}</span>
       </div>
 
       <table>
