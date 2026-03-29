@@ -41,6 +41,8 @@ public class CreateMottakHandler
             var artikkel = await _artikkelRepository.GetByIdAsync(linjeCommand.ArtikkelId, cancellationToken);
             if (artikkel is null)
                 throw new InvalidOperationException($"Artikkel med ID {linjeCommand.ArtikkelId} ble ikke funnet.");
+            if (!artikkel.Aktiv)
+                throw new InvalidOperationException($"Artikkel «{artikkel.Navn}» (ID {linjeCommand.ArtikkelId}) er inaktiv og kan ikke mottas.");
 
             // Auto-generer LotNr hvis ikke oppgitt: ART-<artikkelNr>-<timestamp>
             var lotNr = string.IsNullOrWhiteSpace(linjeCommand.LotNr)
@@ -52,7 +54,7 @@ public class CreateMottakHandler
                 ArtikkelId = linjeCommand.ArtikkelId,
                 LotNr = lotNr,
                 Mengde = linjeCommand.Mengde,
-                Enhet = artikkel.Enhet,
+                Enhet = string.IsNullOrWhiteSpace(linjeCommand.Enhet) ? artikkel.Enhet : linjeCommand.Enhet,
                 BestForDato = linjeCommand.BestForDato,
                 Temperatur = linjeCommand.Temperatur,
                 Strekkode = linjeCommand.Strekkode,

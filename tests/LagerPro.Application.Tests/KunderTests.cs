@@ -75,6 +75,44 @@ public class KunderTests
         Assert.Equal(42, result);
     }
 
+    [Fact]
+    public async Task CreateKundeHandler_DuplicateOrgNr_ThrowsInvalidOperationException()
+    {
+        var command = new CreateKundeCommand(
+            Navn: "Ny Kunde", null, null, null, null, null, null, "987654321", null);
+
+        _repositoryMock.Setup(r => r.GetByOrgNrAsync("987654321", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Kunde { Navn = "Eksisterande Kunde", OrgNr = "987654321" });
+
+        var handler = new CreateKundeHandler(_repositoryMock.Object, _unitOfWorkMock.Object);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => handler.Handle(command, CancellationToken.None));
+
+        Assert.Contains("987654321", ex.Message);
+        _repositoryMock.Verify(r => r.AddAsync(It.IsAny<Kunde>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task CreateKundeHandler_OrgNrNull_BypassesDuplicateCheck()
+    {
+        var command = new CreateKundeCommand(
+            Navn: "Kunde utan orgnr", null, null, null, null, null, null, null, null);
+
+        Kunde? captured = null;
+        _repositoryMock.Setup(r => r.AddAsync(It.IsAny<Kunde>(), It.IsAny<CancellationToken>()))
+            .Callback<Kunde, CancellationToken>((k, _) => captured = k)
+            .Returns(Task.CompletedTask);
+        _unitOfWorkMock.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+
+        var handler = new CreateKundeHandler(_repositoryMock.Object, _unitOfWorkMock.Object);
+
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        Assert.Equal("Kunde utan orgnr", captured!.Navn);
+        _repositoryMock.Verify(r => r.GetByOrgNrAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
     #endregion
 
     #region GetAllKunderHandler
@@ -196,6 +234,51 @@ public class KunderTests
 
         Assert.False(result);
         _repositoryMock.Verify(r => r.Update(It.IsAny<Kunde>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task UpdateKundeHandler_DuplicateOrgNr_ThrowsInvalidOperationException()
+    {
+        var kunde = CreateTestKunde(1, "Min Kunde");
+        kunde.OrgNr = "111111111";
+
+        _repositoryMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(kunde);
+        _repositoryMock.Setup(r => r.GetByOrgNrAsync("222222222", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Kunde { Navn = "Annen Kunde", OrgNr = "222222222" });
+
+        var handler = new UpdateKundeHandler(_repositoryMock.Object, _unitOfWorkMock.Object);
+
+        var command = new UpdateKundeCommand(
+            Id: 1, Navn: "Min Kunde", Kontaktperson: null, Telefon: null, Epost: null,
+            Adresse: null, Postnr: null, Poststed: null, OrgNr: "222222222", Kommentar: null, Aktiv: true);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => handler.Handle(command, CancellationToken.None));
+
+        Assert.Contains("222222222", ex.Message);
+        _repositoryMock.Verify(r => r.Update(It.IsAny<Kunde>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task UpdateKundeHandler_SameOrgNrAsSelf_DoesNotThrow()
+    {
+        var kunde = CreateTestKunde(1, "Min Kunde");
+        kunde.OrgNr = "555555555";
+
+        _repositoryMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(kunde);
+        _repositoryMock.Setup(r => r.GetByOrgNrAsync("555555555", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(kunde);
+        _unitOfWorkMock.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+
+        var handler = new UpdateKundeHandler(_repositoryMock.Object, _unitOfWorkMock.Object);
+
+        var command = new UpdateKundeCommand(
+            Id: 1, Navn: "Min Kunde", Kontaktperson: null, Telefon: null, Epost: null,
+            Adresse: null, Postnr: null, Poststed: null, OrgNr: "555555555", Kommentar: null, Aktiv: true);
+
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        Assert.True(result);
     }
 
     #endregion

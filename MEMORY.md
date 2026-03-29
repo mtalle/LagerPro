@@ -18,23 +18,27 @@
 - Tests: tests/ (xUnit + Moq)
 
 ## LagerPro Status (2026-03-29)
-- Backend build: ✅ (0 errors)
-- Frontend build: ✅ (Next.js, 12 routes)
-- Migrations: Eksisterer i `src/LagerPro.Infrastructure/Migrations/` (InitialCreate 2026-03-27)
-- EF Core Design package: lagt til i LagerPro.Api.csproj (versjon 8.0.*)
+- **Backend build:** ✅ (0 errors, 0 warnings)
+- **Tester:** 117 grønne ✅ (opp fra 112)
+- **GlobalExceptionHandlerMiddleware:** Fanger alle unntak, returnerer konsistent JSON
+- **CORS:** Konfigurerbar via appsettings.json `Cors:AllowedOrigins`
+- **Alle controller-feilmeldinger:** Norsk (ble ikke funnet, ikke "not found")
+- **Health endpoint:** Returnerer timestamp i tillegg til status
+- **Frontend:** Next.js, 12 routes, bygger OK
+- **Migrations:** `20260329092643_InitialCreate` (SQL Server-kompatibel)
 - **MVP: Funksjonelt komplett!** Kjerner: Artikler, Mottak, Lager, Produksjon, Levering, Resepter, Sporing
-- **API Controllers**: Alle med norsk feilhåndtering (BadRequest for InvalidOperationException)
-- **Database**: Unique index på ArtikkelNr, composite index på ArtikkelId+LotNr
-  - **Soft delete artikler** (Aktiv=false) istedenfor ekte sletting
-  - **Unik artikkelNr-sjekk** i CreateArticle med GetByArtikkelNrAsync
-  - **ProduksjonsOrdreDto**: FerdigvareId, FerdigvareNavn, FerdigvareEnhet inkludert i list + detaljer
-  - **UpdateLeveringStatusCommand**: UtfortAv nullable i command (sender fra frontend), Envir.UserName fjernet
-  - **UpdateLeveringStatusRequest**: UtfortAv lagt til
-  - **GetAllProduksjonsOrdreHandler**: inkluderer Ferdigvare via Resept.Ferdigvare
-  - **GetProduksjonsOrdreByIdHandler**: oppdatert for FerdigvareNavn + FerdigvareEnhet
-  - **Alle controllere**: InvalidOperationException → BadRequest med norsk feilmelding (Articles, Production, Receipts, Resepter)
-  - **CreateMottakHandler**: norsk feilmelding
-  - **ProjectStatusService**: oppdatert til "MVP komplett"
+
+### Nye features (2026-03-29)
+- Manuell lagerjustering via `POST /inventory/juster` med transaksjonslogg
+- `DeleteMottak` + `DeleteLevering` endepunkt
+- `FerdigmeldPrefill` + `FerdigmeldLinje` typer i frontend
+- DeleteMottak/DeleteLevering handlers + repo-metoder
+
+### Oppdatert 2026-03-29
+- Alle controller-feilmeldinger → norsk
+- GlobalExceptionHandlerMiddleware lagt til
+- CORS nå konfigurerbar via appsettings.json
+- Helsesjekk `/health` → viser timestamp
 
 ## LagerPro Tech Stack
 - Repository interface mismatch (ILager, IMottak, ILevering, IProduksjonsOrdre, IArtikkel)

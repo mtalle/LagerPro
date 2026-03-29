@@ -11,6 +11,7 @@ public class CreateLeveringHandler
 {
     private readonly ILeveringRepository _leveringRepository;
     private readonly IKundeRepository _kundeRepository;
+    private readonly IArtikkelRepository _artikkelRepository;
     private readonly ILagerRepository _lagerRepository;
     private readonly ILagerTransaksjonRepository _lagerTransaksjonRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -18,12 +19,14 @@ public class CreateLeveringHandler
     public CreateLeveringHandler(
         ILeveringRepository leveringRepository,
         IKundeRepository kundeRepository,
+        IArtikkelRepository artikkelRepository,
         ILagerRepository lagerRepository,
         ILagerTransaksjonRepository lagerTransaksjonRepository,
         IUnitOfWork unitOfWork)
     {
         _leveringRepository = leveringRepository;
         _kundeRepository = kundeRepository;
+        _artikkelRepository = artikkelRepository;
         _lagerRepository = lagerRepository;
         _lagerTransaksjonRepository = lagerTransaksjonRepository;
         _unitOfWork = unitOfWork;
@@ -35,9 +38,15 @@ public class CreateLeveringHandler
         if (kunde is null)
             throw new InvalidOperationException($"Kunde {command.KundeId} ble ikke funnet.");
 
-        // Sjekk lagerbeholdning før levering opprettes
+        // Sjekk lagerbeholdning og artikkelstatus før levering opprettes
         foreach (var linjeCommand in command.Linjer)
         {
+            var artikkel = await _artikkelRepository.GetByIdAsync(linjeCommand.ArtikkelId, cancellationToken);
+            if (artikkel is null)
+                throw new InvalidOperationException($"Artikkel med ID {linjeCommand.ArtikkelId} ble ikke funnet.");
+            if (!artikkel.Aktiv)
+                throw new InvalidOperationException($"Artikkel «{artikkel.Navn}» (ID {linjeCommand.ArtikkelId}) er inaktiv og kan ikke leveres.");
+
             var beholdning = await _lagerRepository.GetByArtikkelOgLotAsync(
                 linjeCommand.ArtikkelId, linjeCommand.LotNr, cancellationToken);
 

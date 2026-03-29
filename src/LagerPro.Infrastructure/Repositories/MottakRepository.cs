@@ -50,4 +50,10 @@ public class MottakRepository : IMottakRepository
         // SaveChanges kun via UnitOfWork
         return Task.CompletedTask;
     }
+
+    public Task DeleteAsync(Mottak mottak, CancellationToken cancellationToken = default)
+    {
+        _dbContext.Mottak.Remove(mottak);
+        return Task.CompletedTask;
+    }
 }

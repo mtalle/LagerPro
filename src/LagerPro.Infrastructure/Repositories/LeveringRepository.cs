@@ -49,4 +49,10 @@ public class LeveringRepository : ILeveringRepository
         // SaveChanges kun via UnitOfWork
         return Task.CompletedTask;
     }
+
+    public Task DeleteAsync(Levering levering, CancellationToken cancellationToken = default)
+    {
+        _dbContext.Leveringer.Remove(levering);
+        return Task.CompletedTask;
+    }
 }

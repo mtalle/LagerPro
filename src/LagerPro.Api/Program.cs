@@ -1,22 +1,28 @@
+using LagerPro.Api.Middleware;
 using LagerPro.Application.DependencyInjection;
 using LagerPro.Infrastructure.Data;
 using LagerPro.Infrastructure.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddApplication();
-builder.Services.AddInfrastructure(builder.Configuration);
+// CORS — origins read from config, with fallback defaults
+var corsOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? new[] { "http://localhost:3000", "http://localhost:3001" };
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "http://localhost:3001")
+        policy.WithOrigins(corsOrigins)
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
 });
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -24,6 +30,9 @@ builder.Services.AddControllers()
     });
 
 var app = builder.Build();
+
+// Global exception handler — must be first in the pipeline
+app.UseGlobalExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
@@ -46,6 +55,6 @@ catch (Exception ex)
 
 app.UseHttpsRedirection();
 app.MapControllers();
-app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
+app.MapGet("/health", () => Results.Ok(new { status = "ok", timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss \"UTC\"") }));
 
 app.Run();

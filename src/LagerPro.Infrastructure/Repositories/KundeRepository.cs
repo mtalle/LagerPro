@@ -21,6 +21,9 @@ public class KundeRepository : IKundeRepository
         => _dbContext.Kunder.OrderBy(x => x.Navn).ToListAsync(cancellationToken)
             .ContinueWith(t => (IReadOnlyList<Kunde>)t.Result, cancellationToken);
 
+    public Task<Kunde?> GetByOrgNrAsync(string orgNr, CancellationToken cancellationToken = default)
+        => _dbContext.Kunder.FirstOrDefaultAsync(x => x.OrgNr == orgNr, cancellationToken);
+
     public async Task AddAsync(Kunde kunde, CancellationToken cancellationToken)
     {
         await _dbContext.Kunder.AddAsync(kunde, cancellationToken);

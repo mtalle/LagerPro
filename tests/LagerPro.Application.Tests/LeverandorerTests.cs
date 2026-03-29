@@ -75,6 +75,24 @@ public class LeverandorerTests
         Assert.Equal(99, result);
     }
 
+    [Fact]
+    public async Task CreateLeverandorHandler_DuplicateOrgNr_ThrowsInvalidOperationException()
+    {
+        var command = new CreateLeverandorCommand(
+            Navn: "Ny Lev", null, null, null, null, null, null, "112233445", null);
+
+        _repositoryMock.Setup(r => r.GetByOrgNrAsync("112233445", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Leverandor { Navn = "Eksisterande Lev", OrgNr = "112233445" });
+
+        var handler = new CreateLeverandorHandler(_repositoryMock.Object, _unitOfWorkMock.Object);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => handler.Handle(command, CancellationToken.None));
+
+        Assert.Contains("112233445", ex.Message);
+        _repositoryMock.Verify(r => r.AddAsync(It.IsAny<Leverandor>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
     #endregion
 
     #region GetAllLeverandorerHandler
@@ -196,6 +214,51 @@ public class LeverandorerTests
 
         Assert.False(result);
         _repositoryMock.Verify(r => r.Update(It.IsAny<Leverandor>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task UpdateLeverandorHandler_DuplicateOrgNr_ThrowsInvalidOperationException()
+    {
+        var lev = CreateTestLeverandor(1, "Min Lev");
+        lev.OrgNr = "111111111";
+
+        _repositoryMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(lev);
+        _repositoryMock.Setup(r => r.GetByOrgNrAsync("222222222", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Leverandor { Navn = "Annen Lev", OrgNr = "222222222" });
+
+        var handler = new UpdateLeverandorHandler(_repositoryMock.Object, _unitOfWorkMock.Object);
+
+        var command = new UpdateLeverandorCommand(
+            Id: 1, Navn: "Min Lev", Kontaktperson: null, Telefon: null, Epost: null,
+            Adresse: null, Postnr: null, Poststed: null, OrgNr: "222222222", Kommentar: null, Aktiv: true);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => handler.Handle(command, CancellationToken.None));
+
+        Assert.Contains("222222222", ex.Message);
+        _repositoryMock.Verify(r => r.Update(It.IsAny<Leverandor>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task UpdateLeverandorHandler_SameOrgNrAsSelf_DoesNotThrow()
+    {
+        var lev = CreateTestLeverandor(1, "Min Lev");
+        lev.OrgNr = "555555555";
+
+        _repositoryMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(lev);
+        _repositoryMock.Setup(r => r.GetByOrgNrAsync("555555555", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(lev);
+        _unitOfWorkMock.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+
+        var handler = new UpdateLeverandorHandler(_repositoryMock.Object, _unitOfWorkMock.Object);
+
+        var command = new UpdateLeverandorCommand(
+            Id: 1, Navn: "Min Lev", Kontaktperson: null, Telefon: null, Epost: null,
+            Adresse: null, Postnr: null, Poststed: null, OrgNr: "555555555", Kommentar: null, Aktiv: true);
+
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        Assert.True(result);
     }
 
     #endregion

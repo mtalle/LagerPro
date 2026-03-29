@@ -2,6 +2,8 @@
 import { useEffect, useState, Fragment } from 'react';
 import { Mottak, Article, Leverandor, UpdateMottakLinje, get, post, patch } from '../../lib/api';
 
+const ENHETER = ['STK', 'KG', 'L', 'M', 'SETT', 'PAKKE', 'BOKS'];
+
 export default function MottakPage() {
   const [mottak, setMottak] = useState<Mottak[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
@@ -98,7 +100,7 @@ export default function MottakPage() {
   const statusBadge = (s: string) => {
     const map: Record<string, string> = {
       Registrert: 'badge-registrert', Mottatt: 'badge-aktiv', Godkjent: 'badge-aktiv',
-      'Delvis mottatt': 'badge-planlagt', Kansellert: 'badge-kansellert', Avvist: 'badge-kansellert',
+      Kansellert: 'badge-kansellert', Avvist: 'badge-kansellert',
     };
     return <span className={`badge ${map[s] ?? ''}`}>{s}</span>;
   };
@@ -134,18 +136,29 @@ export default function MottakPage() {
         </tr>
         {expanded === m.id && m.linjer.map(l => (
           <tr key={`${m.id}-linje-${l.id}`} style={{ background: '#f9fafb', fontSize: '0.85rem' }}>
-            <td colSpan={2}></td>
+            <td colSpan={3}></td>
             <td><code>{l.artikkelNavn ?? `Art.ID ${l.artikkelId}`}</code></td>
-            <td>Lot: <code>{l.lotNr}</code></td>
+            <td>Lot: <code>{l.lotNr || '—'}</code></td>
             <td>{l.mengde} {l.enhet}</td>
-            <td><span className={`badge ${l.godkjent ? 'badge-aktiv' : 'badge-inactive'}`}>{l.godkjent ? 'Godkjent' : l.avvik ?? '—'}</span></td>
-            <td>{l.temperatur != null && l.temperatur !== 0 ? `${l.temperatur}°C` : ''}</td>
+            <td>
+              {l.godkjent ? (
+                <span className="badge badge-aktiv">Godkjent</span>
+              ) : l.avvik ? (
+                <span className="badge badge-kansellert" title={l.avvik}>⚠ {l.avvik}</span>
+              ) : (
+                <span className="badge badge-inactive">Ikke sjekket</span>
+              )}
+            </td>
+            <td>{l.temperatur != null && l.temperatur !== 0 ? `${l.temperatur}°C` : '—'}</td>
             <td>{l.bestForDato ? new Date(l.bestForDato).toLocaleDateString('no-NO') : '—'}</td>
+            <td>
+              {l.kommentar ? <span title={l.kommentar}>💬 Ja</span> : '—'}
+            </td>
             <td>
               {m.status === 'Mottatt' && (
                 <>
                   <button className="btn btn-sm btn-primary" style={{ marginRight: 4 }} onClick={() => updateLinjeGodkjenning(m.id, l.id, true)}>Godkjenn</button>
-                  <button className="btn btn-sm btn-danger" onClick={() => { const a = prompt('Avvik:', l.avvik ?? ''); if (a !== null) updateLinjeGodkjenning(m.id, l.id, false, a); }}>Avvis</button>
+                  <button className="btn btn-sm btn-danger" onClick={() => { const a = prompt('Avvik:', l.avvik ?? ''); if (a !== null) updateLinjeGodkjenning(m.id, l.id, false, a || (l.avvik ?? '')); }}>Avvis</button>
                 </>
               )}
             </td>
@@ -240,7 +253,7 @@ export default function MottakPage() {
                 <button type="button" className="btn btn-sm btn-secondary" onClick={addLine}>+ Linje</button>
               </div>
               {form.linjer.map((linje, i) => (
-                <div key={i} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr 1fr auto', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'end' }}>
+                <div key={i} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr auto', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'end' }}>
                   <div className="form-group">
                     <label>Artikkel</label>
                     <select value={linje.artikkelId} onChange={e => {
@@ -261,6 +274,12 @@ export default function MottakPage() {
                     <input type="number" step="0.001" min="0" value={linje.mengde} onChange={e => updateLine(i, 'mengde', parseFloat(e.target.value))} />
                   </div>
                   <div className="form-group">
+                    <label>Enhet</label>
+                    <select value={linje.enhet} onChange={e => updateLine(i, 'enhet', e.target.value)}>
+                      {ENHETER.map(eu => <option key={eu} value={eu}>{eu}</option>)}
+                    </select>
+                  </div>
+                  <div className="form-group">
                     <label>Best-før</label>
                     <input type="date" value={linje.bestForDato} onChange={e => updateLine(i, 'bestForDato', e.target.value)} />
                   </div>
@@ -269,8 +288,8 @@ export default function MottakPage() {
                     <input type="number" step="0.1" value={linje.temperatur} onChange={e => updateLine(i, 'temperatur', parseFloat(e.target.value) || 0)} />
                   </div>
                   <div className="form-group">
-                    <label>Strekkode</label>
-                    <input value={linje.strekkode} onChange={e => updateLine(i, 'strekkode', e.target.value)} />
+                    <label>Kommentar</label>
+                    <input value={linje.kommentar ?? ''} onChange={e => updateLine(i, 'kommentar', e.target.value)} placeholder="Merknad..." />
                   </div>
                   <button type="button" className="btn btn-sm btn-danger" onClick={() => removeLine(i)}>✕</button>
                 </div>

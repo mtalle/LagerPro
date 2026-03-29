@@ -25,7 +25,9 @@ public class CreateProduksjonsOrdreHandler
     {
         var resept = await _reseptRepository.GetByIdAsync(command.ReseptId, cancellationToken);
         if (resept is null)
-            throw new InvalidOperationException($"Resept with id {command.ReseptId} not found.");
+            throw new InvalidOperationException($"Resept med id {command.ReseptId} ble ikke funnet.");
+        if (!resept.Aktiv)
+            throw new InvalidOperationException($"Resept «{resept.Navn}» (id {command.ReseptId}) er inaktiv og kan ikke brukes til produksjon.");
 
         var ordreNr = string.IsNullOrWhiteSpace(command.OrdreNr)
             ? await GenerateOrdreNrAsync(cancellationToken)

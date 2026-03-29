@@ -23,7 +23,7 @@ export default function LeveringPage() {
   const [form, setForm] = useState({
     kundeId: 0, leveringsDato: new Date().toISOString().slice(0, 10),
     referanse: '', fraktBrev: '', kommentar: '', levertAv: '',
-    linjer: [{ artikkelId: 0, lotNr: '', mengde: 1, enhet: 'STK' }],
+    linjer: [{ artikkelId: 0, lotNr: '', mengde: 1, enhet: 'STK', kommentar: '' }],
   });
 
   useEffect(() => { load(); }, []);
@@ -43,7 +43,7 @@ export default function LeveringPage() {
   }
 
   function addLine() {
-    setForm({ ...form, linjer: [...form.linjer, { artikkelId: 0, lotNr: '', mengde: 1, enhet: 'STK' }] });
+    setForm({ ...form, linjer: [...form.linjer, { artikkelId: 0, lotNr: '', mengde: 1, enhet: 'STK', kommentar: '' }] });
   }
 
   function updateLine(i: number, field: string, value: string | number) {
@@ -76,7 +76,7 @@ export default function LeveringPage() {
       });
       setShowModal(false);
       setError('');
-      setForm({ kundeId: 0, leveringsDato: new Date().toISOString().slice(0, 10), referanse: '', fraktBrev: '', kommentar: '', levertAv: '', linjer: [{ artikkelId: 0, lotNr: '', mengde: 1, enhet: 'STK' }] });
+      setForm({ kundeId: 0, leveringsDato: new Date().toISOString().slice(0, 10), referanse: '', fraktBrev: '', kommentar: '', levertAv: '', linjer: [{ artikkelId: 0, lotNr: '', mengde: 1, enhet: 'STK', kommentar: '' }] });
       load();
     } catch (e) { alert('Feil: ' + (e as Error).message); }
   }
@@ -102,7 +102,7 @@ export default function LeveringPage() {
     <>
       <div className="page-header">
         <h1>🚚 Levering</h1>
-        <button className="btn btn-primary" onClick={() => { setError(''); setForm({ kundeId: 0, leveringsDato: new Date().toISOString().slice(0, 10), referanse: '', fraktBrev: '', kommentar: '', levertAv: '', linjer: [{ artikkelId: 0, lotNr: '', mengde: 1, enhet: 'STK' }] }); setShowModal(true); }}>+ Ny levering</button>
+        <button className="btn btn-primary" onClick={() => { setError(''); setForm({ kundeId: 0, leveringsDato: new Date().toISOString().slice(0, 10), referanse: '', fraktBrev: '', kommentar: '', levertAv: '', linjer: [{ artikkelId: 0, lotNr: '', mengde: 1, enhet: 'STK', kommentar: '' }] }); setShowModal(true); }}>+ Ny levering</button>
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
@@ -114,6 +114,7 @@ export default function LeveringPage() {
           onChange={e => setSearch(e.target.value)}
           style={{ padding: '0.4rem 0.8rem', border: '1px solid #d1d5db', borderRadius: 6, width: 300, fontSize: '0.9rem' }}
         />
+        <span style={{ marginLeft: 'auto', fontSize: '0.85rem', color: '#6b7280' }}>{filtered.length} av {leveringer.length}</span>
       </div>
 
       <table>
@@ -145,7 +146,7 @@ export default function LeveringPage() {
                   <td><code>{linje.artikkelNavn ?? `Art.ID ${linje.artikkelId}`}</code></td>
                   <td>Lot: <code>{linje.lotNr}</code></td>
                   <td>{linje.mengde} {linje.enhet}</td>
-                  <td></td>
+                  <td>{linje.kommentar ? `💬 ${linje.kommentar}` : ''}</td>
                 </tr>
               ))}
             </Fragment>
@@ -192,7 +193,7 @@ export default function LeveringPage() {
               <div style={{ marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem', color: '#374151' }}>Linjer</div>
               <table style={{ marginBottom: '1rem' }}>
                 <thead>
-                  <tr><th>Artikkel/LOT</th><th>Mengde</th><th>Enhet</th><th></th></tr>
+                  <tr><th>Artikkel/LOT</th><th>Mengde</th><th>Enhet</th><th>Kommentar</th><th></th></tr>
                 </thead>
                 <tbody>
                   {form.linjer.map((linje, i) => (
@@ -205,6 +206,7 @@ export default function LeveringPage() {
                       </td>
                       <td><input type="number" required min="0.01" step="0.01" value={linje.mengde} onChange={e => updateLine(i, 'mengde', parseFloat(e.target.value) || 0)} style={{ width: 80 }} /></td>
                       <td><input value={linje.enhet} onChange={e => updateLine(i, 'enhet', e.target.value)} style={{ width: 60 }} /></td>
+                      <td><input value={linje.kommentar ?? ''} onChange={e => updateLine(i, 'kommentar', e.target.value)} placeholder="Merknad..." style={{ width: 100 }} /></td>
                       <td><button type="button" className="btn btn-sm btn-danger" onClick={() => removeLine(i)}>×</button></td>
                     </tr>
                   ))}

@@ -20,5 +20,7 @@ public class LeverandorConfiguration : IEntityTypeConfiguration<Leverandor>
         builder.Property(x => x.Poststed).HasMaxLength(100);
         builder.Property(x => x.OrgNr).HasMaxLength(50);
         builder.Property(x => x.Kommentar).HasMaxLength(1000);
+
+        builder.HasIndex(x => x.OrgNr).IsUnique().HasDatabaseName("IX_Leverandorer_OrgNr");
     }
 }

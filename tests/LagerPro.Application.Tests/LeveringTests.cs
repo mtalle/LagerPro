@@ -13,6 +13,7 @@ public class LeveringTests
 {
     private readonly Mock<ILeveringRepository> _leveringRepoMock;
     private readonly Mock<IKundeRepository> _kundeRepoMock;
+    private readonly Mock<IArtikkelRepository> _artikkelRepoMock;
     private readonly Mock<ILagerRepository> _lagerRepoMock;
     private readonly Mock<ILagerTransaksjonRepository> _transaksjonRepoMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
@@ -21,6 +22,7 @@ public class LeveringTests
     {
         _leveringRepoMock = new Mock<ILeveringRepository>();
         _kundeRepoMock = new Mock<IKundeRepository>();
+        _artikkelRepoMock = new Mock<IArtikkelRepository>();
         _lagerRepoMock = new Mock<ILagerRepository>();
         _transaksjonRepoMock = new Mock<ILagerTransaksjonRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
@@ -49,13 +51,16 @@ public class LeveringTests
             .Callback<Levering, CancellationToken>((l, _) => { captured = l; typeof(BaseEntity).GetProperty("Id")!.SetValue(l, 12); })
             .Returns(Task.CompletedTask);
         _kundeRepoMock.Setup(r => r.GetByIdAsync(5, It.IsAny<CancellationToken>())).ReturnsAsync(kunde);
+        _artikkelRepoMock.Setup(r => r.GetByIdAsync(10, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Artikkel { Id = 10, Navn = "Øl", Aktiv = true });
         _lagerRepoMock.Setup(r => r.GetByArtikkelOgLotAsync(10, "LOT-001", It.IsAny<CancellationToken>()))
             .ReturnsAsync(new LagerBeholdning { Mengde = 100 });
         _unitOfWorkMock.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
         var handler = new CreateLeveringHandler(
             _leveringRepoMock.Object, _kundeRepoMock.Object,
-            _lagerRepoMock.Object, _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
+            _artikkelRepoMock.Object, _lagerRepoMock.Object,
+            _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
 
         var result = await handler.Handle(command, CancellationToken.None);
 
@@ -89,7 +94,8 @@ public class LeveringTests
 
         var handler = new CreateLeveringHandler(
             _leveringRepoMock.Object, _kundeRepoMock.Object,
-            _lagerRepoMock.Object, _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
+            _artikkelRepoMock.Object, _lagerRepoMock.Object,
+            _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
 
         await Assert.ThrowsAsync<InvalidOperationException>(
             () => handler.Handle(command, CancellationToken.None));
@@ -117,13 +123,16 @@ public class LeveringTests
             .Callback<Levering, CancellationToken>((l, _) => captured = l)
             .Returns(Task.CompletedTask);
         _kundeRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(kunde);
+        _artikkelRepoMock.Setup(r => r.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((int id, CancellationToken _) => new Artikkel { Id = id, Navn = $"Artikkel {id}", Aktiv = true });
         _lagerRepoMock.Setup(r => r.GetByArtikkelOgLotAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new LagerBeholdning { Mengde = 100 });
         _unitOfWorkMock.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
         var handler = new CreateLeveringHandler(
             _leveringRepoMock.Object, _kundeRepoMock.Object,
-            _lagerRepoMock.Object, _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
+            _artikkelRepoMock.Object, _lagerRepoMock.Object,
+            _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
 
         await handler.Handle(command, CancellationToken.None);
 
@@ -136,16 +145,52 @@ public class LeveringTests
             It.IsAny<LagerTransaksjon>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
+    [Fact]
+    public async Task CreateLeveringHandler_InaktivArtikkel_Throws()
+    {
+        var kunde = CreateTestKunde(1, "Test Kunde");
+        var inaktivArtikkel = new Artikkel { Id = 10, Navn = "Utgått vare", Aktiv = false };
+        var command = new CreateLeveringCommand(
+            KundeId: 1,
+            LeveringsDato: DateTime.UtcNow,
+            Referanse: null,
+            FraktBrev: null,
+            Kommentar: null,
+            LevertAv: "Steve",
+            Linjer: new List<LeveringLinjeCommand>
+            {
+                new(ArtikkelId: 10, LotNr: "LOT-001", Mengde: 5, Enhet: "kg", Kommentar: null),
+            });
+
+        _kundeRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(kunde);
+        _artikkelRepoMock.Setup(r => r.GetByIdAsync(10, It.IsAny<CancellationToken>())).ReturnsAsync(inaktivArtikkel);
+
+        var handler = new CreateLeveringHandler(
+            _leveringRepoMock.Object, _kundeRepoMock.Object,
+            _artikkelRepoMock.Object, _lagerRepoMock.Object,
+            _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => handler.Handle(command, CancellationToken.None));
+        Assert.Contains("inaktiv", ex.Message);
+    }
+
     #endregion
 
     #region UpdateLeveringStatusHandler
 
     [Fact]
-    public async Task UpdateLeveringStatusHandler_PlanlagtToSendt_UpdatesStatus()
+    public async Task UpdateLeveringStatusHandler_PlanlagtToPlukket_UpdatesStatus()
     {
         var levering = CreateTestLevering(1, LeveringStatus.Planlagt);
+        levering.LevertAv = "Ola";
+        levering.Linjer.Add(new LeveringLinje { ArtikkelId = 10, LotNr = "LOT-001", Mengde = 5, Enhet = "kg" });
 
         _leveringRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(levering);
+        _lagerRepoMock.Setup(r => r.GetByArtikkelOgLotAsync(10, "LOT-001", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new LagerBeholdning { Mengde = 95 });
+        _transaksjonRepoMock.Setup(r => r.AddAsync(It.IsAny<LagerTransaksjon>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
         _unitOfWorkMock.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
         var handler = new UpdateLeveringStatusHandler(
@@ -153,17 +198,17 @@ public class LeveringTests
             _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
 
         var result = await handler.Handle(
-            new UpdateLeveringStatusCommand(1, "Sendt"),
+            new UpdateLeveringStatusCommand(1, "Plukket"),
             CancellationToken.None);
 
         Assert.True(result);
-        Assert.Equal(LeveringStatus.Sendt, levering.Status);
+        Assert.Equal(LeveringStatus.Plukket, levering.Status);
     }
 
     [Fact]
-    public async Task UpdateLeveringStatusHandler_PlanlagtToLagt_LogsDeliveryTransaction()
+    public async Task UpdateLeveringStatusHandler_PlukketToLevert_LogsDeliveryTransaction()
     {
-        var levering = CreateTestLevering(1, LeveringStatus.Planlagt);
+        var levering = CreateTestLevering(1, LeveringStatus.Plukket);
         levering.LevertAv = "Ola";
         levering.Linjer.Add(new LeveringLinje
         {
@@ -196,7 +241,7 @@ public class LeveringTests
     }
 
     [Fact]
-    public async Task UpdateLeveringStatusHandler_InvalidStatus_ReturnsFalse()
+    public async Task UpdateLeveringStatusHandler_InvalidTransition_Throws()
     {
         var levering = CreateTestLevering(1, LeveringStatus.Planlagt);
 
@@ -206,11 +251,8 @@ public class LeveringTests
             _leveringRepoMock.Object, _lagerRepoMock.Object,
             _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
 
-        var result = await handler.Handle(
-            new UpdateLeveringStatusCommand(1, "UgyldigStatus"),
-            CancellationToken.None);
-
-        Assert.False(result);
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            handler.Handle(new UpdateLeveringStatusCommand(1, "Sendt"), CancellationToken.None));
     }
 
     [Fact]
@@ -224,7 +266,7 @@ public class LeveringTests
             _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
 
         var result = await handler.Handle(
-            new UpdateLeveringStatusCommand(999, "Sendt"),
+            new UpdateLeveringStatusCommand(999, "Plukket"),
             CancellationToken.None);
 
         Assert.False(result);

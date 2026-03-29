@@ -185,6 +185,47 @@ public class ResepterTests
     }
 
     [Fact]
+    public async Task CreateReseptHandler_InaktivFerdigvare_Throws()
+    {
+        var inaktivFerdigvare = new Artikkel { Id = 10, Navn = "Utsolgt vare", Enhet = "STK", Aktiv = false };
+        var command = new CreateReseptCommand(
+            Navn: "Test", FerdigvareId: 10, Beskrivelse: null,
+            AntallPortjoner: 1, Instruksjoner: null,
+            Linjer: new List<CreateLinjeCmd>());
+
+        _artikkelRepoMock.Setup(r => r.GetByIdAsync(10, It.IsAny<CancellationToken>())).ReturnsAsync(inaktivFerdigvare);
+
+        var handler = new CreateReseptHandler(_repositoryMock.Object, _artikkelRepoMock.Object, _unitOfWorkMock.Object);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => handler.Handle(command, CancellationToken.None));
+        Assert.Contains("inaktiv", ex.Message);
+    }
+
+    [Fact]
+    public async Task CreateReseptHandler_InaktivRavare_Throws()
+    {
+        var ferdigvare = new Artikkel { Id = 10, Navn = "Brød", Enhet = "STK", Aktiv = true };
+        var inaktivRavare = new Artikkel { Id = 20, Navn = "Umodent mel", Enhet = "kg", Aktiv = false };
+        var command = new CreateReseptCommand(
+            Navn: "Test", FerdigvareId: 10, Beskrivelse: null,
+            AntallPortjoner: 1, Instruksjoner: null,
+            Linjer: new List<CreateLinjeCmd>
+            {
+                new(RavareId: 20, Mengde: 1, Enhet: "kg", Rekkefolge: 1, Kommentar: null),
+            });
+
+        _artikkelRepoMock.Setup(r => r.GetByIdAsync(10, It.IsAny<CancellationToken>())).ReturnsAsync(ferdigvare);
+        _artikkelRepoMock.Setup(r => r.GetByIdAsync(20, It.IsAny<CancellationToken>())).ReturnsAsync(inaktivRavare);
+
+        var handler = new CreateReseptHandler(_repositoryMock.Object, _artikkelRepoMock.Object, _unitOfWorkMock.Object);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => handler.Handle(command, CancellationToken.None));
+        Assert.Contains("inaktiv", ex.Message);
+    }
+
+    [Fact]
     public async Task CreateReseptHandler_NoLinjer_CreatesReseptWithEmptyLinjer()
     {
         var ferdigvare = new Artikkel { Navn = "Brød", Enhet = "STK" };

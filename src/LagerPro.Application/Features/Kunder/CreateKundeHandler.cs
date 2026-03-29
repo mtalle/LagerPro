@@ -17,6 +17,13 @@ public class CreateKundeHandler
 
     public async Task<int> Handle(CreateKundeCommand command, CancellationToken cancellationToken = default)
     {
+        if (!string.IsNullOrWhiteSpace(command.OrgNr))
+        {
+            var eksisterende = await _repository.GetByOrgNrAsync(command.OrgNr, cancellationToken);
+            if (eksisterende is not null)
+                throw new InvalidOperationException($"Ein kunde med organisasjonsnummer {command.OrgNr} finst allereie.");
+        }
+
         var kunde = new Kunde
         {
             Navn = command.Navn,

@@ -9,4 +9,5 @@ public interface ILeveringRepository
     Task<IReadOnlyList<Levering>> GetAllAsync(List<LeveringStatus>? statusFilter = null, CancellationToken cancellationToken = default);
     Task AddAsync(Levering levering, CancellationToken cancellationToken = default);
     Task UpdateAsync(Levering levering, CancellationToken cancellationToken = default);
+    Task DeleteAsync(Levering levering, CancellationToken cancellationToken = default);
 }

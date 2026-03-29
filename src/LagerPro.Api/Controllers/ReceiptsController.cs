@@ -1,3 +1,4 @@
+using LagerPro.Application.Features.Mottak.Commands.DeleteMottak;
 using LagerPro.Application.Features.Mottak.Commands.UpdateMottakStatus;
 using LagerPro.Application.Features.Mottak.Commands.UpdateMottakLinje;
 using LagerPro.Application.Features.Mottak.Commands.UpdateMottakLinjeGodkjenning;
@@ -19,6 +20,7 @@ public class ReceiptsController : ControllerBase
     private readonly UpdateMottakStatusHandler _updateStatusHandler;
     private readonly UpdateMottakLinjeGodkjenningHandler _updateLinjeHandler;
     private readonly UpdateMottakLinjeHandler _updateLinjeFullHandler;
+    private readonly DeleteMottakHandler _deleteHandler;
 
     public ReceiptsController(
         GetAllMottakHandler getAllHandler,
@@ -26,7 +28,8 @@ public class ReceiptsController : ControllerBase
         CreateMottakHandler createHandler,
         UpdateMottakStatusHandler updateStatusHandler,
         UpdateMottakLinjeGodkjenningHandler updateLinjeHandler,
-        UpdateMottakLinjeHandler updateLinjeFullHandler)
+        UpdateMottakLinjeHandler updateLinjeFullHandler,
+        DeleteMottakHandler deleteHandler)
     {
         _getAllHandler = getAllHandler;
         _getByIdHandler = getByIdHandler;
@@ -34,6 +37,7 @@ public class ReceiptsController : ControllerBase
         _updateStatusHandler = updateStatusHandler;
         _updateLinjeHandler = updateLinjeHandler;
         _updateLinjeFullHandler = updateLinjeFullHandler;
+        _deleteHandler = deleteHandler;
     }
 
     [HttpGet]
@@ -47,7 +51,7 @@ public class ReceiptsController : ControllerBase
     public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
     {
         var mottak = await _getByIdHandler.Handle(new GetMottakByIdQuery(id), cancellationToken);
-        if (mottak is null) return NotFound(new { message = $"Mottak with id {id} not found." });
+        if (mottak is null) return NotFound(new { message = $"Mottak med id {id} ble ikke funnet." });
         return Ok(mottak);
     }
 
@@ -88,7 +92,7 @@ public class ReceiptsController : ControllerBase
         try
         {
             var success = await _updateStatusHandler.Handle(new UpdateMottakStatusCommand(id, request.Status), cancellationToken);
-            if (!success) return NotFound(new { message = $"Mottak with id {id} ble ikke funnet." });
+            if (!success) return NotFound(new { message = $"Mottak med id {id} ble ikke funnet." });
             return Ok(new { id, status = request.Status });
         }
         catch (InvalidOperationException ex)
@@ -146,5 +150,13 @@ public class ReceiptsController : ControllerBase
         {
             return BadRequest(new { message = ex.Message });
         }
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
+    {
+        var success = await _deleteHandler.Handle(new DeleteMottakCommand(id), cancellationToken);
+        if (!success) return NotFound(new { message = $"Mottak med id {id} ble ikke funnet." });
+        return NoContent();
     }
 }

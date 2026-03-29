@@ -94,6 +94,7 @@ export default function LagerPage() {
           />
           Vis kun lav beholdning
         </label>
+        <span style={{ marginLeft: 'auto', fontSize: '0.85rem', color: '#6b7280' }}>{filtered.length} av {beholdninger.length}</span>
       </div>
 
       <table>
@@ -107,13 +108,14 @@ export default function LagerPage() {
             <th>Enhet</th>
             <th>Lokasjon</th>
             <th>Best-før</th>
+            <th>Min</th>
             <th>Oppdatert</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
           {filtered.length === 0 ? (
-            <tr><td colSpan={10} style={{ textAlign: 'center', color: '#9ca3af', padding: '2rem' }}>Ingen beholdning funnet</td></tr>
+            <tr><td colSpan={11} style={{ textAlign: 'center', color: '#9ca3af', padding: '2rem' }}>Ingen beholdning funnet</td></tr>
           ) : filtered.map(b => {
             const erLav = b.minBeholdning != null && b.mengde < b.minBeholdning;
             return (
@@ -126,9 +128,12 @@ export default function LagerPage() {
                 <td><code>{b.lotNr}</code></td>
                 <td><strong style={erLav ? { color: '#dc2626' } : undefined}>{b.mengde}</strong></td>
                 <td>{b.enhet}</td>
-                <td>{b.lokasjon ?? '—'}</td>
+                <td>{b.lokasjon ? <span style={{ fontSize: '0.85rem', background: '#f3f4f6', padding: '1px 6px', borderRadius: 4 }}>{b.lokasjon}</span> : <span style={{ color: '#d1d5db' }}>—</span>}</td>
                 <td>{b.bestForDato ? new Date(b.bestForDato).toLocaleDateString('no-NO') : '—'}</td>
-                <td>{new Date(b.sistOppdatert).toLocaleDateString('no-NO')}</td>
+                <td style={{ color: erLav ? '#dc2626' : erLav === false ? '#16a34a' : '#9ca3af', fontSize: '0.85rem' }}>
+                  {b.minBeholdning != null ? b.minBeholdning : '—'}
+                </td>
+                <td style={{ fontSize: '0.85rem', color: '#6b7280' }}>{new Date(b.sistOppdatert).toLocaleDateString('no-NO')}</td>
                 <td>
                   <button className="btn btn-sm btn-secondary" onClick={() => openAdjust(b)}>Juster</button>
                 </td>

@@ -42,59 +42,70 @@ public class KunderController : ControllerBase
     public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
     {
         var kunde = await _getByIdHandler.Handle(new GetKundeByIdQuery(id), cancellationToken);
-        if (kunde is null) return NotFound(new { message = $"Kunde with id {id} not found." });
+        if (kunde is null) return NotFound(new { message = $"Kunde med id {id} ble ikke funnet." });
         return Ok(kunde);
     }
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateKundeRequest request, CancellationToken cancellationToken)
     {
-        var id = await _createHandler.Handle(
-            new CreateKundeCommand(
-                request.Navn,
-                request.Kontaktperson,
-                request.Telefon,
-                request.Epost,
-                request.Adresse,
-                request.Postnr,
-                request.Poststed,
-                request.OrgNr,
-                request.Kommentar),
-            cancellationToken);
+        try
+        {
+            var id = await _createHandler.Handle(
+                new CreateKundeCommand(
+                    request.Navn,
+                    request.Kontaktperson,
+                    request.Telefon,
+                    request.Epost,
+                    request.Adresse,
+                    request.Postnr,
+                    request.Poststed,
+                    request.OrgNr,
+                    request.Kommentar),
+                cancellationToken);
 
-        return CreatedAtAction(nameof(GetById), new { id }, new { id });
+            return CreatedAtAction(nameof(GetById), new { id }, new { id });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateKundeRequest request, CancellationToken cancellationToken)
     {
-        var existing = await _getByIdHandler.Handle(new GetKundeByIdQuery(id), cancellationToken);
-        if (existing is null) return NotFound(new { message = $"Kunde with id {id} not found." });
+        try
+        {
+            var success = await _updateHandler.Handle(
+                new UpdateKundeCommand(
+                    id,
+                    request.Navn,
+                    request.Kontaktperson,
+                    request.Telefon,
+                    request.Epost,
+                    request.Adresse,
+                    request.Postnr,
+                    request.Poststed,
+                    request.OrgNr,
+                    request.Kommentar,
+                    request.Aktiv),
+                cancellationToken);
 
-        var success = await _updateHandler.Handle(
-            new UpdateKundeCommand(
-                id,
-                request.Navn,
-                request.Kontaktperson,
-                request.Telefon,
-                request.Epost,
-                request.Adresse,
-                request.Postnr,
-                request.Poststed,
-                request.OrgNr,
-                request.Kommentar,
-                request.Aktiv),
-            cancellationToken);
-
-        if (!success) return NotFound(new { message = $"Kunde with id {id} not found." });
-        return Ok(new { id });
+            if (!success) return NotFound(new { message = $"Kunde med id {id} ble ikke funnet." });
+            return Ok(new { id });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
     {
         var success = await _deleteHandler.Handle(new DeleteKundeCommand(id), cancellationToken);
-        if (!success) return NotFound(new { message = $"Kunde with id {id} not found." });
+        if (!success) return NotFound(new { message = $"Kunde med id {id} ble ikke funnet." });
         return NoContent();
     }
 }

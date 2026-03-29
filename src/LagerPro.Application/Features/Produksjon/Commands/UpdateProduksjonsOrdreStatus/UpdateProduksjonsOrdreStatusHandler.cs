@@ -9,23 +9,25 @@ public class UpdateProduksjonsOrdreStatusHandler
 {
     private readonly IProduksjonsOrdreRepository _repository;
     private readonly IReseptRepository _reseptRepository;
-    private readonly ILagerRepository _lagerRepository;
-    private readonly ILagerTransaksjonRepository _transaksjonRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public UpdateProduksjonsOrdreStatusHandler(
         IProduksjonsOrdreRepository repository,
         IReseptRepository reseptRepository,
-        ILagerRepository lagerRepository,
-        ILagerTransaksjonRepository transaksjonRepository,
         IUnitOfWork unitOfWork)
     {
         _repository = repository;
         _reseptRepository = reseptRepository;
-        _lagerRepository = lagerRepository;
-        _transaksjonRepository = transaksjonRepository;
         _unitOfWork = unitOfWork;
     }
+
+    private static readonly Dictionary<ProdOrdreStatus, ProdOrdreStatus[]> TillatteOverganger = new()
+    {
+        [ProdOrdreStatus.Planlagt]      = new[] { ProdOrdreStatus.IProduksjon, ProdOrdreStatus.Kansellert },
+        [ProdOrdreStatus.IProduksjon]    = new[] { ProdOrdreStatus.Ferdigmeldt, ProdOrdreStatus.Kansellert },
+        [ProdOrdreStatus.Ferdigmeldt]    = Array.Empty<ProdOrdreStatus>(),
+        [ProdOrdreStatus.Kansellert]     = Array.Empty<ProdOrdreStatus>(),
+    };
 
     public async Task<bool> Handle(UpdateProduksjonsOrdreStatusCommand command, CancellationToken cancellationToken = default)
     {
@@ -35,47 +37,34 @@ public class UpdateProduksjonsOrdreStatusHandler
         if (!Enum.TryParse<ProdOrdreStatus>(command.Status, ignoreCase: true, out var newStatus))
             return false;
 
+        var gammelStatus = ordre.Status;
+
+        // State-machine: blokker ugyldige tilbakeganger
+#pragma warning disable CS8602 // tillatte kan aldri være null her pga short-circuit i ||-uttrykket
+        if (!TillatteOverganger.TryGetValue(gammelStatus, out var tillatte) || !tillatte.Contains(newStatus))
+            throw new InvalidOperationException(
+                $"Ordre kan ikke gå fra '{gammelStatus}' til '{newStatus}'. Tillatte overganger fra '{gammelStatus}': " +
+                (tillatte.Length == 0 ? "ingen" : string.Join(", ", tillatte)) + ".");
+#pragma warning restore CS8602
+
         ordre.Status = newStatus;
 
-        if (newStatus == ProdOrdreStatus.IProduksjon && ordre.Status == ProdOrdreStatus.Planlagt)
+        // Start produksjon: valider at resept er aktiv
+        if (newStatus == ProdOrdreStatus.IProduksjon)
         {
-            if (ordre.Resept is null || !ordre.Resept.Aktiv)
+            var resept = await _reseptRepository.GetByIdAsync(ordre.ReseptId, cancellationToken);
+            if (resept is null || !resept.Aktiv)
                 throw new InvalidOperationException(
                     $"Resept for produksjonsordre {ordre.OrdreNr} er inaktiv eller mangler. Kan ikke starte produksjon.");
         }
 
+        // Ferdigmeldt via status-endring (kun hvis AntallProdusert allerede er satt — helst via Ferdigmeld-endepunkt)
         if (newStatus == ProdOrdreStatus.Ferdigmeldt)
         {
+            if (ordre.AntallProdusert <= 0)
+                throw new InvalidOperationException(
+                    $"Antall produsert må være større enn 0 før ferdigmelding. Bruk POST /api/produksjon/{{id}}/ferdigmeld.");
             ordre.FerdigmeldtDato = DateTime.UtcNow;
-            ordre.AntallProdusert = ordre.AntallProdusert > 0 ? ordre.AntallProdusert : 1;
-
-            // Record finished goods to lager
-            var beholdning = new LagerBeholdning
-            {
-                ArtikkelId = ordre.Resept?.FerdigvareId ?? 0,
-                LotNr = ordre.FerdigvareLotNr,
-                Mengde = ordre.AntallProdusert,
-                Enhet = "Stk",
-                SistOppdatert = DateTime.UtcNow
-            };
-            await _lagerRepository.UpsertAsync(beholdning, cancellationToken);
-
-            // Record transaction
-            var transaksjon = new LagerTransaksjon
-            {
-                ArtikkelId = ordre.Resept?.FerdigvareId ?? 0,
-                LotNr = ordre.FerdigvareLotNr,
-                Type = TransaksjonsType.ProduksjonInn,
-                Mengde = ordre.AntallProdusert,
-                BeholdningEtter = (await _lagerRepository.GetByArtikkelOgLotAsync(
-                    ordre.Resept?.FerdigvareId ?? 0, ordre.FerdigvareLotNr, cancellationToken))?.Mengde ?? 0,
-                Kilde = "ProduksjonsOrdre",
-                KildeId = ordre.Id,
-                Kommentar = $"Produksjonsordre {ordre.OrdreNr} ferdigmeldt",
-                UtfortAv = ordre.UtfortAv,
-                Tidspunkt = DateTime.UtcNow
-            };
-            await _transaksjonRepository.AddAsync(transaksjon, cancellationToken);
         }
 
         await _repository.UpdateAsync(ordre, cancellationToken);

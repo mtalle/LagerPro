@@ -42,59 +42,70 @@ public class LeverandorerController : ControllerBase
     public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
     {
         var leverandor = await _getByIdHandler.Handle(new GetLeverandorByIdQuery(id), cancellationToken);
-        if (leverandor is null) return NotFound(new { message = $"Leverandør with id {id} not found." });
+        if (leverandor is null) return NotFound(new { message = $"Leverandør med id {id} ble ikke funnet." });
         return Ok(leverandor);
     }
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateLeverandorRequest request, CancellationToken cancellationToken)
     {
-        var id = await _createHandler.Handle(
-            new CreateLeverandorCommand(
-                request.Navn,
-                request.Kontaktperson,
-                request.Telefon,
-                request.Epost,
-                request.Adresse,
-                request.Postnr,
-                request.Poststed,
-                request.OrgNr,
-                request.Kommentar),
-            cancellationToken);
+        try
+        {
+            var id = await _createHandler.Handle(
+                new CreateLeverandorCommand(
+                    request.Navn,
+                    request.Kontaktperson,
+                    request.Telefon,
+                    request.Epost,
+                    request.Adresse,
+                    request.Postnr,
+                    request.Poststed,
+                    request.OrgNr,
+                    request.Kommentar),
+                cancellationToken);
 
-        return CreatedAtAction(nameof(GetById), new { id }, new { id });
+            return CreatedAtAction(nameof(GetById), new { id }, new { id });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateLeverandorRequest request, CancellationToken cancellationToken)
     {
-        var existing = await _getByIdHandler.Handle(new GetLeverandorByIdQuery(id), cancellationToken);
-        if (existing is null) return NotFound(new { message = $"Leverandør with id {id} not found." });
+        try
+        {
+            var success = await _updateHandler.Handle(
+                new UpdateLeverandorCommand(
+                    id,
+                    request.Navn,
+                    request.Kontaktperson,
+                    request.Telefon,
+                    request.Epost,
+                    request.Adresse,
+                    request.Postnr,
+                    request.Poststed,
+                    request.OrgNr,
+                    request.Kommentar,
+                    request.Aktiv),
+                cancellationToken);
 
-        var success = await _updateHandler.Handle(
-            new UpdateLeverandorCommand(
-                id,
-                request.Navn,
-                request.Kontaktperson,
-                request.Telefon,
-                request.Epost,
-                request.Adresse,
-                request.Postnr,
-                request.Poststed,
-                request.OrgNr,
-                request.Kommentar,
-                request.Aktiv),
-            cancellationToken);
-
-        if (!success) return NotFound(new { message = $"Leverandør with id {id} not found." });
-        return Ok(new { id });
+            if (!success) return NotFound(new { message = $"Leverandør med id {id} ble ikke funnet." });
+            return Ok(new { id });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
     {
         var success = await _deleteHandler.Handle(new DeleteLeverandorCommand(id), cancellationToken);
-        if (!success) return NotFound(new { message = $"Leverandør with id {id} not found." });
+        if (!success) return NotFound(new { message = $"Leverandør med id {id} ble ikke funnet." });
         return NoContent();
     }
 }

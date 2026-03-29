@@ -320,4 +320,55 @@ public class ArticleTests
         typeof(BaseEntity).GetProperty("Id")!.SetValue(article, id);
         return article;
     }
+
+    #region UpdateArticleHandler - Duplicate artikkelNr
+
+    [Fact]
+    public async Task UpdateArticleHandler_DuplicateArtikkelNr_ThrowsInvalidOperationException()
+    {
+        var article1 = CreateTestArticle(1, "RAV-001", "Hvetemel");
+        var article2 = CreateTestArticle(2, "RAV-002", "Sukker");
+
+        _repositoryMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(article1);
+        _repositoryMock.Setup(r => r.GetByArtikkelNrAsync("RAV-002", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(article2);
+        _unitOfWorkMock.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(1);
+
+        var handler = new UpdateArticleHandler(_repositoryMock.Object, _unitOfWorkMock.Object);
+
+        var command = new UpdateArticleCommand(
+            Id: 1, ArtikkelNr: "RAV-002", Navn: "Hvetemel", Enhet: "kg",
+            Type: "Ravare", null, null, null, 0, 0, 0, true);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => handler.Handle(command, CancellationToken.None));
+        Assert.Contains("RAV-002", ex.Message);
+        Assert.Contains("allerede", ex.Message);
+    }
+
+    [Fact]
+    public async Task UpdateArticleHandler_SameArtikkelNrNoChange_Succeeds()
+    {
+        var article = CreateTestArticle(1, "RAV-001", "Hvetemel");
+
+        _repositoryMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(article);
+        _unitOfWorkMock.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(1);
+
+        var handler = new UpdateArticleHandler(_repositoryMock.Object, _unitOfWorkMock.Object);
+
+        var command = new UpdateArticleCommand(
+            Id: 1, ArtikkelNr: "RAV-001", Navn: "Hvetemel oppdatert", Enhet: "kg",
+            Type: "Ravare", null, null, null, 0, 0, 0, true);
+
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        Assert.True(result);
+        Assert.Equal("Hvetemel oppdatert", article.Navn);
+    }
+
+    #endregion
 }
