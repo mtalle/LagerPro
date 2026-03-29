@@ -34,6 +34,24 @@ public class UpdateLeveringStatusHandler
         if (!Enum.TryParse<LeveringStatus>(command.Status, ignoreCase: true, out var newStatus))
             return false;
 
+        var gammelStatus = levering.Status;
+
+        // State-machine: blokker ugyldige tilbakeganger
+        var gyldigeOverganger = (gammelStatus, newStatus) switch
+        {
+            (LeveringStatus.Planlagt, LeveringStatus.Plukket) => true,
+            (LeveringStatus.Planlagt, LeveringStatus.Kansellert) => true,
+            (LeveringStatus.Plukket, LeveringStatus.Sendt) => true,
+            (LeveringStatus.Plukket, LeveringStatus.Levert) => true,
+            (LeveringStatus.Plukket, LeveringStatus.Kansellert) => true,
+            (LeveringStatus.Sendt, LeveringStatus.Levert) => true,
+            (LeveringStatus.Sendt, LeveringStatus.Kansellert) => true,
+            _ => false
+        };
+        if (!gyldigeOverganger)
+            throw new InvalidOperationException(
+                $"Levering kan ikke gå fra '{gammelStatus}' til '{newStatus}'.");
+
         var utførtAv = command.UtfortAv ?? "System";
 
         // Plukket: Trekk lager når varene fysisk plukkes
