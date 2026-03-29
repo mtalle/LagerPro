@@ -77,9 +77,6 @@ public class ArticlesController : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateArticleRequest request, CancellationToken cancellationToken)
     {
-        var existing = await _getByIdHandler.Handle(new GetArticleByIdQuery(id), cancellationToken);
-        if (existing is null) return NotFound(new { message = $"Artikkel med id {id} ble ikke funnet." });
-
         try
         {
             var success = await _updateHandler.Handle(

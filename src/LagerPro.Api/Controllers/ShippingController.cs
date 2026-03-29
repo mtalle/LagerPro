@@ -50,22 +50,29 @@ public class ShippingController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateLeveringRequest request, CancellationToken cancellationToken)
     {
-        var id = await _createHandler.Handle(
-            new CreateLeveringCommand(
-                request.KundeId,
-                request.LeveringsDato,
-                request.Referanse,
-                request.FraktBrev,
-                request.Kommentar,
-                request.LevertAv,
-                request.Linjer.Select(l => new LeveringLinjeCommand(
-                    l.ArtikkelId,
-                    l.LotNr,
-                    l.Mengde,
-                    l.Enhet,
-                    l.Kommentar)).ToList()),
-            cancellationToken);
-        return CreatedAtAction(nameof(Get), new { id }, new { id });
+        try
+        {
+            var id = await _createHandler.Handle(
+                new CreateLeveringCommand(
+                    request.KundeId,
+                    request.LeveringsDato,
+                    request.Referanse,
+                    request.FraktBrev,
+                    request.Kommentar,
+                    request.LevertAv,
+                    request.Linjer.Select(l => new LeveringLinjeCommand(
+                        l.ArtikkelId,
+                        l.LotNr,
+                        l.Mengde,
+                        l.Enhet,
+                        l.Kommentar)).ToList()),
+                cancellationToken);
+            return CreatedAtAction(nameof(Get), new { id }, new { id });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpPatch("{id}/status")]
