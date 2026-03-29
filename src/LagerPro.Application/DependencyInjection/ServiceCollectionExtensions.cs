@@ -21,6 +21,8 @@ using LagerPro.Application.Features.Levering.Commands.UpdateLeveringStatus;
 using LagerPro.Application.Features.Levering.Queries.GetAllLevering;
 using LagerPro.Application.Features.Levering.Queries.GetLeveringById;
 using LagerPro.Application.Features.Mottak.Commands.CreateMottak;
+using LagerPro.Application.Features.Mottak.Commands.DeleteMottak;
+using LagerPro.Application.Features.Mottak.Commands.UpdateMottakLinje;
 using LagerPro.Application.Features.Mottak.Commands.UpdateMottakLinjeGodkjenning;
 using LagerPro.Application.Features.Mottak.Commands.UpdateMottakStatus;
 using LagerPro.Application.Features.Mottak.Queries.GetAllMottak;
@@ -75,7 +77,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<GetMottakByIdHandler>();
         services.AddScoped<CreateMottakHandler>();
         services.AddScoped<UpdateMottakStatusHandler>();
+        services.AddScoped<UpdateMottakLinjeHandler>();
         services.AddScoped<UpdateMottakLinjeGodkjenningHandler>();
+        services.AddScoped<DeleteMottakHandler>();
 
         // Lager
         services.AddScoped<GetAllLagerBeholdningHandler>();
