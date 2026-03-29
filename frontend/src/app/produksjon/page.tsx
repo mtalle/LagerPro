@@ -159,7 +159,7 @@ export default function ProduksjonPage() {
           placeholder="Søk ordrenr, resept..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          style={{ padding: '0.4rem 0.8rem', border: '1px solid #d1d5db', borderRadius: 6, width: 300, fontSize: '0.9rem' }}
+          style={{ padding: '0.4rem 0.8rem', border: '1px solid #d1d5db', borderRadius: 6, width: 300, fontSize: '0.9rem', minHeight: 44 }}
         />
         <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
           {['', 'Planlagt', 'IProduksjon', 'Ferdigmeldt', 'Kansellert'].map(s => (
@@ -182,6 +182,7 @@ export default function ProduksjonPage() {
         <span style={{ marginLeft: 'auto', fontSize: '0.85rem', color: '#6b7280' }}>{filtered.length} av {ordre.length}</span>
       </div>
 
+      <div className="table-wrapper">
       <table>
         <thead>
           <tr><th>OrdreNr</th><th>Resept</th><th>Ferdigvare</th><th>Planlagt</th><th>Ferdigmeldt</th><th>Antall</th><th>Lot</th><th>Status</th><th>Utfort</th><th></th></tr>
@@ -212,6 +213,7 @@ export default function ProduksjonPage() {
           ))}
         </tbody>
       </table>
+      </div>
 
       {showCreateModal && (
         <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>

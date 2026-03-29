@@ -97,7 +97,7 @@ export default function LagerPage() {
         <span style={{ marginLeft: 'auto', fontSize: '0.85rem', color: '#6b7280' }}>{filtered.length} av {beholdninger.length}</span>
       </div>
 
-      <table>
+      <table className="table-scroll">
         <thead>
           <tr>
             <th></th>

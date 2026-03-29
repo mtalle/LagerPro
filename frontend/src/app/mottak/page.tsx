@@ -192,7 +192,7 @@ export default function MottakPage() {
           placeholder="Søk leverandør, referanse..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          style={{ padding: '0.4rem 0.8rem', border: '1px solid #d1d5db', borderRadius: 6, width: 300, fontSize: '0.9rem' }}
+          style={{ padding: '0.4rem 0.8rem', border: '1px solid #d1d5db', borderRadius: 6, width: 300, fontSize: '0.9rem', minHeight: 44 }}
         />
         <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
           {['', 'Registrert', 'Mottatt', 'Godkjent', 'Avvist'].map(s => (
@@ -215,6 +215,7 @@ export default function MottakPage() {
         <span style={{ marginLeft: 'auto', fontSize: '0.85rem', color: '#6b7280' }}>{filtered.length} av {mottak.length}</span>
       </div>
 
+      <div className="table-wrapper">
       <table>
         <thead>
           <tr><th>ID</th><th>Dato</th><th>Leverandør</th><th>Referanse</th><th>Status</th><th>Mottatt av</th><th></th></tr>
@@ -225,6 +226,7 @@ export default function MottakPage() {
           ) : renderMottakRows()}
         </tbody>
       </table>
+      </div>
 
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>

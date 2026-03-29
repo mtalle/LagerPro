@@ -123,7 +123,7 @@ export default function LeveringPage() {
         <span style={{ marginLeft: 'auto', fontSize: '0.85rem', color: '#6b7280' }}>{filtered.length} av {leveringer.length}</span>
       </div>
 
-      <table>
+      <table className="table-scroll">
         <thead>
           <tr><th>ID</th><th>Dato</th><th>Kunde</th><th>Referanse</th><th>Fraktbrev</th><th>Status</th><th></th></tr>
         </thead>
