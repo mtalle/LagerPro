@@ -94,3 +94,22 @@
 ### Martin sin hardware:
 - Lenovo laptop (Ryzen 5 7520U, 16GB RAM, Radeon 610M)
 - Windows 11
+
+## 2026-03-29 — LagerPro MVP arbeidsøkt
+
+### Hva ble gjort
+- **Backend**: Manifold DI-registreringer manglet i Application/DependencyInjection (GetLagerBeholdningByArtikkelHandler, GetLagerBeholdningByLotNrHandler, JusterLagerHandler, UpdateMottakLinjeGodkjenningHandler, GetFerdigmeldPrefillHandler, CreateMottakHandler). Alle er nå registrert.
+- **Ny feature**: Manuell lagerjustering via `POST /inventory/juster` med transaksjonslogg
+- **Test-fiks**: `DeleteArticleHandler` gjør soft delete (Aktiv=false), testen var feil
+- **3 nye tester** for JusterLagerHandler (85 tester totalt, alle grønne)
+- **Frontend**: Juster-knapp + modal på lager-siden
+
+### Git-historikk
+- `579e83c` — test-fiks + nye tester + DI
+- `1ffe2ff` — manuell lagerjustering backend + frontend (committed under tidligere jobb)
+- Begge pushes til origin/main ✅
+
+### Kjent stand
+- Alle 85 tester grønne
+- Backend bygger med 0 warnings, 0 errors
+- Frontend bygger OK (Next.js)
