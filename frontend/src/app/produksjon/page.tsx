@@ -40,6 +40,7 @@ export default function ProduksjonPage() {
   const [showFerdigmeldModal, setShowFerdigmeldModal] = useState(false);
   const [ferdigmeldPrefill, setFerdigmeldPrefill] = useState<FerdigmeldPrefill | null>(null);
   const [search, setSearch] = useState('');
+  const [error, setError] = useState('');
 
   const [resepter, setResepter] = useState<Resept[]>([]);
 
@@ -68,7 +69,8 @@ export default function ProduksjonPage() {
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
-    if (!createForm.reseptId) { alert('Velg en resept.'); return; }
+    if (!createForm.reseptId) { setError('Velg en resept.'); return; }
+    setError('');
     try {
       await post('/production', { ...createForm, planlagtDato: new Date(createForm.planlagtDato).toISOString() });
       setShowCreateModal(false);
@@ -194,6 +196,7 @@ export default function ProduksjonPage() {
           <div className="modal" onClick={e => e.stopPropagation()}>
             <h2>Ny produksjonsordre</h2>
             <form onSubmit={handleCreate}>
+              {error && <div className="alert alert-error">{error}</div>}
               <div className="form-grid">
                 <div className="form-group">
                   <label>Resept *</label>

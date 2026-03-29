@@ -18,6 +18,7 @@ export default function LeveringPage() {
   const [search, setSearch] = useState('');
   const [expanded, setExpanded] = useState<number | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [error, setError] = useState('');
 
   const [form, setForm] = useState({
     kundeId: 0, leveringsDato: new Date().toISOString().slice(0, 10),
@@ -65,12 +66,16 @@ export default function LeveringPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!form.kundeId) { setError('Velg en kunde.'); return; }
+    if (form.linjer.some(l => !l.artikkelId)) { setError('Velg artikkel på alle linjer.'); return; }
+    setError('');
     try {
       await post('/levering', {
         ...form,
         leveringsDato: new Date(form.leveringsDato).toISOString(),
       });
       setShowModal(false);
+      setError('');
       setForm({ kundeId: 0, leveringsDato: new Date().toISOString().slice(0, 10), referanse: '', fraktBrev: '', kommentar: '', levertAv: '', linjer: [{ artikkelId: 0, lotNr: '', mengde: 1, enhet: 'STK' }] });
       load();
     } catch (e) { alert('Feil: ' + (e as Error).message); }
@@ -97,8 +102,10 @@ export default function LeveringPage() {
     <>
       <div className="page-header">
         <h1>🚚 Levering</h1>
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}>+ Ny levering</button>
+        <button className="btn btn-primary" onClick={() => { setError(''); setForm({ kundeId: 0, leveringsDato: new Date().toISOString().slice(0, 10), referanse: '', fraktBrev: '', kommentar: '', levertAv: '', linjer: [{ artikkelId: 0, lotNr: '', mengde: 1, enhet: 'STK' }] }); setShowModal(true); }}>+ Ny levering</button>
       </div>
+
+      {error && <div className="alert alert-error">{error}</div>}
 
       <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
         <input
@@ -151,6 +158,7 @@ export default function LeveringPage() {
           <div className="modal" onClick={e => e.stopPropagation()}>
             <h2>Ny levering</h2>
             <form onSubmit={handleSubmit}>
+              {error && <div className="alert alert-error">{error}</div>}
               <div className="form-grid">
                 <div className="form-group">
                   <label>Kunde *</label>
