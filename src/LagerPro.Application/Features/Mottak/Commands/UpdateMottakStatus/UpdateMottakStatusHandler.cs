@@ -67,6 +67,7 @@ public class UpdateMottakStatusHandler
                 };
                 await _lagerRepository.UpsertAsync(beholdning, cancellationToken);
 
+                // Hent oppdatert beholdning etter upsert for transaksjon
                 var oppdatertBeholdning = await _lagerRepository.GetByArtikkelOgLotAsync(
                     linje.ArtikkelId, linje.LotNr, cancellationToken);
 

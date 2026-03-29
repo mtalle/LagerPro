@@ -157,13 +157,17 @@ public class FerdigmeldProduksjonsOrdreHandler
             }, cancellationToken);
         }
 
+        var ferdigBeholdningEtter = ferdigBeholdning is not null
+            ? ferdigBeholdning.Mengde
+            : command.AntallProdusert;
+
         await _lagerTransaksjonRepository.AddAsync(new LagerTransaksjon
         {
             ArtikkelId = resept.FerdigvareId,
             LotNr = ordre.FerdigvareLotNr,
             Type = TransaksjonsType.ProduksjonInn,
             Mengde = command.AntallProdusert,
-            BeholdningEtter = (await _lagerRepository.GetByArtikkelOgLotAsync(resept.FerdigvareId, ordre.FerdigvareLotNr, cancellationToken))?.Mengde ?? command.AntallProdusert,
+            BeholdningEtter = ferdigBeholdningEtter,
             Kilde = "ProduksjonsOrdre",
             KildeId = ordre.Id,
             UtfortAv = command.UtfortAv,
