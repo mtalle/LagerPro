@@ -1,3 +1,4 @@
+using LagerPro.Api.Attributes;
 using LagerPro.Application.Features.Lager.Commands.JusterLager;
 using LagerPro.Application.Features.Lager.Queries.GetAllLagerFlat;
 using LagerPro.Application.Features.Lager.Queries.GetLagerBeholdningByArtikkel;
@@ -10,6 +11,7 @@ namespace LagerPro.Api.Controllers;
 [ApiController]
 [Route("api/lager")]
 [Route("api/inventory", Order = 1)]
+[RequireTilgang(3)] // Lager
 public class InventoryController : ControllerBase
 {
     private readonly GetAllLagerFlatHandler _getAllHandler;

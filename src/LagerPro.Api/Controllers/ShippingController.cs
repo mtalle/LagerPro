@@ -1,3 +1,4 @@
+using LagerPro.Api.Attributes;
 using LagerPro.Application.Features.Levering.Commands.DeleteLevering;
 using LagerPro.Application.Features.Levering.Commands.UpdateLeveringStatus;
 using LagerPro.Application.Features.Levering.Queries.GetAllLevering;
@@ -10,6 +11,7 @@ namespace LagerPro.Api.Controllers;
 
 [ApiController]
 [Route("api/levering")]
+[RequireTilgang(5)] // Levering
 public class ShippingController : ControllerBase
 {
     private readonly GetAllLeveringHandler _getAllHandler;

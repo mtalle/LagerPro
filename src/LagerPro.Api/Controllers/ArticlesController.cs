@@ -1,3 +1,4 @@
+using LagerPro.Api.Attributes;
 using LagerPro.Application.Features.Articles.Commands.CreateArticle;
 using LagerPro.Application.Features.Articles.Commands.DeleteArticle;
 using LagerPro.Application.Features.Articles.Commands.UpdateArticle;
@@ -10,6 +11,7 @@ namespace LagerPro.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[RequireTilgang(2)] // Artikler
 public class ArticlesController : ControllerBase
 {
     private readonly GetAllArticlesHandler _getAllHandler;

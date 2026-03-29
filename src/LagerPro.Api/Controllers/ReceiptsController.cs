@@ -1,3 +1,4 @@
+using LagerPro.Api.Attributes;
 using LagerPro.Application.Features.Mottak.Commands.DeleteMottak;
 using LagerPro.Application.Features.Mottak.Commands.UpdateMottakStatus;
 using LagerPro.Application.Features.Mottak.Commands.UpdateMottakLinje;
@@ -12,6 +13,7 @@ namespace LagerPro.Api.Controllers;
 
 [ApiController]
 [Route("api/mottak")]
+[RequireTilgang(1)] // Mottak
 public class ReceiptsController : ControllerBase
 {
     private readonly GetAllMottakHandler _getAllHandler;

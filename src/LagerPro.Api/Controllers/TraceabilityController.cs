@@ -1,3 +1,4 @@
+using LagerPro.Api.Attributes;
 using LagerPro.Application.Features.Traceability.Queries.GetTraceabilityByArtikkel;
 using LagerPro.Application.Features.Traceability.Queries.GetTraceabilityByBatch;
 using LagerPro.Application.Features.Traceability.Queries.GetTraceabilityByKunde;
@@ -8,6 +9,7 @@ namespace LagerPro.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[RequireTilgang(7)] // Sporing
 public class TraceabilityController : ControllerBase
 {
     private readonly GetTraceabilityByLotHandler _lotHandler;

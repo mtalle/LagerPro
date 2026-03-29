@@ -1,4 +1,7 @@
+using LagerPro.Api.Attributes;
+using LagerPro.Api.Authorization;
 using LagerPro.Api.Middleware;
+using LagerPro.Api.Services;
 using LagerPro.Application.DependencyInjection;
 using LagerPro.Infrastructure.Data;
 using LagerPro.Infrastructure.DependencyInjection;
@@ -23,11 +26,16 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddControllers()
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<TilgangAuthorizationFilter>();
+})
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
     });
+
+builder.Services.AddScoped<ITilgangService, TilgangService>();
 
 var app = builder.Build();
 

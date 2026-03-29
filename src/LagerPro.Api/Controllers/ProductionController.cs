@@ -1,3 +1,4 @@
+using LagerPro.Api.Attributes;
 using LagerPro.Application.Features.Produksjon.Commands.CreateProduksjonsOrdre;
 using LagerPro.Application.Features.Produksjon.Commands.DeleteProduksjonsOrdre;
 using LagerPro.Application.Features.Produksjon.Commands.FerdigmeldProduksjonsOrdre;
@@ -14,6 +15,7 @@ namespace LagerPro.Api.Controllers;
 [ApiController]
 [Route("api/produksjon")]
 [Route("api/production", Order = 1)]
+[RequireTilgang(4)] // Produksjon
 public class ProductionController : ControllerBase
 {
     private readonly GetAllProduksjonsOrdreHandler _getAllHandler;

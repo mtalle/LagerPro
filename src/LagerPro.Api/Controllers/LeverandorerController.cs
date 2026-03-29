@@ -1,3 +1,4 @@
+using LagerPro.Api.Attributes;
 using LagerPro.Application.Features.Leverandorer;
 using LagerPro.Application.Features.Leverandorer.Commands;
 using LagerPro.Application.Features.Leverandorer.Queries.GetAllLeverandorer;
@@ -9,6 +10,7 @@ namespace LagerPro.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[RequireTilgang(9)] // Leverandører
 public class LeverandorerController : ControllerBase
 {
     private readonly GetAllLeverandorerHandler _getAllHandler;

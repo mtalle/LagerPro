@@ -1,3 +1,4 @@
+using LagerPro.Api.Attributes;
 using LagerPro.Application.Features.Kunder;
 using LagerPro.Application.Features.Kunder.Commands;
 using LagerPro.Application.Features.Kunder.Queries.GetAllKunder;
@@ -9,6 +10,7 @@ namespace LagerPro.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[RequireTilgang(8)] // Kunder
 public class KunderController : ControllerBase
 {
     private readonly GetAllKunderHandler _getAllHandler;

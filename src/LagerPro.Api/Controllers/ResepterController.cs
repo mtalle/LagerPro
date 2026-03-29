@@ -1,3 +1,4 @@
+using LagerPro.Api.Attributes;
 using CreateLinjeCmd = LagerPro.Application.Features.Resepter.Commands.CreateResept.ReseptLinjeCommand;
 using UpdateLinjeCmd = LagerPro.Application.Features.Resepter.Commands.UpdateResept.ReseptLinjeCommand;
 using LagerPro.Application.Features.Resepter.Commands.CreateResept;
@@ -14,6 +15,7 @@ namespace LagerPro.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Route("api/recipes", Order = 1)]
+[RequireTilgang(6)] // Resepter
 public class ResepterController : ControllerBase
 {
     private readonly GetAllResepterHandler _getAllHandler;
