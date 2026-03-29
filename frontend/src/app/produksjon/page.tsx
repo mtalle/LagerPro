@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { ProduksjonsOrdre, Resept, Plukkliste, get, post, patch } from '../../lib/api';
+import { ProduksjonsOrdre, Resept, Plukkliste, FerdigmeldPrefill, FerdigmeldLinje, get, post, patch } from '../../lib/api';
 
 const STATUS_MAP: Record<string, string> = {
   Planlagt: 'badge-planlagt',
@@ -8,30 +8,6 @@ const STATUS_MAP: Record<string, string> = {
   Ferdigmeldt: 'badge-ferdigmeldt',
   Kansellert: 'badge-kansellert',
 };
-
-interface FerdigmeldLinje {
-  ravareId: number;
-  ravareNavn: string | null;
-  enhet: string | null;
-  oppskriftsMengde: number;
-  foreslattLotNr: string | null;
-  foreslattMengde: number | null;
-  tilgjengeligBeholdning: number | null;
-  harLager: boolean;
-}
-
-interface FerdigmeldPrefill {
-  ordreId: number;
-  ordreNr: string;
-  reseptId: number;
-  reseptNavn: string | null;
-  ferdigvareId: number;
-  ferdigvareNavn: string | null;
-  antallPortjoner: number;
-  ferdigvareEnhet: string | null;
-  foreslattAntall: number;
-  reseptLinjer: FerdigmeldLinje[];
-}
 
 export default function ProduksjonPage() {
   const [ordre, setOrdre] = useState<ProduksjonsOrdre[]>([]);
