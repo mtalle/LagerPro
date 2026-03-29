@@ -81,25 +81,32 @@ public class ResepterController : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateReseptRequest request, CancellationToken cancellationToken)
     {
-        var success = await _updateHandler.Handle(
-            new UpdateReseptCommand(
-                id,
-                request.Navn,
-                request.FerdigvareId,
-                request.Beskrivelse,
-                request.AntallPortjoner,
-                request.Instruksjoner,
-                request.Aktiv,
-                request.Linjer.Select(l => new UpdateLinjeCmd(
-                    l.RavareId,
-                    l.Mengde,
-                    l.Enhet,
-                    l.Rekkefolge,
-                    l.Kommentar)).ToList()),
-            cancellationToken);
+        try
+        {
+            var success = await _updateHandler.Handle(
+                new UpdateReseptCommand(
+                    id,
+                    request.Navn,
+                    request.FerdigvareId,
+                    request.Beskrivelse,
+                    request.AntallPortjoner,
+                    request.Instruksjoner,
+                    request.Aktiv,
+                    request.Linjer.Select(l => new UpdateLinjeCmd(
+                        l.RavareId,
+                        l.Mengde,
+                        l.Enhet,
+                        l.Rekkefolge,
+                        l.Kommentar)).ToList()),
+                cancellationToken);
 
-        if (!success) return NotFound(new { message = $"Resept med id {id} ble ikke funnet." });
-        return Ok(new { id });
+            if (!success) return NotFound(new { message = $"Resept med id {id} ble ikke funnet." });
+            return Ok(new { id });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpDelete("{id:int}")]
