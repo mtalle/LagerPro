@@ -17,13 +17,26 @@
 - Frontend: frontend/ (Next.js, started by sub-agent)
 - Tests: tests/ (xUnit + Moq)
 
-## LagerPro Status (2026-03-28)
-- Backend build: 0 errors, 0 warnings ✅
-- Unit tests: **74 passing** ✅ (ArticleTests 15, KunderTests 9, LeverandorerTests 9, MottakTests 10, LagerTests 7, ProduksjonTests 14, LeveringTests 7, SmokeTests 1)
-- Frontend: started by sub-agent (Next.js based)
-- Credits ran out 2026-03-28 ~04:00 UTC, refilled ~06:00 UTC
+## LagerPro Status (2026-03-29)
+- Backend build: ✅ (0 errors)
+- Frontend build: ✅ (Next.js, 12 routes)
+- Migrations: Eksisterer i `src/LagerPro.Infrastructure/Migrations/` (InitialCreate 2026-03-27)
+- EF Core Design package: lagt til i LagerPro.Api.csproj (versjon 8.0.*)
+- **MVP: Funksjonelt komplett!** Kjerner: Artikler, Mottak, Lager, Produksjon, Levering, Resepter, Sporing
+- **API Controllers**: Alle med norsk feilhåndtering (BadRequest for InvalidOperationException)
+- **Database**: Unique index på ArtikkelNr, composite index på ArtikkelId+LotNr
+  - **Soft delete artikler** (Aktiv=false) istedenfor ekte sletting
+  - **Unik artikkelNr-sjekk** i CreateArticle med GetByArtikkelNrAsync
+  - **ProduksjonsOrdreDto**: FerdigvareId, FerdigvareNavn, FerdigvareEnhet inkludert i list + detaljer
+  - **UpdateLeveringStatusCommand**: UtfortAv nullable i command (sender fra frontend), Envir.UserName fjernet
+  - **UpdateLeveringStatusRequest**: UtfortAv lagt til
+  - **GetAllProduksjonsOrdreHandler**: inkluderer Ferdigvare via Resept.Ferdigvare
+  - **GetProduksjonsOrdreByIdHandler**: oppdatert for FerdigvareNavn + FerdigvareEnhet
+  - **Alle controllere**: InvalidOperationException → BadRequest med norsk feilmelding (Articles, Production, Receipts, Resepter)
+  - **CreateMottakHandler**: norsk feilmelding
+  - **ProjectStatusService**: oppdatert til "MVP komplett"
 
-## Backend fixes applied (2026-03-28)
+## LagerPro Tech Stack
 - Repository interface mismatch (ILager, IMottak, ILevering, IProduksjonsOrdre, IArtikkel)
 - Lagt til manglende repository-metoder i interfaces og implementasjoner
 - Lagt til IUnitOfWork i DI
