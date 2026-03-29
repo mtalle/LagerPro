@@ -1,5 +1,6 @@
 using LagerPro.Application.Abstractions;
 using LagerPro.Application.Features.Mottak.Commands.CreateMottak;
+using LagerPro.Application.Features.Mottak.Commands.UpdateMottakLinjeGodkjenning;
 using LagerPro.Application.Features.Mottak.Commands.UpdateMottakStatus;
 using LagerPro.Application.Features.Mottak.Queries.GetAllMottak;
 using LagerPro.Application.Features.Mottak.Queries.GetMottakById;
@@ -220,6 +221,147 @@ public class MottakTests
         Assert.NotNull(captured);
         Assert.Equal(MottakStatus.Registrert, captured!.Status);
         Assert.Equal("Ola", captured.MottattAv);
+    }
+
+    #endregion
+
+    #region UpdateMottakLinjeGodkjenningHandler
+
+    [Fact]
+    public async Task UpdateMottakLinjeGodkjenningHandler_GodkjennLinje_UpdatesLinje()
+    {
+        var mottak = CreateTestMottak(1, MottakStatus.Mottatt);
+        var linje = new MottakLinje
+        {
+            ArtikkelId = 10,
+            LotNr = "LOT-001",
+            Mengde = 100,
+            Enhet = "kg",
+            Godkjent = false
+        };
+        typeof(BaseEntity).GetProperty("Id")!.SetValue(linje, 5);
+        mottak.Linjer.Add(linje);
+
+        _mottakRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(mottak);
+        _unitOfWorkMock.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+
+        var handler = new UpdateMottakLinjeGodkjenningHandler(
+            _mottakRepoMock.Object, _lagerRepoMock.Object,
+            _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
+
+        var result = await handler.Handle(
+            new UpdateMottakLinjeGodkjenningCommand(1, 5, true, null),
+            CancellationToken.None);
+
+        Assert.True(result);
+        Assert.True(linje.Godkjent);
+        Assert.Null(linje.Avvik);
+    }
+
+    [Fact]
+    public async Task UpdateMottakLinjeGodkjenningHandler_AvvisLinje_UpdatesLinjeWithAvvik()
+    {
+        var mottak = CreateTestMottak(1, MottakStatus.Mottatt);
+        var linje = new MottakLinje
+        {
+            ArtikkelId = 10,
+            LotNr = "LOT-001",
+            Mengde = 100,
+            Enhet = "kg",
+            Godkjent = false
+        };
+        typeof(BaseEntity).GetProperty("Id")!.SetValue(linje, 5);
+        mottak.Linjer.Add(linje);
+
+        _mottakRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(mottak);
+        _unitOfWorkMock.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+
+        var handler = new UpdateMottakLinjeGodkjenningHandler(
+            _mottakRepoMock.Object, _lagerRepoMock.Object,
+            _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
+
+        var result = await handler.Handle(
+            new UpdateMottakLinjeGodkjenningCommand(1, 5, false, "Skadet emballasje"),
+            CancellationToken.None);
+
+        Assert.True(result);
+        Assert.False(linje.Godkjent);
+        Assert.Equal("Skadet emballasje", linje.Avvik);
+    }
+
+    [Fact]
+    public async Task UpdateMottakLinjeGodkjenningHandler_MottakNotFound_ReturnsFalse()
+    {
+        _mottakRepoMock.Setup(r => r.GetByIdAsync(999, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Mottak?)null);
+
+        var handler = new UpdateMottakLinjeGodkjenningHandler(
+            _mottakRepoMock.Object, _lagerRepoMock.Object,
+            _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
+
+        var result = await handler.Handle(
+            new UpdateMottakLinjeGodkjenningCommand(999, 5, true, null),
+            CancellationToken.None);
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task UpdateMottakLinjeGodkjenningHandler_LinjeNotFound_ReturnsFalse()
+    {
+        var mottak = CreateTestMottak(1, MottakStatus.Mottatt);
+
+        _mottakRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(mottak);
+
+        var handler = new UpdateMottakLinjeGodkjenningHandler(
+            _mottakRepoMock.Object, _lagerRepoMock.Object,
+            _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
+
+        var result = await handler.Handle(
+            new UpdateMottakLinjeGodkjenningCommand(1, 999, true, null),
+            CancellationToken.None);
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task UpdateMottakLinjeGodkjenningHandler_GodkjentMottak_OppdatererLager()
+    {
+        var mottak = CreateTestMottak(1, MottakStatus.Godkjent);
+        mottak.MottattAv = "Ola";
+        var linje = new MottakLinje
+        {
+            ArtikkelId = 10,
+            LotNr = "LOT-NEW",
+            Mengde = 50,
+            Enhet = "kg",
+            Godkjent = false
+        };
+        typeof(BaseEntity).GetProperty("Id")!.SetValue(linje, 7);
+        mottak.Linjer.Add(linje);
+
+        _mottakRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(mottak);
+        _lagerRepoMock.Setup(r => r.UpsertAsync(It.IsAny<LagerBeholdning>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        _lagerRepoMock.Setup(r => r.GetByArtikkelOgLotAsync(10, "LOT-NEW", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new LagerBeholdning { Mengde = 150 });
+        _transaksjonRepoMock.Setup(r => r.AddAsync(It.IsAny<LagerTransaksjon>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        _unitOfWorkMock.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+
+        var handler = new UpdateMottakLinjeGodkjenningHandler(
+            _mottakRepoMock.Object, _lagerRepoMock.Object,
+            _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
+
+        var result = await handler.Handle(
+            new UpdateMottakLinjeGodkjenningCommand(1, 7, true, null),
+            CancellationToken.None);
+
+        Assert.True(result);
+        _lagerRepoMock.Verify(r => r.UpsertAsync(It.IsAny<LagerBeholdning>(), It.IsAny<CancellationToken>()), Times.Once);
+        _transaksjonRepoMock.Verify(r => r.AddAsync(
+            It.Is<LagerTransaksjon>(t => t.Type == TransaksjonsType.Mottak && t.Mengde == 50),
+            It.IsAny<CancellationToken>()), Times.Once);
     }
 
     #endregion
