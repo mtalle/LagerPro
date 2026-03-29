@@ -1,27 +1,34 @@
-import type { Metadata } from 'next';
+'use client';
+import { useState } from 'react';
 import './globals.css';
 
-export const metadata: Metadata = {
-  title: 'LagerPro MVP',
-  description: 'Lager- og produksjonsstyring',
-};
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <html lang="no">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </head>
       <body>
         <nav className="navbar">
-          <span className="logo">📦 LagerPro</span>
-          <div className="nav-links">
-            <a href="/">Dashboard</a>
-            <a href="/artikler">Artikler</a>
-            <a href="/kunder">Kunder</a>
-            <a href="/leverandorer">Leverandører</a>
-            <a href="/lager">Lager</a>
-            <a href="/mottak">Mottak</a>
-            <a href="/produksjon">Produksjon</a>
-            <a href="/levering">Levering</a>
-            <a href="/resepter">Resepter</a>
+          <div className="nav-brand">
+            <span className="logo">📦 LagerPro</span>
+            <button className="hamburger" onClick={() => setMenuOpen(!menuOpen)} aria-label="Meny">
+              <span className={menuOpen ? 'hamburger-icon open' : 'hamburger-icon'}></span>
+            </button>
+          </div>
+          <div className={`nav-links ${menuOpen ? 'open' : ''}`}>
+            <a href="/" onClick={() => setMenuOpen(false)}>Dashboard</a>
+            <a href="/artikler" onClick={() => setMenuOpen(false)}>Artikler</a>
+            <a href="/kunder" onClick={() => setMenuOpen(false)}>Kunder</a>
+            <a href="/leverandorer" onClick={() => setMenuOpen(false)}>Leverandører</a>
+            <a href="/lager" onClick={() => setMenuOpen(false)}>Lager</a>
+            <a href="/mottak" onClick={() => setMenuOpen(false)}>Mottak</a>
+            <a href="/produksjon" onClick={() => setMenuOpen(false)}>Produksjon</a>
+            <a href="/levering" onClick={() => setMenuOpen(false)}>Levering</a>
+            <a href="/resepter" onClick={() => setMenuOpen(false)}>Resepter</a>
+            <a href="/brukere" onClick={() => setMenuOpen(false)}>👤 Admin</a>
           </div>
         </nav>
         <main className="container">{children}</main>

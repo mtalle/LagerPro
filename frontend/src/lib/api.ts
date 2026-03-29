@@ -276,3 +276,25 @@ export interface FerdigmeldPrefill {
   foreslattAntall: number;
   reseptLinjer: FerdigmeldLinje[];
 }
+
+// Bruker / RBAC types
+export interface BrukerRessurs {
+  ressursId: number;
+  navn: string;
+}
+
+export interface Bruker {
+  id: number;
+  navn: string;
+  brukernavn: string;
+  epost?: string;
+  erAdmin: boolean;
+  aktiv: boolean;
+  tilganger: BrukerRessurs[];
+}
+
+export interface Ressurs {
+  id: number;
+  navn: string;
+  beskrivelse: string;
+}
