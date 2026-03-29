@@ -107,9 +107,7 @@ public class MottakTests
         _mottakRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(mottak);
         _unitOfWorkMock.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
-        var handler = new UpdateMottakStatusHandler(
-            _mottakRepoMock.Object, _lagerRepoMock.Object,
-            _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new UpdateMottakStatusHandler(_mottakRepoMock.Object, _lagerRepoMock.Object, _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
 
         var result = await handler.Handle(new UpdateMottakStatusCommand(1, "Mottatt"), CancellationToken.None);
 
@@ -125,9 +123,7 @@ public class MottakTests
 
         _mottakRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(mottak);
 
-        var handler = new UpdateMottakStatusHandler(
-            _mottakRepoMock.Object, _lagerRepoMock.Object,
-            _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new UpdateMottakStatusHandler(_mottakRepoMock.Object, _lagerRepoMock.Object, _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
 
         var result = await handler.Handle(new UpdateMottakStatusCommand(1, "UgyldigStatus"), CancellationToken.None);
 
@@ -140,9 +136,7 @@ public class MottakTests
         _mottakRepoMock.Setup(r => r.GetByIdAsync(999, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Mottak?)null);
 
-        var handler = new UpdateMottakStatusHandler(
-            _mottakRepoMock.Object, _lagerRepoMock.Object,
-            _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new UpdateMottakStatusHandler(_mottakRepoMock.Object, _lagerRepoMock.Object, _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
 
         var result = await handler.Handle(new UpdateMottakStatusCommand(999, "Godkjent"), CancellationToken.None);
 
@@ -246,8 +240,7 @@ public class MottakTests
         _unitOfWorkMock.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
         var handler = new UpdateMottakLinjeGodkjenningHandler(
-            _mottakRepoMock.Object, _lagerRepoMock.Object,
-            _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
+            _mottakRepoMock.Object, _unitOfWorkMock.Object);
 
         var result = await handler.Handle(
             new UpdateMottakLinjeGodkjenningCommand(1, 5, true, null),
@@ -277,8 +270,7 @@ public class MottakTests
         _unitOfWorkMock.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
         var handler = new UpdateMottakLinjeGodkjenningHandler(
-            _mottakRepoMock.Object, _lagerRepoMock.Object,
-            _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
+            _mottakRepoMock.Object, _unitOfWorkMock.Object);
 
         var result = await handler.Handle(
             new UpdateMottakLinjeGodkjenningCommand(1, 5, false, "Skadet emballasje"),
@@ -296,8 +288,7 @@ public class MottakTests
             .ReturnsAsync((Mottak?)null);
 
         var handler = new UpdateMottakLinjeGodkjenningHandler(
-            _mottakRepoMock.Object, _lagerRepoMock.Object,
-            _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
+            _mottakRepoMock.Object, _unitOfWorkMock.Object);
 
         var result = await handler.Handle(
             new UpdateMottakLinjeGodkjenningCommand(999, 5, true, null),
@@ -314,54 +305,13 @@ public class MottakTests
         _mottakRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(mottak);
 
         var handler = new UpdateMottakLinjeGodkjenningHandler(
-            _mottakRepoMock.Object, _lagerRepoMock.Object,
-            _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
+            _mottakRepoMock.Object, _unitOfWorkMock.Object);
 
         var result = await handler.Handle(
             new UpdateMottakLinjeGodkjenningCommand(1, 999, true, null),
             CancellationToken.None);
 
         Assert.False(result);
-    }
-
-    [Fact]
-    public async Task UpdateMottakLinjeGodkjenningHandler_GodkjentMottak_OppdatererLager()
-    {
-        var mottak = CreateTestMottak(1, MottakStatus.Godkjent);
-        mottak.MottattAv = "Ola";
-        var linje = new MottakLinje
-        {
-            ArtikkelId = 10,
-            LotNr = "LOT-NEW",
-            Mengde = 50,
-            Enhet = "kg",
-            Godkjent = false
-        };
-        typeof(BaseEntity).GetProperty("Id")!.SetValue(linje, 7);
-        mottak.Linjer.Add(linje);
-
-        _mottakRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(mottak);
-        _lagerRepoMock.Setup(r => r.UpsertAsync(It.IsAny<LagerBeholdning>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-        _lagerRepoMock.Setup(r => r.GetByArtikkelOgLotAsync(10, "LOT-NEW", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new LagerBeholdning { Mengde = 150 });
-        _transaksjonRepoMock.Setup(r => r.AddAsync(It.IsAny<LagerTransaksjon>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-        _unitOfWorkMock.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
-
-        var handler = new UpdateMottakLinjeGodkjenningHandler(
-            _mottakRepoMock.Object, _lagerRepoMock.Object,
-            _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
-
-        var result = await handler.Handle(
-            new UpdateMottakLinjeGodkjenningCommand(1, 7, true, null),
-            CancellationToken.None);
-
-        Assert.True(result);
-        _lagerRepoMock.Verify(r => r.UpsertAsync(It.IsAny<LagerBeholdning>(), It.IsAny<CancellationToken>()), Times.Once);
-        _transaksjonRepoMock.Verify(r => r.AddAsync(
-            It.Is<LagerTransaksjon>(t => t.Type == TransaksjonsType.Mottak && t.Mengde == 50),
-            It.IsAny<CancellationToken>()), Times.Once);
     }
 
     #endregion
