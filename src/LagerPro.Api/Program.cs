@@ -1,3 +1,4 @@
+using LagerPro.Api.Middleware;
 using LagerPro.Application.DependencyInjection;
 using LagerPro.Infrastructure.Data;
 using LagerPro.Infrastructure.DependencyInjection;
@@ -25,6 +26,9 @@ builder.Services.AddControllers()
 
 var app = builder.Build();
 
+// Global exception handler — must be first in the pipeline
+app.UseGlobalExceptionHandler();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -46,6 +50,6 @@ catch (Exception ex)
 
 app.UseHttpsRedirection();
 app.MapControllers();
-app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
+app.MapGet("/health", () => Results.Ok(new { status = "ok", timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss \"UTC\"") }));
 
 app.Run();
