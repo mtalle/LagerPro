@@ -77,4 +77,35 @@ public class InventoryController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+
+    /// <summary>
+    /// Gruppert lageroversikt per artikkel (sum av alle LOTer).
+    /// </summary>
+    [HttpGet("oversikt")]
+    public async Task<IActionResult> GetOversikt(CancellationToken cancellationToken)
+    {
+        var oversikt = await _getAllHandler.Handle(new GetAllLagerFlatQuery(), cancellationToken);
+
+        var grouped = oversikt
+            .GroupBy(x => x.ArtikkelId)
+            .Select(g =>
+            {
+                var first = g.First();
+                return new
+                {
+                    artikkelId = g.Key,
+                    artikkelNr = first.ArtikkelNr,
+                    artikkelNavn = first.ArtikkelNavn,
+                    enhet = first.Enhet,
+                    totalMengde = g.Sum(x => x.Mengde),
+                    antallLots = g.Count(),
+                    minBeholdning = first.MinBeholdning,
+                    detaljer = g.ToList()
+                };
+            })
+            .OrderBy(x => x.artikkelNr)
+            .ToList();
+
+        return Ok(grouped);
+    }
 }

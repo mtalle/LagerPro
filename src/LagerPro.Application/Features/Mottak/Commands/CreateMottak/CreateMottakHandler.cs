@@ -54,7 +54,7 @@ public class CreateMottakHandler
                 ArtikkelId = linjeCommand.ArtikkelId,
                 LotNr = lotNr,
                 Mengde = linjeCommand.Mengde,
-                Enhet = artikkel.Enhet,
+                Enhet = string.IsNullOrWhiteSpace(linjeCommand.Enhet) ? artikkel.Enhet : linjeCommand.Enhet,
                 BestForDato = linjeCommand.BestForDato,
                 Temperatur = linjeCommand.Temperatur,
                 Strekkode = linjeCommand.Strekkode,

@@ -93,6 +93,17 @@ export interface LagerBeholdning {
   minBeholdning?: number;
 }
 
+// Extended inventory view that groups by article
+export interface Lageroversikt {
+  artikkelId: number;
+  artikkelNr: string;
+  artikkelNavn: string;
+  enhet: string;
+  totalMengde: number;
+  antallLots: number;
+  minBeholdning?: number;
+}
+
 export interface JusterLagerRequest {
   artikkelId: number;
   lotNr: string;
