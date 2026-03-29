@@ -40,10 +40,12 @@ public class UpdateProduksjonsOrdreStatusHandler
         var gammelStatus = ordre.Status;
 
         // State-machine: blokker ugyldige tilbakeganger
+#pragma warning disable CS8602 // tillatte kan aldri være null her pga short-circuit i ||-uttrykket
         if (!TillatteOverganger.TryGetValue(gammelStatus, out var tillatte) || !tillatte.Contains(newStatus))
             throw new InvalidOperationException(
                 $"Ordre kan ikke gå fra '{gammelStatus}' til '{newStatus}'. Tillatte overganger fra '{gammelStatus}': " +
                 (tillatte.Length == 0 ? "ingen" : string.Join(", ", tillatte)) + ".");
+#pragma warning restore CS8602
 
         ordre.Status = newStatus;
 
