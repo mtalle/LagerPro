@@ -19,6 +19,7 @@ export default function ProduksjonPage() {
   const [plukklisteLoading, setPlukklisteLoading] = useState(false);
   const [ferdigmeldPrefill, setFerdigmeldPrefill] = useState<FerdigmeldPrefill | null>(null);
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   const [error, setError] = useState('');
 
   const [resepter, setResepter] = useState<Resept[]>([]);
@@ -137,11 +138,12 @@ export default function ProduksjonPage() {
 
   const filtered = ordre.filter(o => {
     const q = search.toLowerCase();
-    return (
+    const matchesSearch =
       o.ordreNr.toLowerCase().includes(q) ||
       (o.reseptNavn ?? '').toLowerCase().includes(q) ||
-      (o.utfortAv ?? '').toLowerCase().includes(q)
-    );
+      (o.utfortAv ?? '').toLowerCase().includes(q);
+    const matchesStatus = !statusFilter || o.status === statusFilter;
+    return matchesSearch && matchesStatus;
   });
 
   return (
@@ -152,13 +154,31 @@ export default function ProduksjonPage() {
         <button className="btn btn-secondary" onClick={openPlukkliste}>📋 Plukkliste</button>
       </div>
 
-      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
+      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap' }}>
         <input
           placeholder="Søk ordrenr, resept..."
           value={search}
           onChange={e => setSearch(e.target.value)}
           style={{ padding: '0.4rem 0.8rem', border: '1px solid #d1d5db', borderRadius: 6, width: 300, fontSize: '0.9rem' }}
         />
+        <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
+          {['', 'Planlagt', 'IProduksjon', 'Ferdigmeldt', 'Kansellert'].map(s => (
+            <button key={s} type="button"
+              onClick={() => setStatusFilter(s)}
+              style={{
+                padding: '0.3rem 0.7rem',
+                borderRadius: 16,
+                fontSize: '0.8rem',
+                border: 'none',
+                cursor: 'pointer',
+                background: statusFilter === s ? '#3b82f6' : '#e5e7eb',
+                color: statusFilter === s ? '#fff' : '#374151',
+                fontWeight: statusFilter === s ? 600 : 400,
+              }}>
+              {s || 'Alle'}
+            </button>
+          ))}
+        </div>
         <span style={{ marginLeft: 'auto', fontSize: '0.85rem', color: '#6b7280' }}>{filtered.length} av {ordre.length}</span>
       </div>
 
