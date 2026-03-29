@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState, Fragment } from 'react';
-import { Mottak, Article, Leverandor, get, post, patch } from '../../lib/api';
+import { Mottak, Article, Leverandor, UpdateMottakLinje, get, post, patch } from '../../lib/api';
 
 export default function MottakPage() {
   const [mottak, setMottak] = useState<Mottak[]>([]);
@@ -87,6 +87,13 @@ export default function MottakPage() {
     } catch (e) { alert('Feil: ' + (e as Error).message); }
   }
 
+  async function updateLinjeGodkjenning(mottakId: number, linjeId: number, godkjent: boolean, avvik?: string) {
+    try {
+      await patch(`/mottak/${mottakId}/linjer/${linjeId}/godkjenning`, { godkjent, avvik } as UpdateMottakLinje);
+      loadData();
+    } catch (e) { alert('Feil: ' + (e as Error).message); }
+  }
+
   const statusBadge = (s: string) => {
     const map: Record<string, string> = {
       Registrert: 'badge-registrert', Mottatt: 'badge-aktiv', Godkjent: 'badge-aktiv',
@@ -129,9 +136,17 @@ export default function MottakPage() {
             <td><code>{l.artikkelNavn ?? `Art.ID ${l.artikkelId}`}</code></td>
             <td>Lot: <code>{l.lotNr}</code></td>
             <td>{l.mengde} {l.enhet}</td>
-            <td><span className={`badge ${l.godkjent ? 'badge-aktiv' : 'badge-inactive'}`}>{l.godkjent ? 'Godkjent' : l.avvik ?? 'Avvik'}</span></td>
+            <td><span className={`badge ${l.godkjent ? 'badge-aktiv' : 'badge-inactive'}`}>{l.godkjent ? 'Godkjent' : l.avvik ?? '—'}</span></td>
             <td>{l.temperatur != null && l.temperatur !== 0 ? `${l.temperatur}°C` : ''}</td>
-            <td>{l.bestForDato ? `BF: ${new Date(l.bestForDato).toLocaleDateString('no-NO')}` : ''}</td>
+            <td>{l.bestForDato ? new Date(l.bestForDato).toLocaleDateString('no-NO') : '—'}</td>
+            <td>
+              {m.status === 'Mottatt' && (
+                <>
+                  <button className="btn btn-sm btn-primary" style={{ marginRight: 4 }} onClick={() => updateLinjeGodkjenning(m.id, l.id, true)}>Godkjenn</button>
+                  <button className="btn btn-sm btn-danger" onClick={() => { const a = prompt('Avvik:', l.avvik ?? ''); if (a !== null) updateLinjeGodkjenning(m.id, l.id, false, a); }}>Avvis</button>
+                </>
+              )}
+            </td>
           </tr>
         ))}
       </Fragment>

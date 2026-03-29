@@ -41,11 +41,18 @@ public class UpdateLeveringStatusHandler
             {
                 var beholdning = await _lagerRepository.GetByArtikkelOgLotAsync(
                     linje.ArtikkelId, linje.LotNr, cancellationToken);
-                if (beholdning is not null)
-                {
-                    beholdning.Mengde -= linje.Mengde;
-                    beholdning.SistOppdatert = DateTime.UtcNow;
-                }
+
+                if (beholdning is null)
+                    throw new InvalidOperationException(
+                        $"Artikkel {linje.ArtikkelId} finst ikkje på lager med lot {linje.LotNr}. Levering kan ikkje plukkast.");
+
+                if (beholdning.Mengde < linje.Mengde)
+                    throw new InvalidOperationException(
+                        $"Ikkje nok beholdning for artikkel {linje.ArtikkelId} (lot {linje.LotNr}). " +
+                        $"Krevst: {linje.Mengde}, på lager: {beholdning.Mengde}.");
+
+                beholdning.Mengde -= linje.Mengde;
+                beholdning.SistOppdatert = DateTime.UtcNow;
 
                 await _transaksjonRepository.AddAsync(new LagerTransaksjon
                 {

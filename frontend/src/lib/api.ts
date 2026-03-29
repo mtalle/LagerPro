@@ -36,6 +36,11 @@ export async function patch<T>(path: string, body: unknown): Promise<T> {
   return res.json();
 }
 
+export interface UpdateMottakLinje {
+  godkjent: boolean;
+  avvik?: string;
+}
+
 export async function del(path: string): Promise<void> {
   const res = await fetch(`${API_BASE}${path}`, { method: 'DELETE' });
   if (!res.ok) throw new Error(`${path}: ${res.status}`);

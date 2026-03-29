@@ -1,4 +1,5 @@
 using LagerPro.Application.Features.Mottak.Commands.UpdateMottakStatus;
+using LagerPro.Application.Features.Mottak.Commands.UpdateMottakLinjeGodkjenning;
 using LagerPro.Application.Features.Mottak.Queries.GetAllMottak;
 using LagerPro.Application.Features.Mottak.Queries.GetMottakById;
 using LagerPro.Application.Features.Mottak.Commands.CreateMottak;
@@ -15,13 +16,15 @@ public class ReceiptsController : ControllerBase
     private readonly GetMottakByIdHandler _getByIdHandler;
     private readonly CreateMottakHandler _createHandler;
     private readonly UpdateMottakStatusHandler _updateStatusHandler;
+    private readonly UpdateMottakLinjeGodkjenningHandler _updateLinjeHandler;
 
-    public ReceiptsController(GetAllMottakHandler getAllHandler, GetMottakByIdHandler getByIdHandler, CreateMottakHandler createHandler, UpdateMottakStatusHandler updateStatusHandler)
+    public ReceiptsController(GetAllMottakHandler getAllHandler, GetMottakByIdHandler getByIdHandler, CreateMottakHandler createHandler, UpdateMottakStatusHandler updateStatusHandler, UpdateMottakLinjeGodkjenningHandler updateLinjeHandler)
     {
         _getAllHandler = getAllHandler;
         _getByIdHandler = getByIdHandler;
         _createHandler = createHandler;
         _updateStatusHandler = updateStatusHandler;
+        _updateLinjeHandler = updateLinjeHandler;
     }
 
     [HttpGet]
@@ -69,5 +72,18 @@ public class ReceiptsController : ControllerBase
         var success = await _updateStatusHandler.Handle(new UpdateMottakStatusCommand(id, request.Status), cancellationToken);
         if (!success) return NotFound(new { message = $"Mottak with id {id} not found." });
         return Ok(new { id, status = request.Status });
+    }
+
+    /// <summary>
+    /// Oppdater godkjenningstatus på én mottakslinje.
+    /// </summary>
+    [HttpPatch("{mottakId}/linjer/{linjeId}/godkjenning")]
+    public async Task<IActionResult> UpdateLinjeGodkjenning(int mottakId, int linjeId, [FromBody] UpdateMottakLinjeRequest request, CancellationToken cancellationToken)
+    {
+        var success = await _updateLinjeHandler.Handle(
+            new UpdateMottakLinjeGodkjenningCommand(mottakId, linjeId, request.Godkjent, request.Avvik),
+            cancellationToken);
+        if (!success) return NotFound(new { message = $"Mottak or linje not found." });
+        return Ok(new { mottakId, linjeId, godkjent = request.Godkjent });
     }
 }

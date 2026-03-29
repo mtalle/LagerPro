@@ -2,11 +2,16 @@
 import { useEffect, useState } from 'react';
 import { Article, CreateArticle, UpdateArticle, get, post, put, patch, del } from '../../lib/api';
 
+const ARTICLE_TYPES = ['Råvare', 'Ferdigvare', 'Halvfabrikat', 'Emballasje', 'Annet'];
+const ENHETER = ['STK', 'KG', 'L', 'M', 'SETT', 'PAKKE', 'BOKS'];
+
 export default function ArtiklerPage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [visKunAktive, setVisKunAktive] = useState(true);
+  const [typeFilter, setTypeFilter] = useState('');
+  const [visInactive, setVisInactive] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editArticle, setEditArticle] = useState<Article | null>(null);
   const [error, setError] = useState('');
@@ -36,8 +41,12 @@ export default function ArtiklerPage() {
       a.navn.toLowerCase().includes(q) ||
       (a.kategori ?? '').toLowerCase().includes(q) ||
       (a.strekkode ?? '').toLowerCase().includes(q);
-    return matchesSearch && (!visKunAktive || a.aktiv);
+    const matchesType = !typeFilter || a.type === typeFilter;
+    const matchesActive = visInactive ? true : a.aktiv;
+    return matchesSearch && matchesType && matchesActive;
   });
+
+  const uniqueTypes = Array.from(new Set(articles.map(a => a.type))).sort();
 
   function openCreate() {
     setEditArticle(null);
@@ -111,6 +120,14 @@ export default function ArtiklerPage() {
     setTimeout(() => setSuccess(''), 3000);
   }
 
+  const typeBadge = (t: string) => {
+    const colors: Record<string, string> = {
+      'Råvare': '#dbeafe', 'Ferdigvare': '#dcfce7', 'Halvfabrikat': '#fef9c3',
+      'Emballasje': '#fce7f3', 'Annet': '#f3f4f6',
+    };
+    return <span style={{ background: colors[t] ?? '#f3f4f6', padding: '2px 8px', borderRadius: 12, fontSize: '0.75rem', color: '#374151' }}>{t}</span>;
+  };
+
   return (
     <>
       <div className="page-header">
@@ -126,12 +143,21 @@ export default function ArtiklerPage() {
           placeholder="Søk artikkelnr, navn, kategori..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          style={{ padding: '0.4rem 0.8rem', border: '1px solid #d1d5db', borderRadius: 6, width: 300, fontSize: '0.9rem' }}
+          style={{ padding: '0.4rem 0.8rem', border: '1px solid #d1d5db', borderRadius: 6, width: 260, fontSize: '0.9rem' }}
         />
-        <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.9rem', cursor: 'pointer', userSelect: 'none' }}>
-          <input type="checkbox" checked={visKunAktive} onChange={e => setVisKunAktive(e.target.checked)} />
-          Vis kun aktive
+        <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} style={{ padding: '0.35rem 0.6rem', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.9rem' }}>
+          <option value="">Alle typer</option>
+          {uniqueTypes.map(t => <option key={t} value={t}>{t}</option>)}
+        </select>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none', color: '#374151' }}>
+          <input type="checkbox" checked={!visKunAktive} onChange={e => setVisKunAktive(!e.target.checked)} />
+          Aktive
         </label>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none', color: '#374151' }}>
+          <input type="checkbox" checked={visInactive} onChange={e => setVisInactive(e.target.checked)} />
+          Vis inaktive
+        </label>
+        <span style={{ marginLeft: 'auto', fontSize: '0.85rem', color: '#6b7280' }}>{filtered.length} av {articles.length} artikler</span>
       </div>
 
       {loading ? (
@@ -141,43 +167,29 @@ export default function ArtiklerPage() {
       ) : (
         <table>
           <thead>
-            <tr>
-              <th>Artikkelnr</th>
-              <th>Navn</th>
-              <th>Type</th>
-              <th>Kategori</th>
-              <th>Enhet</th>
-              <th>Innpris</th>
-              <th>Utpris</th>
-              <th>Min.beholdning</th>
-              <th>Status</th>
-              <th></th>
-            </tr>
+            <tr><th>Artikkelnr</th><th>Navn</th><th>Type</th><th>Enhet</th><th>Innpris</th><th>Utpris</th><th>Min.beh.</th><th>Status</th><th></th></tr>
           </thead>
           <tbody>
             {filtered.map(a => (
-              <tr key={a.id}>
+              <tr key={a.id} style={{ opacity: a.aktiv ? 1 : 0.5 }}>
                 <td><code>{a.artikkelNr}</code></td>
                 <td>{a.navn}</td>
-                <td>{a.type}</td>
-                <td>{a.kategori ?? '—'}</td>
+                <td>{typeBadge(a.type)}</td>
                 <td>{a.enhet}</td>
-                <td>{a.innpris.toFixed(2)}</td>
-                <td>{a.utpris.toFixed(2)}</td>
-                <td>{a.minBeholdning}</td>
+                <td>{a.innpris > 0 ? `${a.innpris.toFixed(2)} kr` : '—'}</td>
+                <td>{a.utpris > 0 ? `${a.utpris.toFixed(2)} kr` : '—'}</td>
+                <td>{a.minBeholdning > 0 ? a.minBeholdning : '—'}</td>
                 <td>
                   <span className={`badge ${a.aktiv ? 'badge-aktiv' : 'badge-inactive'}`}>
                     {a.aktiv ? 'Aktiv' : 'Inaktiv'}
                   </span>
                 </td>
                 <td>
-                  <div style={{ display: 'flex', gap: '0.4rem' }}>
-                    <button className="btn btn-sm btn-secondary" onClick={() => openEdit(a)}>Rediger</button>
-                    <button className="btn btn-sm btn-secondary" onClick={() => handleToggleActive(a)}>
-                      {a.aktiv ? 'Deaktiver' : 'Aktiver'}
-                    </button>
-                    <button className="btn btn-sm btn-danger" onClick={() => handleDelete(a.id)}>Slett</button>
-                  </div>
+                  <button className="btn btn-sm btn-secondary" style={{ marginRight: 4 }} onClick={() => openEdit(a)}>Rediger</button>
+                  <button className="btn btn-sm btn-secondary" style={{ marginRight: 4 }} onClick={() => handleToggleActive(a)}>
+                    {a.aktiv ? 'Deaktiver' : 'Aktiver'}
+                  </button>
+                  <button className="btn btn-sm btn-danger" onClick={() => handleDelete(a.id)}>Slett</button>
                 </td>
               </tr>
             ))}
@@ -204,30 +216,25 @@ export default function ArtiklerPage() {
                 <div className="form-group">
                   <label>Type</label>
                   <select value={form.type} onChange={e => setForm({ ...form, type: e.target.value })}>
-                    <option value="Råvare">Råvare</option>
-                    <option value="Ferdigvare">Ferdigvare</option>
-                    <option value="Halvfabrikat">Halvfabrikat</option>
-                    <option value="Emballasje">Emballasje</option>
-                    <option value="Annet">Annet</option>
+                    {ARTICLE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
                   <label>Kategori</label>
-                  <input value={form.kategori ?? ''} onChange={e => setForm({ ...form, kategori: e.target.value })} placeholder="Kategori" />
+                  <input value={form.kategori ?? ''} onChange={e => setForm({ ...form, kategori: e.target.value })} placeholder="f.eks. Meieri, Kjøtt, Tømmer" list="kategorier" />
+                  <datalist id="kategorier">
+                    {Array.from(new Set(articles.map(a => a.kategori).filter(Boolean))).sort().map(k => <option key={k!} value={k!} />)}
+                  </datalist>
                 </div>
                 <div className="form-group">
                   <label>Enhet</label>
                   <select value={form.enhet} onChange={e => setForm({ ...form, enhet: e.target.value })}>
-                    <option value="STK">STK (stk)</option>
-                    <option value="KG">KG (kg)</option>
-                    <option value="L">L (liter)</option>
-                    <option value="M">M (meter)</option>
-                    <option value="SETT">SETT</option>
+                    {ENHETER.map(e => <option key={e} value={e}>{e}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
                   <label>Strekkode</label>
-                  <input value={form.strekkode ?? ''} onChange={e => setForm({ ...form, strekkode: e.target.value })} placeholder="Strekkode" />
+                  <input value={form.strekkode ?? ''} onChange={e => setForm({ ...form, strekkode: e.target.value })} placeholder="Strekkode / EAN" />
                 </div>
                 <div className="form-group">
                   <label>Innpris (kr)</label>

@@ -63,8 +63,15 @@ public class ShippingController : ControllerBase
     [HttpPatch("{id}/status")]
     public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateLeveringStatusRequest request, CancellationToken cancellationToken)
     {
-        var success = await _updateStatusHandler.Handle(new UpdateLeveringStatusCommand(id, request.Status), cancellationToken);
-        if (!success) return NotFound(new { message = $"Levering with id {id} not found." });
-        return Ok(new { id, status = request.Status });
+        try
+        {
+            var success = await _updateStatusHandler.Handle(new UpdateLeveringStatusCommand(id, request.Status), cancellationToken);
+            if (!success) return NotFound(new { message = $"Levering with id {id} not found." });
+            return Ok(new { id, status = request.Status });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 }
