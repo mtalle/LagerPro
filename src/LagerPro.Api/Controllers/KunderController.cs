@@ -75,9 +75,6 @@ public class KunderController : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateKundeRequest request, CancellationToken cancellationToken)
     {
-        var existing = await _getByIdHandler.Handle(new GetKundeByIdQuery(id), cancellationToken);
-        if (existing is null) return NotFound(new { message = $"Kunde med id {id} ble ikke funnet." });
-
         try
         {
             var success = await _updateHandler.Handle(

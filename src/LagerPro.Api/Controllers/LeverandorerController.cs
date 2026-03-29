@@ -75,9 +75,6 @@ public class LeverandorerController : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateLeverandorRequest request, CancellationToken cancellationToken)
     {
-        var existing = await _getByIdHandler.Handle(new GetLeverandorByIdQuery(id), cancellationToken);
-        if (existing is null) return NotFound(new { message = $"Leverandør med id {id} ble ikke funnet." });
-
         try
         {
             var success = await _updateHandler.Handle(
