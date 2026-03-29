@@ -2,6 +2,8 @@
 import { useEffect, useState, Fragment } from 'react';
 import { Mottak, Article, Leverandor, UpdateMottakLinje, get, post, patch } from '../../lib/api';
 
+const ENHETER = ['STK', 'KG', 'L', 'M', 'SETT', 'PAKKE', 'BOKS'];
+
 export default function MottakPage() {
   const [mottak, setMottak] = useState<Mottak[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
@@ -240,7 +242,7 @@ export default function MottakPage() {
                 <button type="button" className="btn btn-sm btn-secondary" onClick={addLine}>+ Linje</button>
               </div>
               {form.linjer.map((linje, i) => (
-                <div key={i} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr 1fr auto', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'end' }}>
+                <div key={i} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr auto', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'end' }}>
                   <div className="form-group">
                     <label>Artikkel</label>
                     <select value={linje.artikkelId} onChange={e => {
@@ -259,6 +261,12 @@ export default function MottakPage() {
                   <div className="form-group">
                     <label>Mengde</label>
                     <input type="number" step="0.001" min="0" value={linje.mengde} onChange={e => updateLine(i, 'mengde', parseFloat(e.target.value))} />
+                  </div>
+                  <div className="form-group">
+                    <label>Enhet</label>
+                    <select value={linje.enhet} onChange={e => updateLine(i, 'enhet', e.target.value)}>
+                      {ENHETER.map(eu => <option key={eu} value={eu}>{eu}</option>)}
+                    </select>
                   </div>
                   <div className="form-group">
                     <label>Best-før</label>
