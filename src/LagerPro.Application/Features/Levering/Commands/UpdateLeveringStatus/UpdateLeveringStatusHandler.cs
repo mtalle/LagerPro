@@ -34,9 +34,37 @@ public class UpdateLeveringStatusHandler
         if (!Enum.TryParse<LeveringStatus>(command.Status, ignoreCase: true, out var newStatus))
             return false;
 
-        // Plukket: Lager ble allerede reservert ved opprettelse (CreateLevering).
-        // Oppdater kun status uten å endre lager på nytt.
-        // Ved Levert: Logg bekreftelse med egen transaksjonstype.
+        // Plukket: Trekk lager når varene fysisk plukkes
+        if (newStatus == LeveringStatus.Plukket && levering.Status != LeveringStatus.Plukket)
+        {
+            foreach (var linje in levering.Linjer)
+            {
+                var beholdning = await _lagerRepository.GetByArtikkelOgLotAsync(
+                    linje.ArtikkelId, linje.LotNr, cancellationToken);
+                if (beholdning is not null)
+                {
+                    beholdning.Mengde -= linje.Mengde;
+                    beholdning.SistOppdatert = DateTime.UtcNow;
+                }
+
+                await _transaksjonRepository.AddAsync(new LagerTransaksjon
+                {
+                    ArtikkelId = linje.ArtikkelId,
+                    LotNr = linje.LotNr,
+                    Type = TransaksjonsType.Levering,
+                    Mengde = -linje.Mengde,
+                    BeholdningEtter = (await _lagerRepository.GetByArtikkelOgLotAsync(
+                        linje.ArtikkelId, linje.LotNr, cancellationToken))?.Mengde ?? 0,
+                    Kilde = "Levering",
+                    KildeId = levering.Id,
+                    Kommentar = $"Levering #{levering.Id} plukket",
+                    UtfortAv = Environment.UserName,
+                    Tidspunkt = DateTime.UtcNow
+                }, cancellationToken);
+            }
+        }
+
+        // Levert: Logg bekreftelse med egen transaksjonstype.
         if (newStatus == LeveringStatus.Levert && levering.Status != LeveringStatus.Levert)
         {
             foreach (var linje in levering.Linjer)
