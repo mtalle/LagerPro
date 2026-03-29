@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 import { useEffect, useState } from 'react';
 import { Article, CreateArticle, UpdateArticle, get, post, put, patch, del } from '../../lib/api';
 
-const ARTICLE_TYPES = ['Råvare', 'Ferdigvare', 'Halvfabrikat', 'Emballasje', 'Annet'];
+const ARTICLE_TYPES = ['Ravare', 'Ferdigvare', 'Halvfabrikat', 'Emballasje', 'Annet'];
 const ENHETER = ['STK', 'KG', 'L', 'M', 'SETT', 'PAKKE', 'BOKS'];
 
 export default function ArtiklerPage() {
@@ -19,7 +19,7 @@ export default function ArtiklerPage() {
 
   // Form state
   const [form, setForm] = useState<CreateArticle>({
-    artikkelNr: '', navn: '', enhet: 'STK', type: 'Råvare',
+    artikkelNr: '', navn: '', enhet: 'STK', type: 'Ravare',
     beskrivelse: '', strekkode: '', kategori: '',
     innpris: 0, utpris: 0, minBeholdning: 0,
   });
@@ -50,7 +50,7 @@ export default function ArtiklerPage() {
 
   function openCreate() {
     setEditArticle(null);
-    setForm({ artikkelNr: '', navn: '', enhet: 'STK', type: 'Råvare', beskrivelse: '', strekkode: '', kategori: '', innpris: 0, utpris: 0, minBeholdning: 0 });
+    setForm({ artikkelNr: '', navn: '', enhet: 'STK', type: 'Ravare', beskrivelse: '', strekkode: '', kategori: '', innpris: 0, utpris: 0, minBeholdning: 0 });
     setError('');
     setShowModal(true);
   }
@@ -122,7 +122,7 @@ export default function ArtiklerPage() {
 
   const typeBadge = (t: string) => {
     const colors: Record<string, string> = {
-      'Råvare': '#dbeafe', 'Ferdigvare': '#dcfce7', 'Halvfabrikat': '#fef9c3',
+      'Ravare': '#dbeafe', 'Ferdigvare': '#dcfce7', 'Halvfabrikat': '#fef9c3',
       'Emballasje': '#fce7f3', 'Annet': '#f3f4f6',
     };
     return <span style={{ background: colors[t] ?? '#f3f4f6', padding: '2px 8px', borderRadius: 12, fontSize: '0.75rem', color: '#374151' }}>{t}</span>;
