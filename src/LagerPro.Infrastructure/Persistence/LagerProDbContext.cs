@@ -23,6 +23,9 @@ public class LagerProDbContext : DbContext
     public DbSet<ProduksjonsOrdreVersjon> ProduksjonsOrdreVersjoner => Set<ProduksjonsOrdreVersjon>();
     public DbSet<Levering> Leveringer => Set<Levering>();
     public DbSet<LeveringLinje> LeveringLinjer => Set<LeveringLinje>();
+    public DbSet<Bruker> Brukere => Set<Bruker>();
+    public DbSet<BrukerRessursTilgang> BrukerRessursTilganger => Set<BrukerRessursTilgang>();
+    public DbSet<Ressurs> Ressurser => Set<Ressurs>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

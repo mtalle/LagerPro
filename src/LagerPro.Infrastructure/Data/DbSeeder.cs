@@ -138,8 +138,46 @@ public static class DbSeeder
         context.LagerBeholdninger.AddRange(beholdninger);
         await context.SaveChangesAsync();
 
+        // --- Ressurser ---
+        var ressurser = new List<Ressurs>
+        {
+            new() { Id = 1, Navn = "Mottak", Beskrivelse = "Motta varer fra leverandører", OpprettetDato = now },
+            new() { Id = 2, Navn = "Artikler", Beskrivelse = "Administrer artikler", OpprettetDato = now },
+            new() { Id = 3, Navn = "Lager", Beskrivelse = "Lagerbeholdning og transaksjoner", OpprettetDato = now },
+            new() { Id = 4, Navn = "Produksjon", Beskrivelse = "Produksjonsordrer", OpprettetDato = now },
+            new() { Id = 5, Navn = "Levering", Beskrivelse = "Leveringer til kunder", OpprettetDato = now },
+            new() { Id = 6, Navn = "Resepter", Beskrivelse = "Produksjonsresepter", OpprettetDato = now },
+            new() { Id = 7, Navn = "Sporing", Beskrivelse = "Sporing av varer", OpprettetDato = now },
+            new() { Id = 8, Navn = "Kunder", Beskrivelse = "Kundeadministrasjon", OpprettetDato = now },
+            new() { Id = 9, Navn = "Leverandører", Beskrivelse = "Leverandøradministrasjon", OpprettetDato = now },
+        };
+        context.Ressurser.AddRange(ressurser);
+        await context.SaveChangesAsync();
+
+        // --- Admin bruker (alle tilganger) ---
+        var admin = new Bruker
+        {
+            Navn = "Administrator",
+            Brukernavn = "admin",
+            Epost = "admin@lagerpro.no",
+            ErAdmin = true,
+            Aktiv = true,
+            OpprettetDato = now
+        };
+        context.Brukere.Add(admin);
+        await context.SaveChangesAsync();
+
+        var alleTilganger = ressurser.Select(r => new BrukerRessursTilgang
+        {
+            BrukerId = admin.Id,
+            RessursId = r.Id,
+            OpprettetDato = now
+        });
+        context.BrukerRessursTilganger.AddRange(alleTilganger);
+        await context.SaveChangesAsync();
+
         logger.LogInformation(
-            "Database seeded: {Artikler} articles, {Lev} suppliers, {Kunder} customers, {Resepter} recipes, {Lager} stock items",
-            12, 3, 3, 2, beholdninger.Count);
+            "Database seeded: {Artikler} articles, {Lev} suppliers, {Kunder} customers, {Resepter} recipes, {Lager} stock items, {Ressurser} resources, {Admin} admin user",
+            12, 3, 3, 2, beholdninger.Count, ressurser.Count, 1);
     }
 }

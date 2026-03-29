@@ -31,6 +31,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ILeveringRepository, LeveringRepository>();
         services.AddScoped<IProduksjonsOrdreRepository, ProduksjonsOrdreRepository>();
         services.AddScoped<IReseptRepository, ReseptRepository>();
+        services.AddScoped<IBrukerRepository, BrukerRepository>();
+        services.AddScoped<IRessursRepository, RessursRepository>();
 
         return services;
     }
