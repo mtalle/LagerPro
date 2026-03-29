@@ -184,13 +184,16 @@ public class ProduksjonTests
     public async Task UpdateProduksjonsOrdreStatusHandler_ValidStatus_UpdatesAndReturnsTrue()
     {
         var ordre = CreateTestOrdre(1, "PO-001", ProdOrdreStatus.Planlagt);
+        var resept = CreateTestResept(1, "TestResept");
+        resept.Aktiv = true;
+        ordre.Resept = resept;
 
         _ordreRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(ordre);
+        _reseptRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(resept);
         _unitOfWorkMock.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
         var handler = new UpdateProduksjonsOrdreStatusHandler(
-            _ordreRepoMock.Object, _reseptRepoMock.Object,
-            _lagerRepoMock.Object, _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
+            _ordreRepoMock.Object, _reseptRepoMock.Object, _unitOfWorkMock.Object);
 
         var result = await handler.Handle(
             new UpdateProduksjonsOrdreStatusCommand(1, "IProduksjon"),
@@ -208,8 +211,7 @@ public class ProduksjonTests
         _ordreRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(ordre);
 
         var handler = new UpdateProduksjonsOrdreStatusHandler(
-            _ordreRepoMock.Object, _reseptRepoMock.Object,
-            _lagerRepoMock.Object, _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
+            _ordreRepoMock.Object, _reseptRepoMock.Object, _unitOfWorkMock.Object);
 
         var result = await handler.Handle(
             new UpdateProduksjonsOrdreStatusCommand(1, "UgyldigStatus"),
@@ -225,8 +227,7 @@ public class ProduksjonTests
             .ReturnsAsync((ProduksjonsOrdre?)null);
 
         var handler = new UpdateProduksjonsOrdreStatusHandler(
-            _ordreRepoMock.Object, _reseptRepoMock.Object,
-            _lagerRepoMock.Object, _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
+            _ordreRepoMock.Object, _reseptRepoMock.Object, _unitOfWorkMock.Object);
 
         var result = await handler.Handle(
             new UpdateProduksjonsOrdreStatusCommand(999, "IProduksjon"),

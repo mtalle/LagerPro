@@ -24,6 +24,14 @@ public class UpdateMottakStatusHandler
         _unitOfWork = unitOfWork;
     }
 
+    private static readonly Dictionary<MottakStatus, MottakStatus[]> TillatteOverganger = new()
+    {
+        [MottakStatus.Registrert] = new[] { MottakStatus.Mottatt, MottakStatus.Godkjent, MottakStatus.Avvist },
+        [MottakStatus.Mottatt]    = new[] { MottakStatus.Godkjent, MottakStatus.Avvist },
+        [MottakStatus.Godkjent]   = Array.Empty<MottakStatus>(),
+        [MottakStatus.Avvist]     = Array.Empty<MottakStatus>(),
+    };
+
     public async Task<bool> Handle(UpdateMottakStatusCommand command, CancellationToken cancellationToken = default)
     {
         var mottak = await _mottakRepository.GetByIdAsync(command.Id, cancellationToken);
@@ -33,6 +41,13 @@ public class UpdateMottakStatusHandler
             return false;
 
         var gammelStatus = mottak.Status;
+
+        // State-machine: blokker ugyldige tilbakeganger
+        if (!TillatteOverganger.TryGetValue(gammelStatus, out var tillatte) || !tillatte.Contains(newStatus))
+            throw new InvalidOperationException(
+                $"Mottak kan ikke gå fra '{gammelStatus}' til '{newStatus}'. Tillatte overganger fra '{gammelStatus}': " +
+                (tillatte.Length == 0 ? "ingen" : string.Join(", ", tillatte)) + ".");
+
         mottak.Status = newStatus;
 
         // Godkjent → kun godkjente linjer føres inn på lager. Avviste linjer får ingen beholdning
