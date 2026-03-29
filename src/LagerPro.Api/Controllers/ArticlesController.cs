@@ -43,7 +43,7 @@ public class ArticlesController : ControllerBase
     public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
     {
         var article = await _getByIdHandler.Handle(new GetArticleByIdQuery(id), cancellationToken);
-        if (article is null) return NotFound(new { message = $"Article with id {id} not found." });
+        if (article is null) return NotFound(new { message = $"Artikkel med id {id} ble ikke funnet." });
         return Ok(article);
     }
 
@@ -78,7 +78,7 @@ public class ArticlesController : ControllerBase
     public async Task<IActionResult> Update(int id, [FromBody] UpdateArticleRequest request, CancellationToken cancellationToken)
     {
         var existing = await _getByIdHandler.Handle(new GetArticleByIdQuery(id), cancellationToken);
-        if (existing is null) return NotFound(new { message = $"Article with id {id} not found." });
+        if (existing is null) return NotFound(new { message = $"Artikkel med id {id} ble ikke funnet." });
 
         try
         {
@@ -98,7 +98,7 @@ public class ArticlesController : ControllerBase
                     request.Aktiv),
                 cancellationToken);
 
-            if (!success) return NotFound(new { message = $"Article with id {id} not found." });
+            if (!success) return NotFound(new { message = $"Artikkel med id {id} ble ikke funnet." });
             return Ok(new { id });
         }
         catch (InvalidOperationException ex)
@@ -111,7 +111,7 @@ public class ArticlesController : ControllerBase
     public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
     {
         var success = await _deleteHandler.Handle(new DeleteArticleCommand(id), cancellationToken);
-        if (!success) return NotFound(new { message = $"Article with id {id} not found." });
+        if (!success) return NotFound(new { message = $"Artikkel med id {id} ble ikke funnet." });
         return NoContent();
     }
 }

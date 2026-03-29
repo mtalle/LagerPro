@@ -36,7 +36,7 @@ public class ShippingController : ControllerBase
     public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
     {
         var levering = await _getByIdHandler.Handle(new GetLeveringByIdQuery(id), cancellationToken);
-        if (levering is null) return NotFound(new { message = $"Levering with id {id} not found." });
+        if (levering is null) return NotFound(new { message = $"Levering with id {id} ble ikke funnet." });
         return Ok(levering);
     }
 
@@ -76,7 +76,7 @@ public class ShippingController : ControllerBase
             var success = await _updateStatusHandler.Handle(
                 new UpdateLeveringStatusCommand(id, request.Status, request.UtfortAv),
                 cancellationToken);
-            if (!success) return NotFound(new { message = $"Levering with id {id} not found." });
+            if (!success) return NotFound(new { message = $"Levering with id {id} ble ikke funnet." });
             return Ok(new { id, status = request.Status });
         }
         catch (InvalidOperationException ex)
@@ -89,7 +89,7 @@ public class ShippingController : ControllerBase
     public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
     {
         var success = await _deleteHandler.Handle(new DeleteLeveringCommand(id), cancellationToken);
-        if (!success) return NotFound(new { message = $"Levering with id {id} not found." });
+        if (!success) return NotFound(new { message = $"Levering with id {id} ble ikke funnet." });
         return NoContent();
     }
 }

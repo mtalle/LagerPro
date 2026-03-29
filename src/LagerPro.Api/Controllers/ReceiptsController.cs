@@ -51,7 +51,7 @@ public class ReceiptsController : ControllerBase
     public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
     {
         var mottak = await _getByIdHandler.Handle(new GetMottakByIdQuery(id), cancellationToken);
-        if (mottak is null) return NotFound(new { message = $"Mottak with id {id} not found." });
+        if (mottak is null) return NotFound(new { message = $"Mottak med id {id} ble ikke funnet." });
         return Ok(mottak);
     }
 
@@ -92,7 +92,7 @@ public class ReceiptsController : ControllerBase
         try
         {
             var success = await _updateStatusHandler.Handle(new UpdateMottakStatusCommand(id, request.Status), cancellationToken);
-            if (!success) return NotFound(new { message = $"Mottak with id {id} ble ikke funnet." });
+            if (!success) return NotFound(new { message = $"Mottak med id {id} ble ikke funnet." });
             return Ok(new { id, status = request.Status });
         }
         catch (InvalidOperationException ex)
@@ -156,7 +156,7 @@ public class ReceiptsController : ControllerBase
     public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
     {
         var success = await _deleteHandler.Handle(new DeleteMottakCommand(id), cancellationToken);
-        if (!success) return NotFound(new { message = $"Mottak with id {id} not found." });
+        if (!success) return NotFound(new { message = $"Mottak med id {id} ble ikke funnet." });
         return NoContent();
     }
 }

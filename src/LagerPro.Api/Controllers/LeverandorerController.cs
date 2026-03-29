@@ -42,7 +42,7 @@ public class LeverandorerController : ControllerBase
     public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
     {
         var leverandor = await _getByIdHandler.Handle(new GetLeverandorByIdQuery(id), cancellationToken);
-        if (leverandor is null) return NotFound(new { message = $"Leverandør with id {id} not found." });
+        if (leverandor is null) return NotFound(new { message = $"Leverandør med id {id} ble ikke funnet." });
         return Ok(leverandor);
     }
 
@@ -76,7 +76,7 @@ public class LeverandorerController : ControllerBase
     public async Task<IActionResult> Update(int id, [FromBody] UpdateLeverandorRequest request, CancellationToken cancellationToken)
     {
         var existing = await _getByIdHandler.Handle(new GetLeverandorByIdQuery(id), cancellationToken);
-        if (existing is null) return NotFound(new { message = $"Leverandør with id {id} not found." });
+        if (existing is null) return NotFound(new { message = $"Leverandør med id {id} ble ikke funnet." });
 
         try
         {
@@ -95,7 +95,7 @@ public class LeverandorerController : ControllerBase
                     request.Aktiv),
                 cancellationToken);
 
-            if (!success) return NotFound(new { message = $"Leverandør with id {id} not found." });
+            if (!success) return NotFound(new { message = $"Leverandør med id {id} ble ikke funnet." });
             return Ok(new { id });
         }
         catch (InvalidOperationException ex)
@@ -108,7 +108,7 @@ public class LeverandorerController : ControllerBase
     public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
     {
         var success = await _deleteHandler.Handle(new DeleteLeverandorCommand(id), cancellationToken);
-        if (!success) return NotFound(new { message = $"Leverandør with id {id} not found." });
+        if (!success) return NotFound(new { message = $"Leverandør med id {id} ble ikke funnet." });
         return NoContent();
     }
 }

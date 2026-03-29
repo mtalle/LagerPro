@@ -52,7 +52,7 @@ public class ProductionController : ControllerBase
     public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
     {
         var ordre = await _getByIdHandler.Handle(new GetProduksjonsOrdreByIdQuery(id), cancellationToken);
-        if (ordre is null) return NotFound(new { message = $"Produksjonsordre with id {id} not found." });
+        if (ordre is null) return NotFound(new { message = $"Produksjonsordre med id {id} ble ikke funnet." });
         return Ok(ordre);
     }
 
@@ -60,7 +60,7 @@ public class ProductionController : ControllerBase
     public async Task<IActionResult> GetFerdigmeldPrefill(int id, CancellationToken cancellationToken)
     {
         var prefill = await _ferdigmeldPrefillHandler.Handle(new GetFerdigmeldPrefillQuery(id), cancellationToken);
-        if (prefill is null) return NotFound(new { message = $"Produksjonsordre with id {id} not found." });
+        if (prefill is null) return NotFound(new { message = $"Produksjonsordre med id {id} ble ikke funnet." });
         return Ok(prefill);
     }
 
@@ -90,7 +90,7 @@ public class ProductionController : ControllerBase
         try
         {
             var success = await _updateStatusHandler.Handle(new UpdateProduksjonsOrdreStatusCommand(id, request.Status), cancellationToken);
-            if (!success) return NotFound(new { message = $"Produksjonsordre with id {id} ble ikke funnet eller ugyldig status." });
+            if (!success) return NotFound(new { message = $"Produksjonsordre med id {id} ble ikke funnet eller ugyldig status." });
             return Ok(new { id, status = request.Status });
         }
         catch (InvalidOperationException ex)

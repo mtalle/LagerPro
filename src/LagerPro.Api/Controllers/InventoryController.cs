@@ -50,7 +50,7 @@ public class InventoryController : ControllerBase
         var beholdning = await _getByLotNrHandler.Handle(
             new GetLagerBeholdningByLotNrQuery(lotNr), cancellationToken);
         if (beholdning is null)
-            return NotFound(new { message = $"Lot {lotNr} not found." });
+            return NotFound(new { message = $"Lot {lotNr} ble ikke funnet." });
         return Ok(beholdning);
     }
 

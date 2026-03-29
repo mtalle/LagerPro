@@ -47,7 +47,7 @@ public class ResepterController : ControllerBase
     public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
     {
         var resept = await _getByIdHandler.Handle(new GetReseptByIdQuery(id), cancellationToken);
-        if (resept is null) return NotFound(new { message = $"Resept with id {id} not found." });
+        if (resept is null) return NotFound(new { message = $"Resept med id {id} ble ikke funnet." });
         return Ok(resept);
     }
 
@@ -98,7 +98,7 @@ public class ResepterController : ControllerBase
                     l.Kommentar)).ToList()),
             cancellationToken);
 
-        if (!success) return NotFound(new { message = $"Resept with id {id} not found." });
+        if (!success) return NotFound(new { message = $"Resept med id {id} ble ikke funnet." });
         return Ok(new { id });
     }
 
@@ -106,7 +106,7 @@ public class ResepterController : ControllerBase
     public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
     {
         var success = await _deleteHandler.Handle(new DeleteReseptCommand(id), cancellationToken);
-        if (!success) return NotFound(new { message = $"Resept with id {id} not found." });
+        if (!success) return NotFound(new { message = $"Resept med id {id} ble ikke funnet." });
         return NoContent();
     }
 }

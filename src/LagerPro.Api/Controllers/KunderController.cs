@@ -42,7 +42,7 @@ public class KunderController : ControllerBase
     public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
     {
         var kunde = await _getByIdHandler.Handle(new GetKundeByIdQuery(id), cancellationToken);
-        if (kunde is null) return NotFound(new { message = $"Kunde with id {id} not found." });
+        if (kunde is null) return NotFound(new { message = $"Kunde med id {id} ble ikke funnet." });
         return Ok(kunde);
     }
 
@@ -76,7 +76,7 @@ public class KunderController : ControllerBase
     public async Task<IActionResult> Update(int id, [FromBody] UpdateKundeRequest request, CancellationToken cancellationToken)
     {
         var existing = await _getByIdHandler.Handle(new GetKundeByIdQuery(id), cancellationToken);
-        if (existing is null) return NotFound(new { message = $"Kunde with id {id} not found." });
+        if (existing is null) return NotFound(new { message = $"Kunde med id {id} ble ikke funnet." });
 
         try
         {
@@ -95,7 +95,7 @@ public class KunderController : ControllerBase
                     request.Aktiv),
                 cancellationToken);
 
-            if (!success) return NotFound(new { message = $"Kunde with id {id} not found." });
+            if (!success) return NotFound(new { message = $"Kunde med id {id} ble ikke funnet." });
             return Ok(new { id });
         }
         catch (InvalidOperationException ex)
@@ -108,7 +108,7 @@ public class KunderController : ControllerBase
     public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
     {
         var success = await _deleteHandler.Handle(new DeleteKundeCommand(id), cancellationToken);
-        if (!success) return NotFound(new { message = $"Kunde with id {id} not found." });
+        if (!success) return NotFound(new { message = $"Kunde med id {id} ble ikke funnet." });
         return NoContent();
     }
 }
