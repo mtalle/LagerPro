@@ -1,12 +1,18 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { LagerBeholdning, get } from '../../lib/api';
+import { LagerBeholdning, get, patch } from '../../lib/api';
 
 export default function LagerPage() {
   const [beholdninger, setBeholdninger] = useState<LagerBeholdning[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [visKunLav, setVisKunLav] = useState(false);
+  const [adjustTarget, setAdjustTarget] = useState<LagerBeholdning | null>(null);
+  const [adjustMengde, setAdjustMengde] = useState('');
+  const [adjustKommentar, setAdjustKommentar] = useState('');
+  const [adjustError, setAdjustError] = useState('');
+  const [adjustSuccess, setAdjustSuccess] = useState('');
+  const [adjustLoading, setAdjustLoading] = useState(false);
 
   useEffect(() => { loadData(); }, []);
 
@@ -18,6 +24,38 @@ export default function LagerPage() {
       console.error(e);
     } finally {
       setLoading(false);
+    }
+  }
+
+  function openAdjust(b: LagerBeholdning) {
+    setAdjustTarget(b);
+    setAdjustMengde(b.mengde.toString());
+    setAdjustKommentar('');
+    setAdjustError('');
+    setAdjustSuccess('');
+  }
+
+  async function handleAdjust(e: React.FormEvent) {
+    e.preventDefault();
+    if (!adjustTarget) return;
+    const nyMengde = parseFloat(adjustMengde);
+    if (isNaN(nyMengde) || nyMengde < 0) { setAdjustError('Ugyldig mengde.'); return; }
+    setAdjustLoading(true);
+    setAdjustError('');
+    try {
+      await patch('/inventory/juster', {
+        artikkelId: adjustTarget.artikkelId,
+        lotNr: adjustTarget.lotNr,
+        nyMengde,
+        kommentar: adjustKommentar || null,
+      });
+      setAdjustSuccess(`Beholdning justert fra ${adjustTarget.mengde} til ${nyMengde}.`);
+      setTimeout(() => { setAdjustTarget(null); setAdjustSuccess(''); }, 2000);
+      loadData();
+    } catch (err) {
+      setAdjustError('Feil: ' + (err as Error).message);
+    } finally {
+      setAdjustLoading(false);
     }
   }
 
@@ -70,11 +108,12 @@ export default function LagerPage() {
             <th>Lokasjon</th>
             <th>Best-før</th>
             <th>Oppdatert</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
           {filtered.length === 0 ? (
-            <tr><td colSpan={9} style={{ textAlign: 'center', color: '#9ca3af', padding: '2rem' }}>Ingen beholdning funnet</td></tr>
+            <tr><td colSpan={10} style={{ textAlign: 'center', color: '#9ca3af', padding: '2rem' }}>Ingen beholdning funnet</td></tr>
           ) : filtered.map(b => {
             const erLav = b.minBeholdning != null && b.mengde < b.minBeholdning;
             return (
@@ -90,11 +129,58 @@ export default function LagerPage() {
                 <td>{b.lokasjon ?? '—'}</td>
                 <td>{b.bestForDato ? new Date(b.bestForDato).toLocaleDateString('no-NO') : '—'}</td>
                 <td>{new Date(b.sistOppdatert).toLocaleDateString('no-NO')}</td>
+                <td>
+                  <button className="btn btn-sm btn-secondary" onClick={() => openAdjust(b)}>Juster</button>
+                </td>
               </tr>
             );
           })}
         </tbody>
       </table>
+
+      {adjustTarget && (
+        <div className="modal-overlay" onClick={() => setAdjustTarget(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 420 }}>
+            <h2>Juster beholdning</h2>
+            <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1rem' }}>
+              {adjustTarget.artikkelNavn} ({adjustTarget.artikkelNr}) — Lot: <code>{adjustTarget.lotNr}</code>
+            </p>
+            <p style={{ fontSize: '0.875rem', marginBottom: '1rem' }}>
+              Nåværende mengde: <strong>{adjustTarget.mengde} {adjustTarget.enhet}</strong>
+            </p>
+            <form onSubmit={handleAdjust}>
+              {adjustError && <div className="alert alert-error" style={{ marginBottom: '0.75rem' }}>{adjustError}</div>}
+              {adjustSuccess && <div className="alert alert-success" style={{ marginBottom: '0.75rem' }}>{adjustSuccess}</div>}
+              <div className="form-group">
+                <label>Ny mengde ({adjustTarget.enhet})</label>
+                <input
+                  type="number"
+                  step="0.001"
+                  min="0"
+                  required
+                  value={adjustMengde}
+                  onChange={e => setAdjustMengde(e.target.value)}
+                />
+              </div>
+              <div className="form-group">
+                <label>Kommentar</label>
+                <textarea
+                  rows={2}
+                  value={adjustKommentar}
+                  onChange={e => setAdjustKommentar(e.target.value)}
+                  placeholder="f.eks. Varetelling 2026-03-29"
+                />
+              </div>
+              <div className="form-actions">
+                <button type="button" className="btn btn-secondary" onClick={() => setAdjustTarget(null)}>Avbryt</button>
+                <button type="submit" className="btn btn-primary" disabled={adjustLoading}>
+                  {adjustLoading ? 'Lagrer...' : 'Lagre'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 }

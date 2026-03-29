@@ -263,10 +263,11 @@ public class ArticleTests
     #region DeleteArticleHandler
 
     [Fact]
-    public async Task DeleteArticleHandler_ExistingArticle_DeletesAndReturnsTrue()
+    public async Task DeleteArticleHandler_ExistingArticle_SoftDeletesAndReturnsTrue()
     {
-        // Arrange
+        // Arrange — soft delete: setter Aktiv = false, ingen Delete()-call
         var article = CreateTestArticle(1, "RAV-001", "Hvetemel");
+        article.Aktiv = true;
 
         _repositoryMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(article);
@@ -280,7 +281,8 @@ public class ArticleTests
 
         // Assert
         Assert.True(result);
-        _repositoryMock.Verify(r => r.Delete(article, It.IsAny<CancellationToken>()), Times.Once);
+        Assert.False(article.Aktiv); // soft delete
+        _repositoryMock.Verify(r => r.Delete(It.IsAny<Artikkel>(), It.IsAny<CancellationToken>()), Times.Never);
         _unitOfWorkMock.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 

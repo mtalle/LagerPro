@@ -18,6 +18,7 @@ using LagerPro.Application.Features.Levering.Commands.UpdateLeveringStatus;
 using LagerPro.Application.Features.Levering.Queries.GetAllLevering;
 using LagerPro.Application.Features.Levering.Queries.GetLeveringById;
 using LagerPro.Application.Features.Mottak.Commands.CreateMottak;
+using LagerPro.Application.Features.Mottak.Commands.UpdateMottakLinjeGodkjenning;
 using LagerPro.Application.Features.Mottak.Commands.UpdateMottakStatus;
 using LagerPro.Application.Features.Mottak.Queries.GetAllMottak;
 using LagerPro.Application.Features.Mottak.Queries.GetMottakById;
@@ -25,8 +26,12 @@ using LagerPro.Application.Features.Produksjon.Commands.CreateProduksjonsOrdre;
 using LagerPro.Application.Features.Produksjon.Commands.FerdigmeldProduksjonsOrdre;
 using LagerPro.Application.Features.Produksjon.Commands.UpdateProduksjonsOrdreStatus;
 using LagerPro.Application.Features.Produksjon.Queries.GetAllProduksjonsOrdre;
+using LagerPro.Application.Features.Produksjon.Queries.GetFerdigmeldPrefill;
 using LagerPro.Application.Features.Produksjon.Queries.GetPlukkliste;
 using LagerPro.Application.Features.Produksjon.Queries.GetProduksjonsOrdreById;
+using LagerPro.Application.Features.Lager.Commands.JusterLager;
+using LagerPro.Application.Features.Lager.Queries.GetLagerBeholdningByArtikkel;
+using LagerPro.Application.Features.Lager.Queries.GetLagerBeholdningByLotNr;
 using LagerPro.Application.Features.Resepter.Commands.CreateResept;
 using LagerPro.Application.Features.Resepter.Queries.GetAllResepter;
 using LagerPro.Application.Features.Resepter.Queries.GetReseptById;
@@ -68,10 +73,14 @@ public static class ServiceCollectionExtensions
         services.AddScoped<GetMottakByIdHandler>();
         services.AddScoped<CreateMottakHandler>();
         services.AddScoped<UpdateMottakStatusHandler>();
+        services.AddScoped<UpdateMottakLinjeGodkjenningHandler>();
 
         // Lager
         services.AddScoped<GetAllLagerBeholdningHandler>();
         services.AddScoped<GetAllLagerFlatHandler>();
+        services.AddScoped<GetLagerBeholdningByArtikkelHandler>();
+        services.AddScoped<GetLagerBeholdningByLotNrHandler>();
+        services.AddScoped<JusterLagerHandler>();
 
         // Produksjon
         services.AddScoped<GetAllProduksjonsOrdreHandler>();
@@ -79,6 +88,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<CreateProduksjonsOrdreHandler>();
         services.AddScoped<UpdateProduksjonsOrdreStatusHandler>();
         services.AddScoped<FerdigmeldProduksjonsOrdreHandler>();
+        services.AddScoped<GetFerdigmeldPrefillHandler>();
         services.AddScoped<GetPlukklisteHandler>();
 
         // Levering

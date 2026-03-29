@@ -93,6 +93,14 @@ export interface LagerBeholdning {
   minBeholdning?: number;
 }
 
+export interface JusterLagerRequest {
+  artikkelId: number;
+  lotNr: string;
+  nyMengde: number;
+  kommentar?: string;
+  utfortAv?: string;
+}
+
 export interface Mottak {
   id: number;
   leverandorId: number;
