@@ -65,6 +65,24 @@ public class ProduksjonTests
     }
 
     [Fact]
+    public async Task CreateProduksjonsOrdreHandler_InaktivResept_Throws()
+    {
+        var inaktivResept = CreateTestResept(1, "Inaktiv Resept");
+        inaktivResept.Aktiv = false;
+        var command = new CreateProduksjonsOrdreCommand(
+            ReseptId: 1, OrdreNr: null, PlanlagtDato: DateTime.UtcNow.AddDays(1), Kommentar: null);
+
+        _reseptRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(inaktivResept);
+
+        var handler = new CreateProduksjonsOrdreHandler(
+            _ordreRepoMock.Object, _reseptRepoMock.Object, _unitOfWorkMock.Object);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => handler.Handle(command, CancellationToken.None));
+        Assert.Contains("inaktiv", ex.Message);
+    }
+
+    [Fact]
     public async Task CreateProduksjonsOrdreHandler_WithOrdreNr_UsesProvidedOrdreNr()
     {
         var resept = CreateTestResept(1, "Brødresept");

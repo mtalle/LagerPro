@@ -2,4 +2,7 @@
   <PropertyGroup>
     <RootNamespace>LagerPro.Domain</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="LagerPro.Application.Tests" />
+  </ItemGroup>
 </Project>

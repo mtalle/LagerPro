@@ -217,6 +217,32 @@ public class MottakTests
         Assert.Equal("Ola", captured.MottattAv);
     }
 
+    [Fact]
+    public async Task CreateMottakHandler_InaktivArtikkel_Throws()
+    {
+        var inaktivArtikkel = new Artikkel { Id = 10, Navn = "Umodent korn", Enhet = "kg", Aktiv = false };
+        var command = new CreateMottakCommand(
+            LeverandorId: 1,
+            MottaksDato: DateTime.UtcNow,
+            Referanse: null,
+            Kommentar: null,
+            MottattAv: "Steve",
+            Linjer: new List<MottakLinjeCommand>
+            {
+                new(ArtikkelId: 10, LotNr: "LOT-001", Mengde: 100, Enhet: "kg",
+                    BestForDato: null, Temperatur: null, Strekkode: null, Avvik: null, Kommentar: null, Godkjent: false),
+            });
+
+        _artikkelRepoMock.Setup(r => r.GetByIdAsync(10, It.IsAny<CancellationToken>())).ReturnsAsync(inaktivArtikkel);
+
+        var handler = new CreateMottakHandler(
+            _mottakRepoMock.Object, _artikkelRepoMock.Object, _unitOfWorkMock.Object);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => handler.Handle(command, CancellationToken.None));
+        Assert.Contains("inaktiv", ex.Message);
+    }
+
     #endregion
 
     #region UpdateMottakLinjeGodkjenningHandler

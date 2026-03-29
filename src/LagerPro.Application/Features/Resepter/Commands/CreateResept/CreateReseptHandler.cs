@@ -25,7 +25,9 @@ public class CreateReseptHandler
     {
         var ferdigvare = await _artikkelRepository.GetByIdAsync(command.FerdigvareId, cancellationToken);
         if (ferdigvare is null)
-            throw new InvalidOperationException($"Ferdigvare with id {command.FerdigvareId} not found.");
+            throw new InvalidOperationException($"Ferdigvare med id {command.FerdigvareId} ble ikke funnet.");
+        if (!ferdigvare.Aktiv)
+            throw new InvalidOperationException($"Ferdigvare «{ferdigvare.Navn}» (id {command.FerdigvareId}) er inaktiv og kan ikke brukes i en resept.");
 
         var resept = new Resept
         {
@@ -44,7 +46,9 @@ public class CreateReseptHandler
         {
             var ravare = await _artikkelRepository.GetByIdAsync(linje.RavareId, cancellationToken);
             if (ravare is null)
-                throw new InvalidOperationException($"Råvare with id {linje.RavareId} not found.");
+                throw new InvalidOperationException($"Råvare med id {linje.RavareId} ble ikke funnet.");
+            if (!ravare.Aktiv)
+                throw new InvalidOperationException($"Råvare «{ravare.Navn}» (id {linje.RavareId}) er inaktiv og kan ikke brukes i en resept.");
 
             resept.Linjer.Add(new DomainReseptLinje
             {
