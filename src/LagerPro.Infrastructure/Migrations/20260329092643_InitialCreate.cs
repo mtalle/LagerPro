@@ -15,21 +15,21 @@ namespace LagerPro.Infrastructure.Migrations
                 name: "Artikler",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ArtikkelNr = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Navn = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Beskrivelse = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Type = table.Column<int>(type: "int", nullable: false),
-                    Enhet = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    Strekkode = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    Kategori = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ArtikkelNr = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    Navn = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
+                    Beskrivelse = table.Column<string>(type: "TEXT", nullable: true),
+                    Type = table.Column<int>(type: "INTEGER", nullable: false),
+                    Enhet = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
+                    Strekkode = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true),
+                    Kategori = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true),
                     Innpris = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Utpris = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    MinBeholdning = table.Column<int>(type: "int", nullable: false),
-                    Aktiv = table.Column<bool>(type: "bit", nullable: false),
-                    OpprettetDato = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    SistEndret = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    MinBeholdning = table.Column<int>(type: "INTEGER", nullable: false),
+                    Aktiv = table.Column<bool>(type: "INTEGER", nullable: false),
+                    OpprettetDato = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    SistEndret = table.Column<DateTime>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -40,20 +40,20 @@ namespace LagerPro.Infrastructure.Migrations
                 name: "Kunder",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Navn = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Kontaktperson = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    Telefon = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    Epost = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    Adresse = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: true),
-                    Postnr = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
-                    Poststed = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    OrgNr = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    Kommentar = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
-                    Aktiv = table.Column<bool>(type: "bit", nullable: false),
-                    OpprettetDato = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    SistEndret = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Navn = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
+                    Kontaktperson = table.Column<string>(type: "TEXT", maxLength: 200, nullable: true),
+                    Telefon = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),
+                    Epost = table.Column<string>(type: "TEXT", maxLength: 200, nullable: true),
+                    Adresse = table.Column<string>(type: "TEXT", maxLength: 300, nullable: true),
+                    Postnr = table.Column<string>(type: "TEXT", maxLength: 20, nullable: true),
+                    Poststed = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true),
+                    OrgNr = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),
+                    Kommentar = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: true),
+                    Aktiv = table.Column<bool>(type: "INTEGER", nullable: false),
+                    OpprettetDato = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    SistEndret = table.Column<DateTime>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -64,20 +64,20 @@ namespace LagerPro.Infrastructure.Migrations
                 name: "Leverandorer",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Navn = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Kontaktperson = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    Telefon = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    Epost = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    Adresse = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: true),
-                    Postnr = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
-                    Poststed = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    OrgNr = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    Kommentar = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
-                    Aktiv = table.Column<bool>(type: "bit", nullable: false),
-                    OpprettetDato = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    SistEndret = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Navn = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
+                    Kontaktperson = table.Column<string>(type: "TEXT", maxLength: 200, nullable: true),
+                    Telefon = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),
+                    Epost = table.Column<string>(type: "TEXT", maxLength: 200, nullable: true),
+                    Adresse = table.Column<string>(type: "TEXT", maxLength: 300, nullable: true),
+                    Postnr = table.Column<string>(type: "TEXT", maxLength: 20, nullable: true),
+                    Poststed = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true),
+                    OrgNr = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),
+                    Kommentar = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: true),
+                    Aktiv = table.Column<bool>(type: "INTEGER", nullable: false),
+                    OpprettetDato = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    SistEndret = table.Column<DateTime>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -88,15 +88,15 @@ namespace LagerPro.Infrastructure.Migrations
                 name: "LagerBeholdninger",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ArtikkelId = table.Column<int>(type: "int", nullable: false),
-                    LotNr = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ArtikkelId = table.Column<int>(type: "INTEGER", nullable: false),
+                    LotNr = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
                     Mengde = table.Column<decimal>(type: "decimal(18,3)", nullable: false),
-                    Enhet = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    Lokasjon = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    BestForDato = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    SistOppdatert = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Enhet = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
+                    Lokasjon = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true),
+                    BestForDato = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    SistOppdatert = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -113,18 +113,18 @@ namespace LagerPro.Infrastructure.Migrations
                 name: "LagerTransaksjoner",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ArtikkelId = table.Column<int>(type: "int", nullable: false),
-                    LotNr = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Type = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ArtikkelId = table.Column<int>(type: "INTEGER", nullable: false),
+                    LotNr = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    Type = table.Column<int>(type: "INTEGER", nullable: false),
                     Mengde = table.Column<decimal>(type: "decimal(18,3)", nullable: false),
                     BeholdningEtter = table.Column<decimal>(type: "decimal(18,3)", nullable: false),
-                    Kilde = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    KildeId = table.Column<int>(type: "int", nullable: true),
-                    Kommentar = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
-                    UtfortAv = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    Tidspunkt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Kilde = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    KildeId = table.Column<int>(type: "INTEGER", nullable: true),
+                    Kommentar = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: true),
+                    UtfortAv = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true),
+                    Tidspunkt = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -141,17 +141,17 @@ namespace LagerPro.Infrastructure.Migrations
                 name: "Resepter",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Navn = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    FerdigvareId = table.Column<int>(type: "int", nullable: false),
-                    Beskrivelse = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Navn = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
+                    FerdigvareId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Beskrivelse = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: true),
                     AntallPortjoner = table.Column<decimal>(type: "decimal(18,3)", nullable: false),
-                    Instruksjoner = table.Column<string>(type: "nvarchar(4000)", maxLength: 4000, nullable: true),
-                    Aktiv = table.Column<bool>(type: "bit", nullable: false),
-                    Versjon = table.Column<int>(type: "int", nullable: false),
-                    OpprettetDato = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    SistEndret = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    Instruksjoner = table.Column<string>(type: "TEXT", maxLength: 4000, nullable: true),
+                    Aktiv = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Versjon = table.Column<int>(type: "INTEGER", nullable: false),
+                    OpprettetDato = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    SistEndret = table.Column<DateTime>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -168,16 +168,16 @@ namespace LagerPro.Infrastructure.Migrations
                 name: "Leveringer",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    KundeId = table.Column<int>(type: "int", nullable: false),
-                    LeveringsDato = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Referanse = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    FraktBrev = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    Kommentar = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
-                    LevertAv = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    OpprettetDato = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    KundeId = table.Column<int>(type: "INTEGER", nullable: false),
+                    LeveringsDato = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    Referanse = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true),
+                    FraktBrev = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true),
+                    Status = table.Column<int>(type: "INTEGER", nullable: false),
+                    Kommentar = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: true),
+                    LevertAv = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true),
+                    OpprettetDato = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -194,15 +194,15 @@ namespace LagerPro.Infrastructure.Migrations
                 name: "Mottak",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    LeverandorId = table.Column<int>(type: "int", nullable: false),
-                    MottaksDato = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Referanse = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    Kommentar = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    MottattAv = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    OpprettetDato = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    LeverandorId = table.Column<int>(type: "INTEGER", nullable: false),
+                    MottaksDato = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    Referanse = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true),
+                    Kommentar = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: true),
+                    Status = table.Column<int>(type: "INTEGER", nullable: false),
+                    MottattAv = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true),
+                    OpprettetDato = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -219,18 +219,18 @@ namespace LagerPro.Infrastructure.Migrations
                 name: "ProduksjonsOrdre",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ReseptId = table.Column<int>(type: "int", nullable: false),
-                    OrdreNr = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    PlanlagtDato = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    FerdigmeldtDato = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ReseptId = table.Column<int>(type: "INTEGER", nullable: false),
+                    OrdreNr = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    PlanlagtDato = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    FerdigmeldtDato = table.Column<DateTime>(type: "TEXT", nullable: true),
                     AntallProdusert = table.Column<decimal>(type: "decimal(18,3)", nullable: false),
-                    FerdigvareLotNr = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    Kommentar = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
-                    UtfortAv = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    OpprettetDato = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    FerdigvareLotNr = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    Status = table.Column<int>(type: "INTEGER", nullable: false),
+                    Kommentar = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: true),
+                    UtfortAv = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true),
+                    OpprettetDato = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -247,14 +247,14 @@ namespace LagerPro.Infrastructure.Migrations
                 name: "ReseptLinjer",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ReseptId = table.Column<int>(type: "int", nullable: false),
-                    RavareId = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ReseptId = table.Column<int>(type: "INTEGER", nullable: false),
+                    RavareId = table.Column<int>(type: "INTEGER", nullable: false),
                     Mengde = table.Column<decimal>(type: "decimal(18,3)", nullable: false),
-                    Enhet = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    Rekkefolge = table.Column<int>(type: "int", nullable: false),
-                    Kommentar = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true)
+                    Enhet = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
+                    Rekkefolge = table.Column<int>(type: "INTEGER", nullable: false),
+                    Kommentar = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -277,14 +277,14 @@ namespace LagerPro.Infrastructure.Migrations
                 name: "LeveringLinjer",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    LeveringId = table.Column<int>(type: "int", nullable: false),
-                    ArtikkelId = table.Column<int>(type: "int", nullable: false),
-                    LotNr = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    LeveringId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ArtikkelId = table.Column<int>(type: "INTEGER", nullable: false),
+                    LotNr = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
                     Mengde = table.Column<decimal>(type: "decimal(18,3)", nullable: false),
-                    Enhet = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    Kommentar = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true)
+                    Enhet = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
+                    Kommentar = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -307,19 +307,19 @@ namespace LagerPro.Infrastructure.Migrations
                 name: "MottakLinjer",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    MottakId = table.Column<int>(type: "int", nullable: false),
-                    ArtikkelId = table.Column<int>(type: "int", nullable: false),
-                    LotNr = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    MottakId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ArtikkelId = table.Column<int>(type: "INTEGER", nullable: false),
+                    LotNr = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
                     Mengde = table.Column<decimal>(type: "decimal(18,3)", nullable: false),
-                    Enhet = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    BestForDato = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Enhet = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
+                    BestForDato = table.Column<DateTime>(type: "TEXT", nullable: true),
                     Temperatur = table.Column<decimal>(type: "decimal(5,2)", nullable: true),
-                    Strekkode = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    Avvik = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
-                    Kommentar = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
-                    Godkjent = table.Column<bool>(type: "bit", nullable: false)
+                    Strekkode = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true),
+                    Avvik = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: true),
+                    Kommentar = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: true),
+                    Godkjent = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -342,15 +342,15 @@ namespace LagerPro.Infrastructure.Migrations
                 name: "ProdOrdreForbruk",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ProdOrdreId = table.Column<int>(type: "int", nullable: false),
-                    ArtikkelId = table.Column<int>(type: "int", nullable: false),
-                    LotNr = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ProdOrdreId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ArtikkelId = table.Column<int>(type: "INTEGER", nullable: false),
+                    LotNr = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
                     MengdeBrukt = table.Column<decimal>(type: "decimal(18,3)", nullable: false),
-                    Enhet = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    Overstyrt = table.Column<bool>(type: "bit", nullable: false),
-                    Kommentar = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true)
+                    Enhet = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
+                    Overstyrt = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Kommentar = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -364,6 +364,34 @@ namespace LagerPro.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_ProdOrdreForbruk_ProduksjonsOrdre_ProdOrdreId",
                         column: x => x.ProdOrdreId,
+                        principalTable: "ProduksjonsOrdre",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProduksjonsOrdreVersjoner",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ProduksjonsOrdreId = table.Column<int>(type: "INTEGER", nullable: false),
+                    VersjonsNummer = table.Column<int>(type: "INTEGER", nullable: false),
+                    AntallProdusert = table.Column<decimal>(type: "TEXT", precision: 18, scale: 4, nullable: false),
+                    FerdigvareLotNr = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    Status = table.Column<int>(type: "INTEGER", nullable: false),
+                    Kommentar = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: true),
+                    UtfortAv = table.Column<string>(type: "TEXT", maxLength: 200, nullable: true),
+                    FerdigmeldtDato = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    OpprettetDato = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    SistEndret = table.Column<DateTime>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProduksjonsOrdreVersjoner", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProduksjonsOrdreVersjoner_ProduksjonsOrdre_ProduksjonsOrdreId",
+                        column: x => x.ProduksjonsOrdreId,
                         principalTable: "ProduksjonsOrdre",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -438,6 +466,11 @@ namespace LagerPro.Infrastructure.Migrations
                 column: "ReseptId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ProduksjonsOrdreVersjoner_ProduksjonsOrdreId",
+                table: "ProduksjonsOrdreVersjoner",
+                column: "ProduksjonsOrdreId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Resepter_FerdigvareId",
                 table: "Resepter",
                 column: "FerdigvareId");
@@ -470,6 +503,9 @@ namespace LagerPro.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "ProdOrdreForbruk");
+
+            migrationBuilder.DropTable(
+                name: "ProduksjonsOrdreVersjoner");
 
             migrationBuilder.DropTable(
                 name: "ReseptLinjer");

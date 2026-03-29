@@ -8,8 +8,7 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<LagerProDb
     public LagerProDbContext CreateDbContext(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<LagerProDbContext>();
-        optionsBuilder.UseSqlServer(
-            "Server=localhost;Database=LagerProDb;User Id=sa;Password=YourStrong!Passw0rd;Encrypt=True;TrustServerCertificate=True;");
+        optionsBuilder.UseSqlite("Data Source=/home/ubuntu/.openclaw/workspace/LagerPro.db");
 
         return new LagerProDbContext(optionsBuilder.Options);
     }

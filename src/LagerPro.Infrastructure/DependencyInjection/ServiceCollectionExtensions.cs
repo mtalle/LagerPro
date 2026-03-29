@@ -13,10 +13,10 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? "Server=localhost;Database=LagerProDb;Trusted_Connection=False;Encrypt=True;TrustServerCertificate=True;";
+            ?? "Data Source=/home/ubuntu/.openclaw/workspace/LagerPro.db";
 
         services.AddDbContext<LagerProDbContext>(options =>
-            options.UseSqlServer(connectionString));
+            options.UseSqlite(connectionString));
 
         // Unit of Work
         services.AddScoped<IUnitOfWork, UnitOfWork>();

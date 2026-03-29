@@ -20,6 +20,7 @@ public class LagerProDbContext : DbContext
     public DbSet<ReseptLinje> ReseptLinjer => Set<ReseptLinje>();
     public DbSet<ProduksjonsOrdre> ProduksjonsOrdre => Set<ProduksjonsOrdre>();
     public DbSet<ProdOrdreForbruk> ProdOrdreForbruk => Set<ProdOrdreForbruk>();
+    public DbSet<ProduksjonsOrdreVersjon> ProduksjonsOrdreVersjoner => Set<ProduksjonsOrdreVersjon>();
     public DbSet<Levering> Leveringer => Set<Levering>();
     public DbSet<LeveringLinje> LeveringLinjer => Set<LeveringLinje>();
 

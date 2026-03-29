@@ -1,3 +1,4 @@
+using LagerPro.Application.Services;
 using LagerPro.Application.Features.Articles.Commands.CreateArticle;
 using LagerPro.Application.Features.Articles.Commands.DeleteArticle;
 using LagerPro.Application.Features.Articles.Commands.UpdateArticle;
@@ -19,6 +20,7 @@ using LagerPro.Application.Features.Levering.Queries.GetAllLevering;
 using LagerPro.Application.Features.Levering.Queries.GetLeveringById;
 using LagerPro.Application.Features.Mottak.Commands.CreateMottak;
 using LagerPro.Application.Features.Mottak.Commands.UpdateMottakLinjeGodkjenning;
+using LagerPro.Application.Features.Mottak.Commands.UpdateMottakLinje;
 using LagerPro.Application.Features.Mottak.Commands.UpdateMottakStatus;
 using LagerPro.Application.Features.Mottak.Queries.GetAllMottak;
 using LagerPro.Application.Features.Mottak.Queries.GetMottakById;
@@ -33,6 +35,8 @@ using LagerPro.Application.Features.Lager.Commands.JusterLager;
 using LagerPro.Application.Features.Lager.Queries.GetLagerBeholdningByArtikkel;
 using LagerPro.Application.Features.Lager.Queries.GetLagerBeholdningByLotNr;
 using LagerPro.Application.Features.Resepter.Commands.CreateResept;
+using LagerPro.Application.Features.Resepter.Commands.UpdateResept;
+using LagerPro.Application.Features.Resepter.Commands.DeleteResept;
 using LagerPro.Application.Features.Resepter.Queries.GetAllResepter;
 using LagerPro.Application.Features.Resepter.Queries.GetReseptById;
 using LagerPro.Application.Features.Traceability.Queries.GetTraceabilityByArtikkel;
@@ -73,6 +77,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<GetMottakByIdHandler>();
         services.AddScoped<CreateMottakHandler>();
         services.AddScoped<UpdateMottakStatusHandler>();
+        services.AddScoped<UpdateMottakLinjeHandler>();
         services.AddScoped<UpdateMottakLinjeGodkjenningHandler>();
 
         // Lager
@@ -101,12 +106,17 @@ public static class ServiceCollectionExtensions
         services.AddScoped<GetAllResepterHandler>();
         services.AddScoped<GetReseptByIdHandler>();
         services.AddScoped<CreateReseptHandler>();
+        services.AddScoped<UpdateReseptHandler>();
+        services.AddScoped<DeleteReseptHandler>();
 
         // Traceability
         services.AddScoped<GetTraceabilityByLotHandler>();
         services.AddScoped<GetTraceabilityByArtikkelHandler>();
         services.AddScoped<GetTraceabilityByBatchHandler>();
         services.AddScoped<GetTraceabilityByKundeHandler>();
+
+        // Services
+        services.AddScoped<ProjectStatusService>();
 
         return services;
     }

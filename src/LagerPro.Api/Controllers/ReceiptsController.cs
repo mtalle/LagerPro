@@ -1,4 +1,5 @@
 using LagerPro.Application.Features.Mottak.Commands.UpdateMottakStatus;
+using LagerPro.Application.Features.Mottak.Commands.UpdateMottakLinje;
 using LagerPro.Application.Features.Mottak.Commands.UpdateMottakLinjeGodkjenning;
 using LagerPro.Application.Features.Mottak.Queries.GetAllMottak;
 using LagerPro.Application.Features.Mottak.Queries.GetMottakById;
@@ -17,14 +18,22 @@ public class ReceiptsController : ControllerBase
     private readonly CreateMottakHandler _createHandler;
     private readonly UpdateMottakStatusHandler _updateStatusHandler;
     private readonly UpdateMottakLinjeGodkjenningHandler _updateLinjeHandler;
+    private readonly UpdateMottakLinjeHandler _updateLinjeFullHandler;
 
-    public ReceiptsController(GetAllMottakHandler getAllHandler, GetMottakByIdHandler getByIdHandler, CreateMottakHandler createHandler, UpdateMottakStatusHandler updateStatusHandler, UpdateMottakLinjeGodkjenningHandler updateLinjeHandler)
+    public ReceiptsController(
+        GetAllMottakHandler getAllHandler,
+        GetMottakByIdHandler getByIdHandler,
+        CreateMottakHandler createHandler,
+        UpdateMottakStatusHandler updateStatusHandler,
+        UpdateMottakLinjeGodkjenningHandler updateLinjeHandler,
+        UpdateMottakLinjeHandler updateLinjeFullHandler)
     {
         _getAllHandler = getAllHandler;
         _getByIdHandler = getByIdHandler;
         _createHandler = createHandler;
         _updateStatusHandler = updateStatusHandler;
         _updateLinjeHandler = updateLinjeHandler;
+        _updateLinjeFullHandler = updateLinjeFullHandler;
     }
 
     [HttpGet]
@@ -101,6 +110,37 @@ public class ReceiptsController : ControllerBase
                 cancellationToken);
             if (!success) return NotFound(new { message = $"Mottak eller linje ble ikke funnet." });
             return Ok(new { mottakId, linjeId, godkjent = request.Godkjent });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Full update av en mottakslinje (alle felt).
+    /// </summary>
+    [HttpPut("{mottakId}/linjer/{linjeId}")]
+    public async Task<IActionResult> UpdateLinje(int mottakId, int linjeId, [FromBody] UpdateMottakLinjeFullRequest request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var success = await _updateLinjeFullHandler.Handle(
+                new UpdateMottakLinjeCommand(
+                    mottakId,
+                    linjeId,
+                    request.ArtikkelId,
+                    request.LotNr,
+                    request.Mengde,
+                    request.Enhet,
+                    request.BestForDato,
+                    request.Temperatur,
+                    request.Strekkode,
+                    request.Avvik,
+                    request.Kommentar),
+                cancellationToken);
+            if (!success) return NotFound(new { message = $"Mottak eller linje ble ikke funnet." });
+            return Ok(new { mottakId, linjeId, updated = true });
         }
         catch (InvalidOperationException ex)
         {
