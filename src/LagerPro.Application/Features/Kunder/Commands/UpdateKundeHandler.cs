@@ -21,6 +21,13 @@ public class UpdateKundeHandler
         if (kunde is null)
             return false;
 
+        if (!string.IsNullOrWhiteSpace(command.OrgNr))
+        {
+            var eksisterende = await _repository.GetByOrgNrAsync(command.OrgNr, cancellationToken);
+            if (eksisterende is not null && eksisterende.Id != command.Id)
+                throw new InvalidOperationException($"Ein kunde med organisasjonsnummer {command.OrgNr} finst allereie.");
+        }
+
         kunde.Navn = command.Navn;
         kunde.Kontaktperson = command.Kontaktperson;
         kunde.Telefon = command.Telefon;

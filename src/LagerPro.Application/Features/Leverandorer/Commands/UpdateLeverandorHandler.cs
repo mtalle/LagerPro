@@ -21,6 +21,13 @@ public class UpdateLeverandorHandler
         if (leverandor is null)
             return false;
 
+        if (!string.IsNullOrWhiteSpace(command.OrgNr))
+        {
+            var eksisterende = await _repository.GetByOrgNrAsync(command.OrgNr, cancellationToken);
+            if (eksisterende is not null && eksisterende.Id != command.Id)
+                throw new InvalidOperationException($"Ein leverandør med organisasjonsnummer {command.OrgNr} finst allereie.");
+        }
+
         leverandor.Navn = command.Navn;
         leverandor.Kontaktperson = command.Kontaktperson;
         leverandor.Telefon = command.Telefon;
