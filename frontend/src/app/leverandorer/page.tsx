@@ -135,6 +135,7 @@ export default function LeverandorerPage() {
       ) : filtered.length === 0 ? (
         <div className="empty">Ingen leverandører funnet</div>
       ) : (
+        <div className="table-wrapper">
         <table>
           <thead>
             <tr>
@@ -175,6 +176,7 @@ export default function LeverandorerPage() {
             ))}
           </tbody>
         </table>
+        </div>
       )}
 
       {showModal && (

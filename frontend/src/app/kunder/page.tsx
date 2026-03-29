@@ -135,6 +135,7 @@ export default function KunderPage() {
       ) : filtered.length === 0 ? (
         <div className="empty">Ingen kunder funnet</div>
       ) : (
+        <div className="table-wrapper">
         <table>
           <thead>
             <tr>
@@ -175,6 +176,7 @@ export default function KunderPage() {
             ))}
           </tbody>
         </table>
+        </div>
       )}
 
       {showModal && (

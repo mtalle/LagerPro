@@ -188,6 +188,7 @@ export default function ResepterPage() {
       {filtered.length === 0 ? (
         <div style={{ textAlign: 'center', color: '#9ca3af', padding: '2rem' }}>Ingen resepter funnet</div>
       ) : (
+        <div className="table-wrapper">
         <table>
           <thead>
             <tr><th>Navn</th><th>Ferdigvare</th><th>Porsjoner</th><th>Linjer</th><th>Status</th><th></th></tr>
@@ -250,6 +251,7 @@ export default function ResepterPage() {
             ))}
           </tbody>
         </table>
+        </div>
       )}
 
       {showModal && (
