@@ -11,6 +11,7 @@ export default function MottakPage() {
   const [showModal, setShowModal] = useState(false);
   const [expanded, setExpanded] = useState<number | null>(null);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const [form, setForm] = useState({
     leverandorId: 0, mottaksDato: new Date().toISOString().slice(0, 10),
@@ -73,6 +74,8 @@ export default function MottakPage() {
         })),
       });
       setShowModal(false);
+      setSuccess('Mottak opprettet!');
+      setTimeout(() => setSuccess(''), 3000);
       loadData();
     } catch (e) { setError('Feil: ' + (e as Error).message); }
   }
@@ -143,6 +146,7 @@ export default function MottakPage() {
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
+      {success && <div className="alert alert-success">{success}</div>}
 
       <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
         <input

@@ -1232,3 +1232,104 @@ Få en første brukertestbar MVP av LagerPro så fort som mulig.
 ### Admin sine oppgåver
 - Opprette/redigere brukarar
 - Velje kva kvar brukar har tilgang til
+
+[2026-03-29 00:00:01 UTC] LagerPro cron run
+[1/4] git status
+ ? Steve-Status
+ M reports/lagerpro-cron.log
+[2/4] build
+MSBuild version 17.8.49+7806cbf7b for .NET
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  LagerPro.Domain -> /home/ubuntu/.openclaw/workspace/src/LagerPro.Domain/bin/Debug/net8.0/LagerPro.Domain.dll
+  LagerPro.Contracts -> /home/ubuntu/.openclaw/workspace/src/LagerPro.Contracts/bin/Debug/net8.0/LagerPro.Contracts.dll
+  LagerPro.Web -> /home/ubuntu/.openclaw/workspace/src/LagerPro.Web/bin/Debug/net8.0/LagerPro.Web.dll
+  LagerPro.Domain.Tests -> /home/ubuntu/.openclaw/workspace/tests/LagerPro.Domain.Tests/bin/Debug/net8.0/LagerPro.Domain.Tests.dll
+  LagerPro.Application -> /home/ubuntu/.openclaw/workspace/src/LagerPro.Application/bin/Debug/net8.0/LagerPro.Application.dll
+  LagerPro.Infrastructure -> /home/ubuntu/.openclaw/workspace/src/LagerPro.Infrastructure/bin/Debug/net8.0/LagerPro.Infrastructure.dll
+  LagerPro.Application.Tests -> /home/ubuntu/.openclaw/workspace/tests/LagerPro.Application.Tests/bin/Debug/net8.0/LagerPro.Application.Tests.dll
+  LagerPro.Api -> /home/ubuntu/.openclaw/workspace/src/LagerPro.Api/bin/Debug/net8.0/LagerPro.Api.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.93
+[3/4] test
+Test run for /home/ubuntu/.openclaw/workspace/tests/LagerPro.Domain.Tests/bin/Debug/net8.0/LagerPro.Domain.Tests.dll (.NETCoreApp,Version=v8.0)
+Microsoft (R) Test Execution Command Line Tool Version 17.8.0 (x64)
+Copyright (c) Microsoft Corporation.  All rights reserved.
+
+Test run for /home/ubuntu/.openclaw/workspace/tests/LagerPro.Application.Tests/bin/Debug/net8.0/LagerPro.Application.Tests.dll (.NETCoreApp,Version=v8.0)
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+Microsoft (R) Test Execution Command Line Tool Version 17.8.0 (x64)
+Copyright (c) Microsoft Corporation.  All rights reserved.
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: < 1 ms - LagerPro.Domain.Tests.dll (net8.0)
+
+Passed!  - Failed:     0, Passed:    82, Skipped:     0, Total:    82, Duration: 426 ms - LagerPro.Application.Tests.dll (net8.0)
+[4/4] mvp plan pointer
+# LagerPro — MVP-plan
+
+## Visjon
+**For matindustrien** — sporbarheit, lagerstyring og produksjonsplanlegging i éin applikasjon.
+
+**Kjerneverdi:** Live lager med full sporing frå råvare til ferdig produkt.
+
+**Langtsiktig:** Versjon 1 → éin solid applikasjon, bygd på generisk architektur.
+
+---
+
+## Mål
+Få en første brukertestbar MVP av LagerPro så fort som mulig.
+
+## Backend-status (2026-03-28) ✅
+**Ferdig:** Artikler, Kunder, Leverandører, Resepter, Mottak, Produksjon, Levering, Lager, Sporbarhet
+**Tester:** 82 passing
+**Alle API-endepunkt på plass og pushet til GitHub**
+
+---
+
+## Frontend MVP — Nytt fokusområde
+
+### Prioritert rekkefølge (sub-agent oppdrag)
+
+#### Fase 1: Fiks eksisterande sider
+- [ ] **Lageroversikt** → Bruk `/api/lager`
+- [ ] **Mottak** → Bruk `/api/mottak`
+- [ ] **Produksjon** → Bruk `/api/produksjon`
+- [ ] **Levering** → Bruk `/api/levering`
+- [ ] Alle knappar og skjema må fungere (les, lag, oppdater)
+
+#### Fase 2: Nye sider + organisering
+- [ ] **Artikklar** → vis alle + rediger (Varelager)
+- [ ] **Innstillingar** → Kunder + Leverandører (CRUD)
+- [ ] **Resepter** → liste + legg til + rediger
+
+#### Fase 3: Avansert
+- [ ] **Sporing** → spor artikkel/lotje via `/api/traceability/lot/{lotNr}`
+- [ ] **Dashboard** → enkel oversikt (artiklar, lager, produksjon)
+- [ ] **Rapporter** → enkle nedlastningar
+
+---
+
+## Brukarroller & Mobil-oppleving
+
+### Kjerneprinsipp
+**Brukarvennleg høgt opp** — appen skal vere enkel for alle, spesielt dei på gulvet.
+
+### Brukartypen
+| Rolle | Tilgang | Grensesnitt |
+|-------|--------|-------------|
+| **Admin** | Alt + brukarstyring | Web (full) |
+| **Varemottak** | Berre mottak | Mobil-vennleg (eitt skjerm) |
+| **Produksjon** | Berre produksjon | Mobil-vennleg |
+| **Levering** | Berre levering | Mobil-vennleg |
+
+### Admin sine oppgåver
+- Opprette/redigere brukarar
+- Velje kva kvar brukar har tilgang til

@@ -182,9 +182,24 @@ export interface Leverandor {
   aktiv: boolean;
 }
 
+export interface ReseptLinje {
+  id: number;
+  ravareId: number;
+  ravareNavn?: string;
+  mengde: number;
+  enhet: string;
+  rekkefolge: number;
+  kommentar?: string;
+}
+
 export interface Resept {
   id: number;
   navn: string;
+  ferdigvareId: number;
+  ferdigvareNavn?: string;
   beskrivelse?: string;
+  antallPortjoner: number;
+  instruksjoner?: string;
   aktiv: boolean;
+  linjer: ReseptLinje[];
 }
