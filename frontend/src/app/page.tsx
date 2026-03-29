@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Article, ProduksjonsOrdre, Mottak, Levering, LagerBeholdning, get } from '../lib/api';
+import { Article, ProduksjonsOrdre, Mottak, Levering, LagerBeholdning, Kunde, Leverandor, Resept, get } from '../lib/api';
 
 interface DashboardStats {
   artikler: number;
@@ -23,12 +23,15 @@ export default function DashboardPage() {
 
   async function load() {
     try {
-      const [artikler, mottak, produksjon, levering, lager] = await Promise.all([
+      const [artikler, mottak, produksjon, levering, lager, kunder, leverandorer, resepter] = await Promise.all([
         get<Article[]>('/articles'),
         get<Mottak[]>('/mottak'),
         get<ProduksjonsOrdre[]>('/production'),
         get<Levering[]>('/levering'),
-        get<LagerBeholdning[]>('/lager'),
+        get<LagerBeholdning[]>('/inventory'),
+        get<Kunde[]>('/kunder'),
+        get<Leverandor[]>('/leverandorer'),
+        get<Resept[]>('/recipes'),
       ]);
 
       const aktiveArtikler = artikler.filter(a => a.aktiv).length;
@@ -37,9 +40,9 @@ export default function DashboardPage() {
       setStats({
         artikler: artikler.length,
         aktiveArtikler,
-        kunder: 0, // loaded on demand if needed
-        leverandorer: 0,
-        resepter: 0,
+        kunder: kunder.length,
+        leverandorer: leverandorer.length,
+        resepter: resepter.length,
         lagerlinjer: lager.length,
         lavBeholdning,
         aapneMottak: mottak.filter(m => m.status === 'Registrert' || m.status === 'Mottatt').length,
@@ -57,6 +60,9 @@ export default function DashboardPage() {
   if (!stats) return null;
 
   const statCards = [
+    { label: 'Kunder', value: stats.kunder, sub: 'registrert', color: '#10b981', href: '/kunder' },
+    { label: 'Leverandører', value: stats.leverandorer, sub: 'registrert', color: '#f59e0b', href: '/leverandorer' },
+    { label: 'Resepter', value: stats.resepter, sub: 'aktive resepter', color: '#8b5cf6', href: '/resepter' },
     { label: 'Artikler', value: stats.artikler, sub: `${stats.aktiveArtikler} aktive`, color: '#3b82f6', href: '/artikler' },
     { label: 'Lagerlinjer', value: stats.lagerlinjer, sub: stats.lavBeholdning > 0 ? `${stats.lavBeholdning} lav beholdning` : ' Ingen lav beholdning', color: stats.lavBeholdning > 0 ? '#ef4444' : '#22c55e', href: '/lager' },
     { label: 'Åpne mottak', value: stats.aapneMottak, sub: 'krever handling', color: '#f59e0b', href: '/mottak' },
