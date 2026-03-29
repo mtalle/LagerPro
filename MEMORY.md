@@ -18,7 +18,10 @@
 - Tests: tests/ (xUnit + Moq)
 
 ## LagerPro Status (2026-03-29)
-- Backend build: ✅ (0 errors)
+- Backend build: ✅ (0 errors, 0 warnings)
+- GlobalExceptionHandlerMiddleware: catcher alle unntak, returnerer konsistent JSON
+- CORS: konfigurerbar via appsettings.json Cors:AllowedOrigins "Cors:AllowedOrigins"
+- Alle controller-feilmeldinger: norsk (ble ikke funnet, ikke "not found")
 - Frontend build: ✅ (Next.js, 12 routes)
 - Migrations: Eksisterer i `src/LagerPro.Infrastructure/Migrations/` (InitialCreate 2026-03-27)
 - EF Core Design package: lagt til i LagerPro.Api.csproj (versjon 8.0.*)
