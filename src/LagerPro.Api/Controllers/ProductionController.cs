@@ -67,23 +67,36 @@ public class ProductionController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateProduksjonsOrdreRequest request, CancellationToken cancellationToken)
     {
-        var id = await _createHandler.Handle(
-            new CreateProduksjonsOrdreCommand(
-                request.ReseptId,
-                request.OrdreNr,
-                request.PlanlagtDato,
-                request.Kommentar),
-            cancellationToken);
-
-        return CreatedAtAction(nameof(GetById), new { id }, new { id });
+        try
+        {
+            var id = await _createHandler.Handle(
+                new CreateProduksjonsOrdreCommand(
+                    request.ReseptId,
+                    request.OrdreNr,
+                    request.PlanlagtDato,
+                    request.Kommentar),
+                cancellationToken);
+            return CreatedAtAction(nameof(GetById), new { id }, new { id });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpPatch("{id}/status")]
     public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateProduksjonsOrdreStatusRequest request, CancellationToken cancellationToken)
     {
-        var success = await _updateStatusHandler.Handle(new UpdateProduksjonsOrdreStatusCommand(id, request.Status), cancellationToken);
-        if (!success) return NotFound(new { message = $"Produksjonsordre with id {id} not found or invalid status." });
-        return Ok(new { id, status = request.Status });
+        try
+        {
+            var success = await _updateStatusHandler.Handle(new UpdateProduksjonsOrdreStatusCommand(id, request.Status), cancellationToken);
+            if (!success) return NotFound(new { message = $"Produksjonsordre with id {id} ble ikke funnet eller ugyldig status." });
+            return Ok(new { id, status = request.Status });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpGet("plukkliste")]
@@ -96,20 +109,27 @@ public class ProductionController : ControllerBase
     [HttpPost("{id}/ferdigmeld")]
     public async Task<IActionResult> Ferdigmeld(int id, [FromBody] FerdigmeldProduksjonsOrdreRequest request, CancellationToken cancellationToken)
     {
-        var resultId = await _ferdigmeldHandler.Handle(
-            new FerdigmeldProduksjonsOrdreCommand(
-                id,
-                request.AntallProdusert,
-                request.Kommentar,
-                request.UtfortAv,
-                request.Forbruk?.Select(f => new FerdigmeldForbrukLinjeCommand(
-                    f.ArtikkelId,
-                    f.LotNr,
-                    f.MengdeBrukt,
-                    f.Enhet ?? string.Empty,
-                    f.Overstyrt,
-                    f.Kommentar)).ToList()),
-            cancellationToken);
-        return Ok(new { id = resultId });
+        try
+        {
+            var resultId = await _ferdigmeldHandler.Handle(
+                new FerdigmeldProduksjonsOrdreCommand(
+                    id,
+                    request.AntallProdusert,
+                    request.Kommentar,
+                    request.UtfortAv,
+                    request.Forbruk?.Select(f => new FerdigmeldForbrukLinjeCommand(
+                        f.ArtikkelId,
+                        f.LotNr,
+                        f.MengdeBrukt,
+                        f.Enhet ?? string.Empty,
+                        f.Overstyrt,
+                        f.Kommentar)).ToList()),
+                cancellationToken);
+            return Ok(new { id = resultId });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 }

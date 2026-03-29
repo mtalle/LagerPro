@@ -50,21 +50,28 @@ public class ArticlesController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateArticleRequest request, CancellationToken cancellationToken)
     {
-        var id = await _createHandler.Handle(
-            new CreateArticleCommand(
-                request.ArtikkelNr,
-                request.Navn,
-                request.Enhet,
-                request.Type,
-                request.Beskrivelse,
-                request.Strekkode,
-                request.Kategori,
-                request.Innpris,
-                request.Utpris,
-                request.MinBeholdning),
-            cancellationToken);
+        try
+        {
+            var id = await _createHandler.Handle(
+                new CreateArticleCommand(
+                    request.ArtikkelNr,
+                    request.Navn,
+                    request.Enhet,
+                    request.Type,
+                    request.Beskrivelse,
+                    request.Strekkode,
+                    request.Kategori,
+                    request.Innpris,
+                    request.Utpris,
+                    request.MinBeholdning),
+                cancellationToken);
 
-        return CreatedAtAction(nameof(GetById), new { id }, new { id });
+            return CreatedAtAction(nameof(GetById), new { id }, new { id });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpPut("{id:int}")]

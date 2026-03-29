@@ -45,33 +45,47 @@ public class ReceiptsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateMottakRequest request, CancellationToken cancellationToken)
     {
-        var id = await _createHandler.Handle(
-            new CreateMottakCommand(
-                request.LeverandorId,
-                request.MottaksDato,
-                request.Referanse,
-                request.Kommentar,
-                request.MottattAv,
-                request.Linjer.Select(l => new MottakLinjeCommand(
-                    l.ArtikkelId,
-                    l.LotNr,
-                    l.Mengde,
-                    l.Enhet,
-                    l.BestForDato,
-                    l.Temperatur,
-                    l.Strekkode,
-                    l.Avvik,
-                    l.Kommentar)).ToList()),
-            cancellationToken);
-        return CreatedAtAction(nameof(GetById), new { id }, new { id });
+        try
+        {
+            var id = await _createHandler.Handle(
+                new CreateMottakCommand(
+                    request.LeverandorId,
+                    request.MottaksDato,
+                    request.Referanse,
+                    request.Kommentar,
+                    request.MottattAv,
+                    request.Linjer.Select(l => new MottakLinjeCommand(
+                        l.ArtikkelId,
+                        l.LotNr,
+                        l.Mengde,
+                        l.Enhet,
+                        l.BestForDato,
+                        l.Temperatur,
+                        l.Strekkode,
+                        l.Avvik,
+                        l.Kommentar)).ToList()),
+                cancellationToken);
+            return CreatedAtAction(nameof(GetById), new { id }, new { id });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpPatch("{id}/status")]
     public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateMottakStatusRequest request, CancellationToken cancellationToken)
     {
-        var success = await _updateStatusHandler.Handle(new UpdateMottakStatusCommand(id, request.Status), cancellationToken);
-        if (!success) return NotFound(new { message = $"Mottak with id {id} not found." });
-        return Ok(new { id, status = request.Status });
+        try
+        {
+            var success = await _updateStatusHandler.Handle(new UpdateMottakStatusCommand(id, request.Status), cancellationToken);
+            if (!success) return NotFound(new { message = $"Mottak with id {id} ble ikke funnet." });
+            return Ok(new { id, status = request.Status });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     /// <summary>
@@ -80,10 +94,17 @@ public class ReceiptsController : ControllerBase
     [HttpPatch("{mottakId}/linjer/{linjeId}/godkjenning")]
     public async Task<IActionResult> UpdateLinjeGodkjenning(int mottakId, int linjeId, [FromBody] UpdateMottakLinjeRequest request, CancellationToken cancellationToken)
     {
-        var success = await _updateLinjeHandler.Handle(
-            new UpdateMottakLinjeGodkjenningCommand(mottakId, linjeId, request.Godkjent, request.Avvik),
-            cancellationToken);
-        if (!success) return NotFound(new { message = $"Mottak or linje not found." });
-        return Ok(new { mottakId, linjeId, godkjent = request.Godkjent });
+        try
+        {
+            var success = await _updateLinjeHandler.Handle(
+                new UpdateMottakLinjeGodkjenningCommand(mottakId, linjeId, request.Godkjent, request.Avvik),
+                cancellationToken);
+            if (!success) return NotFound(new { message = $"Mottak eller linje ble ikke funnet." });
+            return Ok(new { mottakId, linjeId, godkjent = request.Godkjent });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 }

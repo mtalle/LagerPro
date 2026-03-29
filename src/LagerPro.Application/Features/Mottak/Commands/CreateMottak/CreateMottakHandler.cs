@@ -40,7 +40,7 @@ public class CreateMottakHandler
         {
             var artikkel = await _artikkelRepository.GetByIdAsync(linjeCommand.ArtikkelId, cancellationToken);
             if (artikkel is null)
-                throw new InvalidOperationException($"Artikkel with id {linjeCommand.ArtikkelId} not found.");
+                throw new InvalidOperationException($"Artikkel med ID {linjeCommand.ArtikkelId} ble ikke funnet.");
 
             // Auto-generer LotNr hvis ikke oppgitt: ART-<artikkelNr>-<timestamp>
             var lotNr = string.IsNullOrWhiteSpace(linjeCommand.LotNr)
