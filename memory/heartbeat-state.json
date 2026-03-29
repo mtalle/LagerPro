@@ -3,15 +3,18 @@
     "email": null,
     "calendar": null,
     "weather": null,
-    "lagerpro": 1743222000
+    "lagerpro": 1743237000
   },
   "subagents": {
-    "mottak-levering": "running - wrapper up, clean state",
-    "produksjon": "running - fixing FerdigmeldPrefill endpoint"
+    "mottak-levering": "unknown",
+    "produksjon": "unknown"
   },
   "lagerpro": {
-    "tests": 104,
+    "tests": 105,
     "build": "clean",
-    "lastCommit": "f07e611"
+    "lastCommit": "3a12140",
+    "commits_since_heartbeat": ["59a7a40", "3a12140"],
+    "frontend_build": "clean",
+    "backend_build": "clean"
   }
 }
