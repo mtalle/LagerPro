@@ -155,8 +155,15 @@ public class ReceiptsController : ControllerBase
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
     {
-        var success = await _deleteHandler.Handle(new DeleteMottakCommand(id), cancellationToken);
-        if (!success) return NotFound(new { message = $"Mottak med id {id} ble ikke funnet." });
-        return NoContent();
+        try
+        {
+            var success = await _deleteHandler.Handle(new DeleteMottakCommand(id), cancellationToken);
+            if (!success) return NotFound(new { message = $"Mottak med id {id} ble ikke funnet." });
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 }

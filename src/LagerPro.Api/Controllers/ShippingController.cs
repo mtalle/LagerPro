@@ -95,8 +95,15 @@ public class ShippingController : ControllerBase
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
     {
-        var success = await _deleteHandler.Handle(new DeleteLeveringCommand(id), cancellationToken);
-        if (!success) return NotFound(new { message = $"Levering with id {id} ble ikke funnet." });
-        return NoContent();
+        try
+        {
+            var success = await _deleteHandler.Handle(new DeleteLeveringCommand(id), cancellationToken);
+            if (!success) return NotFound(new { message = $"Levering with id {id} ble ikke funnet." });
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 }
