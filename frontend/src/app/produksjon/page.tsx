@@ -181,7 +181,7 @@ export default function ProduksjonPage() {
 
       <table>
         <thead>
-          <tr><th>OrdreNr</th><th>Resept</th><th>Planlagt</th><th>Ferdigmeldt</th><th>Antall</th><th>Lot</th><th>Status</th><th>Utfort</th><th></th></tr>
+          <tr><th>OrdreNr</th><th>Resept</th><th>Ferdigvare</th><th>Planlagt</th><th>Ferdigmeldt</th><th>Antall</th><th>Lot</th><th>Status</th><th>Utfort</th><th></th></tr>
         </thead>
         <tbody>
           {filtered.length === 0 ? (
@@ -190,6 +190,7 @@ export default function ProduksjonPage() {
             <tr key={o.id}>
               <td><code>{o.ordreNr}</code></td>
               <td>{o.reseptNavn ?? `Resept.ID ${o.reseptId}`}</td>
+              <td>{o.ferdigvareNavn ?? '—'}{o.ferdigvareEnhet ? ` (${o.ferdigvareEnhet})` : ''}</td>
               <td>{new Date(o.planlagtDato).toLocaleDateString('no-NO')}</td>
               <td>{o.ferdigmeldtDato ? new Date(o.ferdigmeldtDato).toLocaleDateString('no-NO') : '—'}</td>
               <td>{o.antallProdusert}</td>

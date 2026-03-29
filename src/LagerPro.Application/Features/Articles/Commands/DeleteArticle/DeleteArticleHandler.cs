@@ -20,7 +20,9 @@ public class DeleteArticleHandler
         if (article is null)
             return false;
 
-        await _repository.Delete(article, cancellationToken);
+        // Soft delete: deaktiver artikkelen i stedet for å slette
+        // Slette rad i databasen kan føre til referansebrudd i historiske transaksjoner
+        article.Aktiv = false;
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return true;
     }

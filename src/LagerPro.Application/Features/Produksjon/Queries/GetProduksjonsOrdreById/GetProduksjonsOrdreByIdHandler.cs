@@ -31,7 +31,10 @@ public class GetProduksjonsOrdreByIdHandler
                 ordre.Status.ToString(),
                 ordre.Kommentar,
                 ordre.UtfortAv,
-                ordre.OpprettetDato),
+                ordre.OpprettetDato,
+                ordre.Resept?.Ferdigvare?.Id,
+                ordre.Resept?.Ferdigvare?.Navn,
+                ordre.Resept?.Ferdigvare?.Enhet),
             ordre.Forbruk.Select(f => new ProdOrdreForbrukDto(
                 f.Id,
                 f.ArtikkelId,

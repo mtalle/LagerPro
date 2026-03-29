@@ -18,6 +18,11 @@ public class CreateArticleHandler
 
     public async Task<int> Handle(CreateArticleCommand command, CancellationToken cancellationToken = default)
     {
+        // Sjekk for duplikat artikkelNr
+        var eksisterende = await _repository.GetByArtikkelNrAsync(command.ArtikkelNr, cancellationToken);
+        if (eksisterende is not null)
+            throw new InvalidOperationException($"Artikkel med nummer '{command.ArtikkelNr}' eksisterer allerede.");
+
         var article = new Artikkel
         {
             ArtikkelNr = command.ArtikkelNr,

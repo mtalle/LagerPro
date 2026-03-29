@@ -5,7 +5,7 @@ using LagerPro.Domain.Repositories;
 
 namespace LagerPro.Application.Features.Levering.Commands.UpdateLeveringStatus;
 
-public record UpdateLeveringStatusCommand(int Id, string Status);
+public record UpdateLeveringStatusCommand(int Id, string Status, string? UtfortAv = null);
 
 public class UpdateLeveringStatusHandler
 {
@@ -33,6 +33,8 @@ public class UpdateLeveringStatusHandler
 
         if (!Enum.TryParse<LeveringStatus>(command.Status, ignoreCase: true, out var newStatus))
             return false;
+
+        var utførtAv = command.UtfortAv ?? "System";
 
         // Plukket: Trekk lager når varene fysisk plukkes
         if (newStatus == LeveringStatus.Plukket && levering.Status != LeveringStatus.Plukket)
@@ -65,7 +67,7 @@ public class UpdateLeveringStatusHandler
                     Kilde = "Levering",
                     KildeId = levering.Id,
                     Kommentar = $"Levering #{levering.Id} plukket",
-                    UtfortAv = Environment.UserName,
+                    UtfortAv = utførtAv,
                     Tidspunkt = DateTime.UtcNow
                 }, cancellationToken);
             }
@@ -87,11 +89,11 @@ public class UpdateLeveringStatusHandler
                     Kilde = "Levering",
                     KildeId = levering.Id,
                     Kommentar = $"Levering #{levering.Id} levert og bekreftet",
-                    UtfortAv = Environment.UserName,
+                    UtfortAv = utførtAv,
                     Tidspunkt = DateTime.UtcNow
                 }, cancellationToken);
             }
-            levering.LevertAv ??= Environment.UserName;
+            levering.LevertAv ??= utførtAv;
         }
 
         // Kansellert: Gjenopprett lager hvis det var plukket
@@ -118,7 +120,7 @@ public class UpdateLeveringStatusHandler
                     Kilde = "Levering",
                     KildeId = levering.Id,
                     Kommentar = $"Levering #{levering.Id} kansellert — lager gjenopprettet",
-                    UtfortAv = Environment.UserName,
+                    UtfortAv = utførtAv,
                     Tidspunkt = DateTime.UtcNow
                 }, cancellationToken);
             }

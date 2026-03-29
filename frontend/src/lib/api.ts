@@ -134,6 +134,9 @@ export interface ProduksjonsOrdre {
   kommentar?: string;
   utfortAv?: string;
   opprettetDato: string;
+  ferdigvareId?: number;
+  ferdigvareNavn?: string;
+  ferdigvareEnhet?: string;
 }
 
 export interface Levering {

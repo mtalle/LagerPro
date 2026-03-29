@@ -30,7 +30,7 @@ public class ProduksjonsOrdreRepository : IProduksjonsOrdreRepository
 
     public async Task<IReadOnlyList<ProduksjonsOrdre>> GetAllAsync(CancellationToken cancellationToken = default)
         => await _dbContext.ProduksjonsOrdre
-            .Include(x => x.Resept)
+            .Include(x => x.Resept).ThenInclude(r => r!.Ferdigvare)
             .OrderByDescending(x => x.PlanlagtDato)
             .ToListAsync(cancellationToken);
 

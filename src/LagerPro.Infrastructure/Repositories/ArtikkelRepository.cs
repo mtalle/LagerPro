@@ -19,6 +19,12 @@ public class ArtikkelRepository : IArtikkelRepository
         return await _dbContext.Artikler.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
 
+    public async Task<Artikkel?> GetByArtikkelNrAsync(string artikkelNr, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Artikler
+            .FirstOrDefaultAsync(x => x.ArtikkelNr == artikkelNr, cancellationToken);
+    }
+
     public async Task<IReadOnlyList<Artikkel>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return await _dbContext.Artikler

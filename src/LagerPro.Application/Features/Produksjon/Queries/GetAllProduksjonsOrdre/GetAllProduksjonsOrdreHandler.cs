@@ -15,7 +15,7 @@ public class GetAllProduksjonsOrdreHandler
     public async Task<IReadOnlyList<ProduksjonsOrdreDto>> Handle(GetAllProduksjonsOrdreQuery query, CancellationToken cancellationToken = default)
     {
         var ordre = await _repository.GetAllAsync(cancellationToken);
-        
+
         return ordre.Select(o => new ProduksjonsOrdreDto(
             o.Id,
             o.ReseptId,
@@ -28,6 +28,9 @@ public class GetAllProduksjonsOrdreHandler
             o.Status.ToString(),
             o.Kommentar,
             o.UtfortAv,
-            o.OpprettetDato)).ToList();
+            o.OpprettetDato,
+            o.Resept?.Ferdigvare?.Id,
+            o.Resept?.Ferdigvare?.Navn,
+            o.Resept?.Ferdigvare?.Enhet)).ToList();
     }
 }

@@ -16,7 +16,11 @@ public class ShippingController : ControllerBase
     private readonly CreateLeveringHandler _createHandler;
     private readonly UpdateLeveringStatusHandler _updateStatusHandler;
 
-    public ShippingController(GetAllLeveringHandler getAllHandler, GetLeveringByIdHandler getByIdHandler, CreateLeveringHandler createHandler, UpdateLeveringStatusHandler updateStatusHandler)
+    public ShippingController(
+        GetAllLeveringHandler getAllHandler,
+        GetLeveringByIdHandler getByIdHandler,
+        CreateLeveringHandler createHandler,
+        UpdateLeveringStatusHandler updateStatusHandler)
     {
         _getAllHandler = getAllHandler;
         _getByIdHandler = getByIdHandler;
@@ -49,13 +53,13 @@ public class ShippingController : ControllerBase
                 request.Referanse,
                 request.FraktBrev,
                 request.Kommentar,
-                null,
+                request.LevertAv,
                 request.Linjer.Select(l => new LeveringLinjeCommand(
                     l.ArtikkelId,
                     l.LotNr,
                     l.Mengde,
                     l.Enhet,
-                    null)).ToList()),
+                    l.Kommentar)).ToList()),
             cancellationToken);
         return CreatedAtAction(nameof(Get), new { id }, new { id });
     }
@@ -65,7 +69,9 @@ public class ShippingController : ControllerBase
     {
         try
         {
-            var success = await _updateStatusHandler.Handle(new UpdateLeveringStatusCommand(id, request.Status), cancellationToken);
+            var success = await _updateStatusHandler.Handle(
+                new UpdateLeveringStatusCommand(id, request.Status, request.UtfortAv),
+                cancellationToken);
             if (!success) return NotFound(new { message = $"Levering with id {id} not found." });
             return Ok(new { id, status = request.Status });
         }

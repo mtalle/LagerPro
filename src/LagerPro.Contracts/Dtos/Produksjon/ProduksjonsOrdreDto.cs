@@ -12,7 +12,10 @@ public record ProduksjonsOrdreDto(
     string Status,
     string? Kommentar,
     string? UtfortAv,
-    DateTime OpprettetDato);
+    DateTime OpprettetDato,
+    int? FerdigvareId,
+    string? FerdigvareNavn,
+    string? FerdigvareEnhet);
 
 public record ProduksjonsOrdreDetaljerDto(
     ProduksjonsOrdreDto Ordre,

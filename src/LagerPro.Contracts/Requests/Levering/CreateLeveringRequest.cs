@@ -16,4 +16,4 @@ public record CreateLeveringLinjeRequest(
     string Enhet,
     string? Kommentar);
 
-public record UpdateLeveringStatusRequest(string Status);
+public record UpdateLeveringStatusRequest(string Status, string? UtfortAv = null);
