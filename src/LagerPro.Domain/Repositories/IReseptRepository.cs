@@ -8,4 +8,5 @@ public interface IReseptRepository
     Task<IReadOnlyList<Resept>> GetAllAsync(CancellationToken cancellationToken = default);
     Task AddAsync(Resept resept, CancellationToken cancellationToken = default);
     void Delete(Resept resept);
+    void Update(Resept resept);
 }

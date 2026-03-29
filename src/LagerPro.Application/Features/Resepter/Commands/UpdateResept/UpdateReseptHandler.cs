@@ -49,6 +49,7 @@ public class UpdateReseptHandler
 
             resept.Linjer.Add(new DomainReseptLinje
             {
+                ReseptId = resept.Id,
                 RavareId = linje.RavareId,
                 Mengde = linje.Mengde,
                 Enhet = linje.Enhet,
@@ -57,6 +58,7 @@ public class UpdateReseptHandler
             });
         }
 
+        _repository.Update(resept);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return true;
     }

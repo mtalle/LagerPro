@@ -37,4 +37,9 @@ public class ReseptRepository : IReseptRepository
     {
         _dbContext.Resepter.Remove(resept);
     }
+
+    public void Update(Resept resept)
+    {
+        _dbContext.Resepter.Update(resept);
+    }
 }
