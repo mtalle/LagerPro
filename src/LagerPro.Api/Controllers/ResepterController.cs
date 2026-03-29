@@ -54,22 +54,28 @@ public class ResepterController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateReseptRequest request, CancellationToken cancellationToken)
     {
-        var id = await _createHandler.Handle(
-            new CreateReseptCommand(
-                request.Navn,
-                request.FerdigvareId,
-                request.Beskrivelse,
-                request.AntallPortjoner,
-                request.Instruksjoner,
-                request.Linjer.Select(l => new CreateLinjeCmd(
-                    l.RavareId,
-                    l.Mengde,
-                    l.Enhet,
-                    l.Rekkefolge,
-                    l.Kommentar)).ToList()),
-            cancellationToken);
-
-        return CreatedAtAction(nameof(GetById), new { id }, new { id });
+        try
+        {
+            var id = await _createHandler.Handle(
+                new CreateReseptCommand(
+                    request.Navn,
+                    request.FerdigvareId,
+                    request.Beskrivelse,
+                    request.AntallPortjoner,
+                    request.Instruksjoner,
+                    request.Linjer.Select(l => new CreateLinjeCmd(
+                        l.RavareId,
+                        l.Mengde,
+                        l.Enhet,
+                        l.Rekkefolge,
+                        l.Kommentar)).ToList()),
+                cancellationToken);
+            return CreatedAtAction(nameof(GetById), new { id }, new { id });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpPut("{id:int}")]

@@ -6,10 +6,10 @@ public class ProjectStatusService
 {
     public ProjectStatusDto GetCurrentStatus() => new(
         "LagerPro",
-        "Bygger MVP med fokus på ekte kjerneflyt",
-        "Fullføre artikkel-, mottak- og lagerflyt i riktig rekkefølge",
-        "Koble domenelogikk, API og dataflyt uten å gjøre MVP for stor",
-        "Database/migrering må holdes kontrollert; scope må ikke eksplodere",
-        "Få artikkel-flyten helt stabil og jobb videre modul for modul",
+        "MVP komplett: Artikler, Mottak, Lager, Produksjon, Levering",
+        "Scope-ferdig. Stabilisering, feilhåndtering, tracebility og sporingsflyt",
+        "Integrationstesting, performance og eventuelle edge-case fixes",
+        "Klar for produksjonsetting med docker-compose og reelle data",
+        "Alt kjerner er på plass. MVP er funksjonelt komplett.",
         DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss 'UTC'"));
 }
