@@ -156,12 +156,12 @@ public class TraceabilityTests
             CreateTransaksjon(2, 20, "FG-001", TransaksjonsType.ProduksjonInn, 10),
         };
 
-        _ordreRepoMock.Setup(r => r.GetByIdAsync(5, It.IsAny<CancellationToken>())).ReturnsAsync(ordre);
-        _transaksjonRepoMock.Setup(r => r.GetByBatchNrAsync("5", It.IsAny<CancellationToken>())).ReturnsAsync(transaksjoner);
+        _ordreRepoMock.Setup(r => r.GetByOrdreNrAsync("PO-001", It.IsAny<CancellationToken>())).ReturnsAsync(ordre);
+        _transaksjonRepoMock.Setup(r => r.GetByBatchNrAsync("PO-001", It.IsAny<CancellationToken>())).ReturnsAsync(transaksjoner);
 
         var handler = new GetTraceabilityByBatchHandler(_ordreRepoMock.Object, _transaksjonRepoMock.Object);
 
-        var result = await handler.Handle(new GetTraceabilityByBatchQuery("5"), CancellationToken.None);
+        var result = await handler.Handle(new GetTraceabilityByBatchQuery("PO-001"), CancellationToken.None);
 
         Assert.NotNull(result);
         Assert.Equal(5, result.OrdreId);
@@ -173,6 +173,9 @@ public class TraceabilityTests
     [Fact]
     public async Task GetTraceabilityByBatchHandler_InvalidBatchNr_ReturnsNull()
     {
+        _ordreRepoMock.Setup(r => r.GetByOrdreNrAsync("invalid", It.IsAny<CancellationToken>())).ReturnsAsync((ProduksjonsOrdre?)null);
+        _ordreRepoMock.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(new List<ProduksjonsOrdre>());
+
         var handler = new GetTraceabilityByBatchHandler(_ordreRepoMock.Object, _transaksjonRepoMock.Object);
 
         var result = await handler.Handle(new GetTraceabilityByBatchQuery("invalid"), CancellationToken.None);
@@ -183,12 +186,12 @@ public class TraceabilityTests
     [Fact]
     public async Task GetTraceabilityByBatchHandler_BatchNotFound_ReturnsNull()
     {
-        _ordreRepoMock.Setup(r => r.GetByIdAsync(999, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((ProduksjonsOrdre?)null);
+        _ordreRepoMock.Setup(r => r.GetByOrdreNrAsync("PO-999", It.IsAny<CancellationToken>())).ReturnsAsync((ProduksjonsOrdre?)null);
+        _ordreRepoMock.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(new List<ProduksjonsOrdre>());
 
         var handler = new GetTraceabilityByBatchHandler(_ordreRepoMock.Object, _transaksjonRepoMock.Object);
 
-        var result = await handler.Handle(new GetTraceabilityByBatchQuery("999"), CancellationToken.None);
+        var result = await handler.Handle(new GetTraceabilityByBatchQuery("PO-999"), CancellationToken.None);
 
         Assert.Null(result);
     }
