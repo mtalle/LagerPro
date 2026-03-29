@@ -23,7 +23,7 @@ public class LeverandorRepository : ILeverandorRepository
     public async Task AddAsync(Leverandor leverandor, CancellationToken cancellationToken)
     {
         await _dbContext.Leverandorer.AddAsync(leverandor, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        // SaveChanges kun via UnitOfWork
     }
 
     public void Update(Leverandor leverandor)

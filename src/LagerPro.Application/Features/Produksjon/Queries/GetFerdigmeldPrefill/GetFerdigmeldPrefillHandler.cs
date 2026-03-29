@@ -1,4 +1,5 @@
 using LagerPro.Contracts.Dtos.Produksjon;
+using LagerPro.Domain.Entities;
 using LagerPro.Domain.Repositories;
 
 namespace LagerPro.Application.Features.Produksjon.Queries.GetFerdigmeldPrefill;
@@ -35,29 +36,28 @@ public class GetFerdigmeldPrefillHandler
         var foreslattAntall = resept.AntallPortjoner;
         var reseptLinjer = new List<FerdigmeldReseptLinjeDto>();
 
-        if (resept.Linjer != null)
+        var alleLinjer = (resept.Linjer ?? Enumerable.Empty<ReseptLinje>()).OrderBy(l => l.Rekkefolge);
+
+        foreach (var linje in alleLinjer)
         {
-            foreach (var linje in resept.Linjer.OrderBy(l => l.Rekkefolge))
-            {
-                var beholdninger = await _lagerRepository.GetByArtikkelAsync(linje.RavareId, cancellationToken);
-                var aktiveBeh = beholdninger
-                    .Where(b => b.Mengde > 0)
-                    .OrderByDescending(b => b.BestForDato ?? DateTime.MaxValue)
-                    .ThenBy(b => b.SistOppdatert)
-                    .ToList();
+            var beholdninger = await _lagerRepository.GetByArtikkelAsync(linje.RavareId, cancellationToken);
+            var aktiveBeh = beholdninger
+                .Where(b => b.Mengde > 0)
+                .OrderByDescending(b => b.BestForDato ?? DateTime.MaxValue)
+                .ThenBy(b => b.SistOppdatert)
+                .ToList();
 
-                var besteBeh = aktiveBeh.FirstOrDefault();
+            var besteBeh = aktiveBeh.FirstOrDefault();
 
-                reseptLinjer.Add(new FerdigmeldReseptLinjeDto(
-                    linje.RavareId,
-                    linje.Ravare?.Navn,
-                    linje.Enhet,
-                    linje.Mengde,
-                    besteBeh?.LotNr,
-                    besteBeh?.Mengde,
-                    aktiveBeh.Sum(b => b.Mengde),
-                    aktiveBeh.Count > 0));
-            }
+            reseptLinjer.Add(new FerdigmeldReseptLinjeDto(
+                linje.RavareId,
+                linje.Ravare?.Navn,
+                linje.Enhet,
+                linje.Mengde,
+                besteBeh?.LotNr,
+                besteBeh?.Mengde,
+                aktiveBeh.Sum(b => b.Mengde),
+                aktiveBeh.Count > 0));
         }
 
         return new FerdigmeldPrefillDto(

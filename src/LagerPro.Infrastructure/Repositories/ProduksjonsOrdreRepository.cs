@@ -25,7 +25,8 @@ public class ProduksjonsOrdreRepository : IProduksjonsOrdreRepository
 
     public async Task<ProduksjonsOrdre?> GetByOrdreNrAsync(string ordreNr, CancellationToken cancellationToken = default)
         => await _dbContext.ProduksjonsOrdre
-            .Include(x => x.Resept)
+            .Include(x => x.Resept).ThenInclude(r => r!.Ferdigvare)
+            .Include(x => x.Resept).ThenInclude(r => r!.Linjer).ThenInclude(l => l.Ravare)
             .FirstOrDefaultAsync(x => x.OrdreNr == ordreNr, cancellationToken);
 
     public async Task<IReadOnlyList<ProduksjonsOrdre>> GetAllAsync(CancellationToken cancellationToken = default)
@@ -37,6 +38,7 @@ public class ProduksjonsOrdreRepository : IProduksjonsOrdreRepository
     public async Task<IReadOnlyList<ProduksjonsOrdre>> GetActivesWithForbrukAsync(CancellationToken cancellationToken = default)
         => await _dbContext.ProduksjonsOrdre
             .Include(x => x.Resept).ThenInclude(r => r!.Ferdigvare)
+            .Include(x => x.Resept).ThenInclude(r => r!.Linjer).ThenInclude(l => l.Ravare)
             .Include(x => x.Forbruk).ThenInclude(f => f.Artikkel)
             .Where(x => x.Status != ProdOrdreStatus.Ferdigmeldt && x.Status != ProdOrdreStatus.Kansellert)
             .OrderByDescending(x => x.PlanlagtDato)

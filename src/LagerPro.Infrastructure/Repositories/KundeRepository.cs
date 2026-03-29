@@ -18,12 +18,13 @@ public class KundeRepository : IKundeRepository
         => _dbContext.Kunder.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
     public Task<IReadOnlyList<Kunde>> GetAllAsync(CancellationToken cancellationToken)
-        => _dbContext.Kunder.OrderBy(x => x.Navn).ToListAsync(cancellationToken).ContinueWith(t => (IReadOnlyList<Kunde>)t.Result, cancellationToken);
+        => _dbContext.Kunder.OrderBy(x => x.Navn).ToListAsync(cancellationToken)
+            .ContinueWith(t => (IReadOnlyList<Kunde>)t.Result, cancellationToken);
 
     public async Task AddAsync(Kunde kunde, CancellationToken cancellationToken)
     {
         await _dbContext.Kunder.AddAsync(kunde, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        // SaveChanges kun via UnitOfWork
     }
 
     public void Update(Kunde kunde)

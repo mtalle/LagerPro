@@ -26,17 +26,16 @@ public class GetPlukklisteHandler
             if (ordre.Resept?.Linjer == null) continue;
 
             // Felt-antall = antall som skal plukkes for denne ordren
-            // = (reseptLinje.mengde / resept.antallPortjoner) × antallProdusert
-            var skalPlukkes = ordre.Resept.AntallPortjoner > 0
-                ? ordre.AntallProdusert
-                : 0;
+            // For planlagte/nye ordre: bruk reseptens antall portjoner som mål
+            // For ordre under produksjon: bruk faktisk antallProdusert hvis satt
+            var planlagtAntall = ordre.AntallProdusert > 0 ? ordre.AntallProdusert : ordre.Resept.AntallPortjoner;
 
             foreach (var reseptLinje in ordre.Resept.Linjer)
             {
                 var ratio = ordre.Resept.AntallPortjoner > 0
                     ? (decimal)reseptLinje.Mengde / ordre.Resept.AntallPortjoner
                     : 0;
-                var feltAntall = skalPlukkes * ratio;
+                var feltAntall = planlagtAntall * ratio;
 
                 var beholdninger = await _lagerRepository.GetByArtikkelAsync(reseptLinje.RavareId, cancellationToken);
                 var aktiveBeholdninger = beholdninger

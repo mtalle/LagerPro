@@ -20,10 +20,17 @@ public class GetTraceabilityByBatchHandler
 
     public async Task<BatchTraceDto?> Handle(GetTraceabilityByBatchQuery query, CancellationToken cancellationToken = default)
     {
-        if (!int.TryParse(query.BatchNr, out var ordreId))
-            return null;
+        // BatchNr is the ferdigvare LotNr (e.g. "FG-20260329-A1B2C3") or OrdreNr
+        // Try by OrdreNr first, then by ferdigvare LotNr via the ordre lookup
+        var ordre = await _ordreRepository.GetByOrdreNrAsync(query.BatchNr, cancellationToken);
 
-        var ordre = await _ordreRepository.GetByIdAsync(ordreId, cancellationToken);
+        // If not found by OrdreNr, try to find by ferdigvare LotNr
+        if (ordre is null)
+        {
+            var alleOrdre = await _ordreRepository.GetAllAsync(cancellationToken);
+            ordre = alleOrdre.FirstOrDefault(o => o.FerdigvareLotNr == query.BatchNr);
+        }
+
         if (ordre is null) return null;
 
         var transaksjoner = await _transaksjonRepository.GetByBatchNrAsync(query.BatchNr, cancellationToken);
