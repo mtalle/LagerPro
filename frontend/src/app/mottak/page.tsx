@@ -8,6 +8,7 @@ export default function MottakPage() {
   const [leverandorer, setLeverandorer] = useState<Leverandor[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('');
   const [showModal, setShowModal] = useState(false);
   const [expanded, setExpanded] = useState<number | null>(null);
   const [error, setError] = useState('');
@@ -106,12 +107,13 @@ export default function MottakPage() {
 
   const filtered = mottak.filter(m => {
     const q = search.toLowerCase();
-    return (
+    const matchesSearch =
       (m.leverandorNavn ?? '').toLowerCase().includes(q) ||
       (m.referanse ?? '').toLowerCase().includes(q) ||
       (m.mottattAv ?? '').toLowerCase().includes(q) ||
-      m.id.toString().includes(q)
-    );
+      m.id.toString().includes(q);
+    const matchesStatus = !statusFilter || m.status === statusFilter;
+    return matchesSearch && matchesStatus;
   });
 
   function renderMottakRows() {
@@ -163,13 +165,32 @@ export default function MottakPage() {
       {error && <div className="alert alert-error">{error}</div>}
       {success && <div className="alert alert-success">{success}</div>}
 
-      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
+      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap' }}>
         <input
           placeholder="Søk leverandør, referanse..."
           value={search}
           onChange={e => setSearch(e.target.value)}
           style={{ padding: '0.4rem 0.8rem', border: '1px solid #d1d5db', borderRadius: 6, width: 300, fontSize: '0.9rem' }}
         />
+        <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
+          {['', 'Registrert', 'Mottatt', 'Godkjent', 'Avvist'].map(s => (
+            <button key={s} type="button"
+              onClick={() => setStatusFilter(s)}
+              style={{
+                padding: '0.3rem 0.7rem',
+                borderRadius: 16,
+                fontSize: '0.8rem',
+                border: 'none',
+                cursor: 'pointer',
+                background: statusFilter === s ? '#3b82f6' : '#e5e7eb',
+                color: statusFilter === s ? '#fff' : '#374151',
+                fontWeight: statusFilter === s ? 600 : 400,
+              }}>
+              {s || 'Alle'}
+            </button>
+          ))}
+        </div>
+        <span style={{ marginLeft: 'auto', fontSize: '0.85rem', color: '#6b7280' }}>{filtered.length} av {mottak.length}</span>
       </div>
 
       <table>
@@ -177,8 +198,8 @@ export default function MottakPage() {
           <tr><th>ID</th><th>Dato</th><th>Leverandør</th><th>Referanse</th><th>Status</th><th>Mottatt av</th><th></th></tr>
         </thead>
         <tbody>
-          {mottak.length === 0 ? (
-            <tr><td colSpan={8} style={{ textAlign: 'center', color: '#9ca3af', padding: '2rem' }}>Ingen mottak</td></tr>
+          {filtered.length === 0 ? (
+            <tr><td colSpan={8} style={{ textAlign: 'center', color: '#9ca3af', padding: '2rem' }}>{mottak.length === 0 ? 'Ingen mottak registrert' : 'Ingen resultater for filter'}</td></tr>
           ) : renderMottakRows()}
         </tbody>
       </table>

@@ -10,6 +10,7 @@ public record PlukklisteLinjeDto(
     string? ReseptNavn,
     string FerdigvareNavn,
     decimal PlanlagtAntall,
+    decimal? FeltAntall,
     int RavareId,
     string? RavareNavn,
     string LotNr,

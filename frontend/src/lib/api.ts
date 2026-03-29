@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000/api';
 
 export async function get<T>(path: string): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`);
@@ -226,6 +226,7 @@ export interface PlukklisteLinje {
   reseptNavn: string | null;
   ferdigvareNavn: string;
   planlagtAntall: number;
+  feltAntall: number | null;
   ravareId: number;
   ravareNavn: string | null;
   lotNr: string;

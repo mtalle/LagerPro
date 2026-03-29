@@ -35,18 +35,14 @@ public class UpdateMottakStatusHandler
         var gammelStatus = mottak.Status;
         mottak.Status = newStatus;
 
-        // Kun godkjent-status skal oppdatere lager — og kun én gang
-        if (newStatus == MottakStatus.Godkjent && gammelStatus != MottakStatus.Godkjent)
+        // Mottatt → varene flyttes til lager. Kvalitetssikring skjer via per-linje godkjenning,
+        // som lar operatøren godkjenne/avvise enkelte linjer først.
+        if (newStatus == MottakStatus.Mottatt && gammelStatus == MottakStatus.Registrert)
         {
-            var godkjenteLinjer = mottak.Linjer.Where(l => l.Godkjent).ToList();
-
-            // Hvis ingen linjer er explicit godkjent via per-linje-godkjenning, godta alle med mindre de har avvik
-            if (godkjenteLinjer.Count == 0)
-            {
-                godkjenteLinjer = mottak.Linjer.Where(l => string.IsNullOrWhiteSpace(l.Avvik)).ToList();
-            }
-
-            foreach (var linje in godkjenteLinjer)
+            // Oppdater lager for ALLE mottatte linjer (varene er fysisk mottatt på lageret).
+            // Kvalitetsavvik følger med på linja, men beholdningen oppdateres uansett —
+            // avviste varer kan håndteres manuelt (f.eks. kassert) via lagerjustering.
+            foreach (var linje in mottak.Linjer)
             {
                 var beholdning = new LagerBeholdning
                 {
@@ -71,7 +67,8 @@ public class UpdateMottakStatusHandler
                     BeholdningEtter = oppdatertBeholdning?.Mengde ?? linje.Mengde,
                     Kilde = "Mottak",
                     KildeId = mottak.Id,
-                    Kommentar = $"Mottak #{mottak.Id} godkjent",
+                    Kommentar = $"Mottak #{mottak.Id} mottatt" +
+                                (string.IsNullOrWhiteSpace(linje.Avvik) ? "" : $" | Avvik: {linje.Avvik}"),
                     UtfortAv = mottak.MottattAv,
                     Tidspunkt = DateTime.UtcNow
                 };

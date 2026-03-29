@@ -20,3 +20,4 @@ projects/
 
 # IDE
 *.DotSettings.user
+.env.local

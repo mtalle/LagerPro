@@ -353,7 +353,7 @@ export default function ProduksjonPage() {
                   <table style={{ width: '100%', fontSize: '0.85rem' }}>
                     <thead>
                       <tr style={{ background: '#f3f4f6', textAlign: 'left' }}>
-                        <th>OrdreNr</th><th>Resept</th><th>Ferdigvare</th><th>Råvare</th><th>LotNr</th><th>Mengde</th><th>Enhet</th><th>Status</th>
+                        <th>OrdreNr</th><th>Resept</th><th>Ferdigvare</th><th>Råvare</th><th>LOT</th><th>Skal plukkes</th><th>Tilgjengelig</th><th>Enhet</th><th>Status</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -364,7 +364,8 @@ export default function ProduksjonPage() {
                           <td>{linje.ferdigvareNavn}</td>
                           <td>{linje.ravareNavn ?? `Råvare.ID ${linje.ravareId}`}</td>
                           <td><code style={{ color: linje.lotNr === '-' ? '#dc2626' : undefined }}>{linje.lotNr}</code></td>
-                          <td>{linje.lotNr === '-' ? <span style={{ color: '#dc2626' }}>MANGLER</span> : linje.mengde}</td>
+                          <td><strong>{linje.feltAntall != null ? linje.feltAntall.toFixed(2) : '—'}</strong></td>
+                          <td>{linje.lotNr === '-' ? <span style={{ color: '#dc2626' }}>MANGLER</span> : linje.mengde.toFixed(2)}</td>
                           <td>{linje.enhet}</td>
                           <td><span className="badge badge-planlagt">{linje.status}</span></td>
                         </tr>
