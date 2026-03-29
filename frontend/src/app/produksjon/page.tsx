@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { ProduksjonsOrdre, Resept, Plukkliste, FerdigmeldPrefill, FerdigmeldLinje, get, post, patch } from '../../lib/api';
+import { ProduksjonsOrdre, Resept, Plukkliste, FerdigmeldPrefill, FerdigmeldLinje, get, post, patch, del } from '../../lib/api';
 
 const STATUS_MAP: Record<string, string> = {
   Planlagt: 'badge-planlagt',
@@ -127,6 +127,12 @@ export default function ProduksjonPage() {
     catch (e) { alert('Feil: ' + (e as Error).message); }
   }
 
+  async function handleDelete(id: number) {
+    if (!confirm('Er du sikker på at du vil slette denne produksjonsordren?')) return;
+    try { await del(`/production/${id}`); load(); }
+    catch (e) { alert('Feil: ' + (e as Error).message); }
+  }
+
   if (loading) return <div className="loading">Laster produksjonsordrer...</div>;
 
   const filtered = ordre.filter(o => {
@@ -175,6 +181,9 @@ export default function ProduksjonPage() {
               <td><span className={`badge ${STATUS_MAP[o.status] ?? ''}`}>{o.status}</span></td>
               <td>{o.utfortAv ?? '—'}</td>
               <td>
+                {(o.status === 'Planlagt' || o.status === 'Kansellert') && (
+                  <button className="btn btn-sm btn-danger" style={{ marginRight: 4 }} onClick={() => handleDelete(o.id)}>Slett</button>
+                )}
                 {o.status === 'Planlagt' && <button className="btn btn-sm btn-primary" style={{ marginRight: 4 }} onClick={() => setStatus(o.id, 'IProduksjon')}>Start</button>}
                 {o.status === 'IProduksjon' && <button className="btn btn-sm btn-primary" style={{ marginRight: 4 }} onClick={() => openFerdigmeld(o)}>Ferdigmeld</button>}
                 {o.status !== 'Ferdigmeldt' && o.status !== 'Kansellert' && <button className="btn btn-sm btn-danger" onClick={() => setStatus(o.id, 'Kansellert')}>Kanseller</button>}

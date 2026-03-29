@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState, Fragment } from 'react';
-import { Levering, Kunde, LagerBeholdning, get, post, patch } from '../../lib/api';
+import { Levering, Kunde, LagerBeholdning, get, post, patch, del } from '../../lib/api';
 
 const STATUS_MAP: Record<string, string> = {
   Planlagt: 'badge-planlagt',
@@ -83,6 +83,12 @@ export default function LeveringPage() {
 
   async function setStatus(id: number, status: string) {
     try { await patch(`/levering/${id}/status`, { status }); load(); }
+    catch (e) { alert('Feil: ' + (e as Error).message); }
+  }
+
+  async function handleDelete(id: number) {
+    if (!confirm('Er du sikker på at du vil slette denne leveringen?')) return;
+    try { await del(`/levering/${id}`); load(); }
     catch (e) { alert('Feil: ' + (e as Error).message); }
   }
 

@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState, Fragment } from 'react';
-import { Mottak, Article, Leverandor, UpdateMottakLinje, get, post, patch } from '../../lib/api';
+import { Mottak, Article, Leverandor, UpdateMottakLinje, get, post, patch, del } from '../../lib/api';
 
 const ENHETER = ['STK', 'KG', 'L', 'M', 'SETT', 'PAKKE', 'BOKS'];
 
@@ -97,6 +97,12 @@ export default function MottakPage() {
     } catch (e) { alert('Feil: ' + (e as Error).message); }
   }
 
+  async function handleDelete(id: number) {
+    if (!confirm('Er du sikker på at du vil slette dette mottaket?')) return;
+    try { await del(`/mottak/${id}`); loadData(); }
+    catch (e) { alert('Feil: ' + (e as Error).message); }
+  }
+
   const statusBadge = (s: string) => {
     const map: Record<string, string> = {
       Registrert: 'badge-registrert', Mottatt: 'badge-aktiv', Godkjent: 'badge-aktiv',
@@ -129,9 +135,12 @@ export default function MottakPage() {
           <td>{statusBadge(m.status)}</td>
           <td>{m.mottattAv ?? '—'}</td>
           <td>
+            {m.status === 'Registrert' && (
+              <button className="btn btn-sm btn-danger" style={{ marginRight: 4 }} onClick={e => { e.stopPropagation(); handleDelete(m.id); }}>Slett</button>
+            )}
             {m.status === 'Registrert' && <button className="btn btn-sm btn-primary" style={{ marginRight: 4 }} onClick={e => { e.stopPropagation(); updateStatus(m.id, 'Mottatt'); }}>Mottatt</button>}
             {m.status === 'Mottatt' && <button className="btn btn-sm btn-primary" style={{ marginRight: 4 }} onClick={e => { e.stopPropagation(); updateStatus(m.id, 'Godkjent'); }}>Godkjenn</button>}
-            {m.status !== 'Godkjent' && m.status !== 'Avvist' && <button className="btn btn-sm btn-danger" onClick={e => { e.stopPropagation(); updateStatus(m.id, 'Avvist'); }}>Avvis</button>}
+            {m.status === 'Mottatt' && <button className="btn btn-sm btn-danger" style={{ marginRight: 4 }} onClick={e => { e.stopPropagation(); updateStatus(m.id, 'Avvist'); }}>Avvis</button>}
           </td>
         </tr>
         {expanded === m.id && m.linjer.map(l => (
