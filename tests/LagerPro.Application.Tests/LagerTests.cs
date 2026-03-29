@@ -1,3 +1,5 @@
+using LagerPro.Application.Abstractions;
+using LagerPro.Application.Features.Lager.Commands.JusterLager;
 using LagerPro.Application.Features.Lager.Queries.GetAllLagerBeholdning;
 using LagerPro.Application.Features.Lager.Queries.GetLagerBeholdningByArtikkel;
 using LagerPro.Application.Features.Lager.Queries.GetLagerBeholdningByLotNr;
@@ -11,6 +13,8 @@ namespace LagerPro.Application.Tests;
 public class LagerTests
 {
     private readonly Mock<ILagerRepository> _repositoryMock;
+    private readonly Mock<ILagerTransaksjonRepository> _transaksjonRepoMock = new();
+    private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
 
     public LagerTests()
     {
@@ -145,6 +149,80 @@ public class LagerTests
         var result = await handler.Handle(new GetLagerBeholdningByLotNrQuery("NONEXISTENT"), CancellationToken.None);
 
         Assert.Null(result);
+    }
+
+    #endregion
+
+    #region JusterLagerHandler
+
+    [Fact]
+    public async Task JusterLagerHandler_GyldigBeholdning_JustererOgLagrerTransaksjon()
+    {
+        // Arrange
+        var beholdning = CreateTestBeholdning(1, 10, "LOT-001", 50m, "KG");
+
+        _repositoryMock.Setup(r => r.GetByArtikkelOgLotAsync(10, "LOT-001", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(beholdning);
+        _transaksjonRepoMock.Setup(r => r.AddAsync(It.IsAny<LagerTransaksjon>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        _unitOfWorkMock.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(1);
+
+        var handler = new JusterLagerHandler(_repositoryMock.Object, _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
+
+        // Act
+        var result = await handler.Handle(
+            new JusterLagerCommand(10, "LOT-001", 45.5m, "Varetelling", "Martin"),
+            CancellationToken.None);
+
+        // Assert
+        Assert.True(result);
+        Assert.Equal(45.5m, beholdning.Mengde);
+        _transaksjonRepoMock.Verify(
+            r => r.AddAsync(It.Is<LagerTransaksjon>(t =>
+                t.ArtikkelId == 10 &&
+                t.LotNr == "LOT-001" &&
+                t.Mengde == -4.5m &&
+                t.Type == Domain.Enums.TransaksjonsType.Justering),
+            It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task JusterLagerHandler_IkkeFunnet_KasterException()
+    {
+        _repositoryMock.Setup(r => r.GetByArtikkelOgLotAsync(99, "LOT-X", It.IsAny<CancellationToken>()))
+            .ReturnsAsync((LagerBeholdning?)null);
+
+        var handler = new JusterLagerHandler(_repositoryMock.Object, _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            handler.Handle(new JusterLagerCommand(99, "LOT-X", 10m, null, null), CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task JusterLagerHandler_Nullstill_LagrerNegativTransaksjon()
+    {
+        var beholdning = CreateTestBeholdning(1, 10, "LOT-001", 100m, "KG");
+
+        _repositoryMock.Setup(r => r.GetByArtikkelOgLotAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(beholdning);
+        _transaksjonRepoMock.Setup(r => r.AddAsync(It.IsAny<LagerTransaksjon>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        _unitOfWorkMock.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(1);
+
+        var handler = new JusterLagerHandler(_repositoryMock.Object, _transaksjonRepoMock.Object, _unitOfWorkMock.Object);
+
+        var result = await handler.Handle(
+            new JusterLagerCommand(10, "LOT-001", 0m, "Nullstill", "Admin"),
+            CancellationToken.None);
+
+        Assert.True(result);
+        Assert.Equal(0m, beholdning.Mengde);
+        _transaksjonRepoMock.Verify(r => r.AddAsync(
+            It.Is<LagerTransaksjon>(t => t.Mengde == -100m),
+            It.IsAny<CancellationToken>()), Times.Once);
     }
 
     #endregion
