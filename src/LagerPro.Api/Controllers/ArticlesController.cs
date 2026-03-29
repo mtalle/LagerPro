@@ -80,24 +80,31 @@ public class ArticlesController : ControllerBase
         var existing = await _getByIdHandler.Handle(new GetArticleByIdQuery(id), cancellationToken);
         if (existing is null) return NotFound(new { message = $"Article with id {id} not found." });
 
-        var success = await _updateHandler.Handle(
-            new UpdateArticleCommand(
-                id,
-                existing.ArtikkelNr,
-                request.Navn,
-                request.Enhet,
-                request.Type,
-                request.Beskrivelse,
-                request.Strekkode,
-                request.Kategori,
-                request.Innpris,
-                request.Utpris,
-                request.MinBeholdning,
-                request.Aktiv),
-            cancellationToken);
+        try
+        {
+            var success = await _updateHandler.Handle(
+                new UpdateArticleCommand(
+                    id,
+                    request.ArtikkelNr,
+                    request.Navn,
+                    request.Enhet,
+                    request.Type,
+                    request.Beskrivelse,
+                    request.Strekkode,
+                    request.Kategori,
+                    request.Innpris,
+                    request.Utpris,
+                    request.MinBeholdning,
+                    request.Aktiv),
+                cancellationToken);
 
-        if (!success) return NotFound(new { message = $"Article with id {id} not found." });
-        return Ok(new { id });
+            if (!success) return NotFound(new { message = $"Article with id {id} not found." });
+            return Ok(new { id });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpDelete("{id:int}")]

@@ -1,6 +1,7 @@
 namespace LagerPro.Contracts.Requests.Articles;
 
 public record UpdateArticleRequest(
+    string ArtikkelNr,
     string Navn,
     string Enhet,
     string Type,

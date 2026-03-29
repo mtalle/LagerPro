@@ -22,6 +22,14 @@ public class UpdateArticleHandler
         if (article is null)
             return false;
 
+        // Sjekk for duplikat artikkelNr hvis den er endret
+        if (article.ArtikkelNr != command.ArtikkelNr)
+        {
+            var eksisterende = await _repository.GetByArtikkelNrAsync(command.ArtikkelNr, cancellationToken);
+            if (eksisterende is not null && eksisterende.Id != command.Id)
+                throw new InvalidOperationException($"Artikkel med nummer '{command.ArtikkelNr}' eksisterer allerede.");
+        }
+
         article.ArtikkelNr = command.ArtikkelNr;
         article.Navn = command.Navn;
         article.Enhet = command.Enhet;

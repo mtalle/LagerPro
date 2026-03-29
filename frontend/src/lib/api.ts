@@ -168,6 +168,7 @@ export interface LeveringLinje {
   lotNr: string;
   mengde: number;
   enhet: string;
+  kommentar?: string;
 }
 
 export interface Kunde {
