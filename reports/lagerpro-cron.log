@@ -1374,3 +1374,38 @@ Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration:
 Passed!  - Failed:     0, Passed:    85, Skipped:     0, Total:    85, Duration: 466 ms - LagerPro.Application.Tests.dll (net8.0)
 [4/4] mvp plan pointer
 sed: can't read projects/lagerpro/docs/mvp-plan.md: No such file or directory
+
+[2026-03-29 08:00:01 UTC] LagerPro cron run
+[1/4] git status
+ M reports/lagerpro-cron.log
+[2/4] build
+MSBuild version 17.8.49+7806cbf7b for .NET
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  LagerPro.Domain -> /home/ubuntu/.openclaw/workspace/src/LagerPro.Domain/bin/Debug/net8.0/LagerPro.Domain.dll
+  LagerPro.Contracts -> /home/ubuntu/.openclaw/workspace/src/LagerPro.Contracts/bin/Debug/net8.0/LagerPro.Contracts.dll
+  LagerPro.Domain.Tests -> /home/ubuntu/.openclaw/workspace/tests/LagerPro.Domain.Tests/bin/Debug/net8.0/LagerPro.Domain.Tests.dll
+  LagerPro.Web -> /home/ubuntu/.openclaw/workspace/src/LagerPro.Web/bin/Debug/net8.0/LagerPro.Web.dll
+  LagerPro.Application -> /home/ubuntu/.openclaw/workspace/src/LagerPro.Application/bin/Debug/net8.0/LagerPro.Application.dll
+  LagerPro.Infrastructure -> /home/ubuntu/.openclaw/workspace/src/LagerPro.Infrastructure/bin/Debug/net8.0/LagerPro.Infrastructure.dll
+/home/ubuntu/.openclaw/workspace/tests/LagerPro.Application.Tests/MottakTests.cs(248,27): error CS1729: 'UpdateMottakLinjeGodkjenningHandler' does not contain a constructor that takes 4 arguments [/home/ubuntu/.openclaw/workspace/tests/LagerPro.Application.Tests/LagerPro.Application.Tests.csproj]
+/home/ubuntu/.openclaw/workspace/tests/LagerPro.Application.Tests/MottakTests.cs(279,27): error CS1729: 'UpdateMottakLinjeGodkjenningHandler' does not contain a constructor that takes 4 arguments [/home/ubuntu/.openclaw/workspace/tests/LagerPro.Application.Tests/LagerPro.Application.Tests.csproj]
+/home/ubuntu/.openclaw/workspace/tests/LagerPro.Application.Tests/MottakTests.cs(298,27): error CS1729: 'UpdateMottakLinjeGodkjenningHandler' does not contain a constructor that takes 4 arguments [/home/ubuntu/.openclaw/workspace/tests/LagerPro.Application.Tests/LagerPro.Application.Tests.csproj]
+/home/ubuntu/.openclaw/workspace/tests/LagerPro.Application.Tests/MottakTests.cs(316,27): error CS1729: 'UpdateMottakLinjeGodkjenningHandler' does not contain a constructor that takes 4 arguments [/home/ubuntu/.openclaw/workspace/tests/LagerPro.Application.Tests/LagerPro.Application.Tests.csproj]
+/home/ubuntu/.openclaw/workspace/tests/LagerPro.Application.Tests/MottakTests.cs(352,27): error CS1729: 'UpdateMottakLinjeGodkjenningHandler' does not contain a constructor that takes 4 arguments [/home/ubuntu/.openclaw/workspace/tests/LagerPro.Application.Tests/LagerPro.Application.Tests.csproj]
+  LagerPro.Api -> /home/ubuntu/.openclaw/workspace/src/LagerPro.Api/bin/Debug/net8.0/LagerPro.Api.dll
+
+Build FAILED.
+
+/home/ubuntu/.openclaw/workspace/tests/LagerPro.Application.Tests/MottakTests.cs(248,27): error CS1729: 'UpdateMottakLinjeGodkjenningHandler' does not contain a constructor that takes 4 arguments [/home/ubuntu/.openclaw/workspace/tests/LagerPro.Application.Tests/LagerPro.Application.Tests.csproj]
+/home/ubuntu/.openclaw/workspace/tests/LagerPro.Application.Tests/MottakTests.cs(279,27): error CS1729: 'UpdateMottakLinjeGodkjenningHandler' does not contain a constructor that takes 4 arguments [/home/ubuntu/.openclaw/workspace/tests/LagerPro.Application.Tests/LagerPro.Application.Tests.csproj]
+/home/ubuntu/.openclaw/workspace/tests/LagerPro.Application.Tests/MottakTests.cs(298,27): error CS1729: 'UpdateMottakLinjeGodkjenningHandler' does not contain a constructor that takes 4 arguments [/home/ubuntu/.openclaw/workspace/tests/LagerPro.Application.Tests/LagerPro.Application.Tests.csproj]
+/home/ubuntu/.openclaw/workspace/tests/LagerPro.Application.Tests/MottakTests.cs(316,27): error CS1729: 'UpdateMottakLinjeGodkjenningHandler' does not contain a constructor that takes 4 arguments [/home/ubuntu/.openclaw/workspace/tests/LagerPro.Application.Tests/LagerPro.Application.Tests.csproj]
+/home/ubuntu/.openclaw/workspace/tests/LagerPro.Application.Tests/MottakTests.cs(352,27): error CS1729: 'UpdateMottakLinjeGodkjenningHandler' does not contain a constructor that takes 4 arguments [/home/ubuntu/.openclaw/workspace/tests/LagerPro.Application.Tests/LagerPro.Application.Tests.csproj]
+    0 Warning(s)
+    5 Error(s)
+
+Time Elapsed 00:00:20.87
+[build failed]
+[4/4] mvp plan pointer
+sed: can't read projects/lagerpro/docs/mvp-plan.md: No such file or directory
