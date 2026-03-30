@@ -42,6 +42,10 @@ using LagerPro.Application.Features.Resepter.Commands.UpdateResept;
 using LagerPro.Application.Features.Resepter.Commands.DeleteResept;
 using LagerPro.Application.Features.Resepter.Queries.GetAllResepter;
 using LagerPro.Application.Features.Resepter.Queries.GetReseptById;
+using LagerPro.Application.Features.Brukere.Queries.GetAllBrukere;
+using LagerPro.Application.Features.Brukere.Queries.GetBrukerById;
+using LagerPro.Application.Features.Brukere.Queries.GetAllRessurser;
+using LagerPro.Application.Features.Brukere.Commands.UpdateBrukerTilganger;
 using LagerPro.Application.Features.Traceability.Queries.GetTraceabilityByArtikkel;
 using LagerPro.Application.Features.Traceability.Queries.GetTraceabilityByBatch;
 using LagerPro.Application.Features.Traceability.Queries.GetTraceabilityByKunde;
@@ -120,6 +124,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<GetTraceabilityByArtikkelHandler>();
         services.AddScoped<GetTraceabilityByBatchHandler>();
         services.AddScoped<GetTraceabilityByKundeHandler>();
+
+        // Brukere
+        services.AddScoped<GetAllBrukereHandler>();
+        services.AddScoped<GetBrukerByIdHandler>();
+        services.AddScoped<GetAllRessurserHandler>();
+        services.AddScoped<UpdateBrukerTilgangerHandler>();
 
         return services;
     }

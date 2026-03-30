@@ -1,3 +1,4 @@
+using LagerPro.Api.Attributes;
 using LagerPro.Application.Features.Brukere;
 using LagerPro.Application.Features.Brukere.Commands.UpdateBrukerTilganger;
 using LagerPro.Application.Features.Brukere.Queries.GetAllBrukere;
@@ -10,6 +11,7 @@ namespace LagerPro.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[RequireTilgang(10)] // Brukere
 public class BrukereController : ControllerBase
 {
     private readonly GetAllBrukereHandler _getAllHandler;

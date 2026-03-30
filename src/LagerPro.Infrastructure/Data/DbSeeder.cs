@@ -150,6 +150,7 @@ public static class DbSeeder
             new() { Id = 7, Navn = "Sporing", Beskrivelse = "Sporing av varer", OpprettetDato = now },
             new() { Id = 8, Navn = "Kunder", Beskrivelse = "Kundeadministrasjon", OpprettetDato = now },
             new() { Id = 9, Navn = "Leverandører", Beskrivelse = "Leverandøradministrasjon", OpprettetDato = now },
+            new() { Id = 10, Navn = "Brukere", Beskrivelse = "Brukeradministrasjon", OpprettetDato = now },
         };
         context.Ressurser.AddRange(ressurser);
         await context.SaveChangesAsync();

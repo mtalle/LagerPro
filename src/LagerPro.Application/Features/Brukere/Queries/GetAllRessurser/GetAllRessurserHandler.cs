@@ -1,4 +1,3 @@
-using LagerPro.Contracts.Dtos.Brukere;
 using LagerPro.Domain.Repositories;
 
 namespace LagerPro.Application.Features.Brukere.Queries.GetAllRessurser;
@@ -18,3 +17,5 @@ public class GetAllRessurserHandler
         return ressurser.Select(r => new RessursDto(r.Id, r.Navn, r.Beskrivelse)).ToList();
     }
 }
+
+public record RessursDto(int Id, string Navn, string? Beskrivelse);

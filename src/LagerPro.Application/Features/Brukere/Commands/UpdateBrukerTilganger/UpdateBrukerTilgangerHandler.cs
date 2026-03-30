@@ -25,10 +25,8 @@ public class UpdateBrukerTilgangerHandler
         var bruker = await _brukerRepository.GetByIdWithTilgangerAsync(command.BrukerId, cancellationToken);
         if (bruker is null) return false;
 
-        // Clear existing tilganger (cascade delete via EF)
         bruker.Tilganger.Clear();
 
-        // Add new tilganger
         foreach (var ressursId in command.RessursIder)
         {
             bruker.Tilganger.Add(new BrukerRessursTilgang
