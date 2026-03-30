@@ -1,9 +1,14 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './globals.css';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [brukerNavn, setBrukerNavn] = useState<string | null>(null);
+
+  useEffect(() => {
+    setBrukerNavn(localStorage.getItem('lagerpro_bruker_navn'));
+  }, []);
 
   return (
     <html lang="no">
@@ -30,6 +35,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <a href="/resepter" onClick={() => setMenuOpen(false)}>Resepter</a>
             <a href="/brukere" onClick={() => setMenuOpen(false)}>👤 Admin</a>
           </div>
+          {brukerNavn && (
+            <div className="nav-bruker" style={{ marginLeft: 'auto', padding: '0 1rem', fontSize: '0.85rem', color: '#6b7280' }}>
+              Innlogget: <strong>{brukerNavn}</strong>
+            </div>
+          )}
         </nav>
         <main className="container">{children}</main>
       </body>

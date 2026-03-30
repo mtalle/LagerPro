@@ -36,6 +36,9 @@ export default function BrukerePage() {
     setSelectedTilganger(new Set(bruker.tilganger.map(t => t.ressursId)));
     setSuccess('');
     setError('');
+    // Sett aktiv bruker i localStorage
+    localStorage.setItem('lagerpro_bruker_id', String(bruker.id));
+    localStorage.setItem('lagerpro_bruker_navn', bruker.navn);
   }
 
   function toggleRessurs(ressursId: number) {
@@ -56,6 +59,9 @@ export default function BrukerePage() {
     try {
       await put(`/brukere/${selected.id}/tilganger`, { ressursIder: Array.from(selectedTilganger) });
       setSuccess('Tilganger lagret!');
+      // Lagre valgt bruker i localStorage slik at API-kall får X-Bruker-Id
+      localStorage.setItem('lagerpro_bruker_id', String(selected.id));
+      localStorage.setItem('lagerpro_bruker_navn', selected.navn);
       // Refresh
       const oppdatert = await get<Bruker[]>(`/brukere`);
       setBrukere(oppdatert);

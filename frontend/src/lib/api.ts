@@ -1,7 +1,16 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000/api';
 
+function authHeaders(): Record<string, string> {
+  if (typeof window === 'undefined') return {};
+  const uid = localStorage.getItem('lagerpro_bruker_id');
+  if (!uid) return {};
+  return { 'X-Bruker-Id': uid };
+}
+
 export async function get<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`);
+  const res = await fetch(`${API_BASE}${path}`, {
+    headers: { ...authHeaders() },
+  });
   if (!res.ok) throw new Error(`${path}: ${res.status}`);
   return res.json();
 }
@@ -9,7 +18,7 @@ export async function get<T>(path: string): Promise<T> {
 export async function post<T>(path: string, body: unknown): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
     body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error(`${path}: ${res.status}`);
@@ -19,7 +28,7 @@ export async function post<T>(path: string, body: unknown): Promise<T> {
 export async function put<T>(path: string, body: unknown): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
     body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error(`${path}: ${res.status}`);
@@ -29,20 +38,19 @@ export async function put<T>(path: string, body: unknown): Promise<T> {
 export async function patch<T>(path: string, body: unknown): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
     body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error(`${path}: ${res.status}`);
   return res.json();
 }
-
 export interface UpdateMottakLinje {
   godkjent: boolean;
   avvik?: string;
 }
 
 export async function del(path: string): Promise<void> {
-  const res = await fetch(`${API_BASE}${path}`, { method: 'DELETE' });
+  const res = await fetch(`${API_BASE}${path}`, { method: 'DELETE', headers: { ...authHeaders() } });
   if (!res.ok) throw new Error(`${path}: ${res.status}`);
 }
 
