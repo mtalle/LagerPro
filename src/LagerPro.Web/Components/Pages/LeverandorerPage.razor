@@ -1,0 +1,286 @@
+@page "/leverandorer"
+@using LagerPro.Web.Models
+@using LagerPro.Web.Services
+@using LagerPro.Contracts.Requests.Leverandorer
+@inject ApiService Api
+
+<h3>Leverandører</h3>
+
+@if (loading)
+{
+    <p>Laster...</p>
+}
+else if (error != null)
+{
+    <p class="text-danger">@error</p>
+}
+else
+{
+    <button class="btn btn-primary mb-3" @onclick="ShowCreateModal">Ny leverandør</button>
+
+    <div class="table-wrapper">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Navn</th>
+                <th>Kontaktperson</th>
+                <th>Telefon</th>
+                <th>E-post</th>
+                <th>OrgNr</th>
+                <th>Aktiv</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var leverandor in leverandorer)
+            {
+                <tr>
+                    <td>@leverandor.Navn</td>
+                    <td>@(leverandor.Kontaktperson ?? "-")</td>
+                    <td>@(leverandor.Telefon ?? "-")</td>
+                    <td>@(leverandor.Epost ?? "-")</td>
+                    <td>@(leverandor.OrgNr ?? "-")</td>
+                    <td>@(leverandor.Aktiv ? "Ja" : "Nei")</td>
+                    <td>
+                        <button class="btn btn-sm btn-secondary" @onclick="() => ShowEditModal(leverandor)">Rediger</button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteLeverandor(leverandor.Id)">Slett</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    </div>
+}
+
+@if (showModal)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(isEdit ? "Rediger leverandør" : "Ny leverandør")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-2">
+                        <div class="col">
+                            <label>Navn</label>
+                            <input class="form-control" @bind="editLeverandor.Navn" />
+                        </div>
+                        <div class="col">
+                            <label>Kontaktperson</label>
+                            <input class="form-control" @bind="editLeverandor.Kontaktperson" />
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col">
+                            <label>Telefon</label>
+                            <input class="form-control" @bind="editLeverandor.Telefon" />
+                        </div>
+                        <div class="col">
+                            <label>E-post</label>
+                            <input class="form-control" type="email" @bind="editLeverandor.Epost" />
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col">
+                            <label>Adresse</label>
+                            <input class="form-control" @bind="editLeverandor.Adresse" />
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col">
+                            <label>Postnr</label>
+                            <input class="form-control" @bind="editLeverandor.Postnr" />
+                        </div>
+                        <div class="col">
+                            <label>Poststed</label>
+                            <input class="form-control" @bind="editLeverandor.Poststed" />
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col">
+                            <label>OrgNr</label>
+                            <input class="form-control" @bind="editLeverandor.OrgNr" />
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label>Kommentar</label>
+                        <textarea class="form-control" rows="2" @bind="editLeverandor.Kommentar"></textarea>
+                    </div>
+                    @if (isEdit)
+                    {
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" @bind="editLeverandor.Aktiv" />
+                            <label class="form-check-label">Aktiv</label>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Avbryt</button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveLeverandor">Lagre</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop show"></div>
+}
+
+@if (showDeleteConfirm)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Bekreft sletting</h5>
+                    <button type="button" class="btn-close" @onclick="CancelDelete"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Er du sikker på at du vil slette denne leverandøren?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CancelDelete">Avbryt</button>
+                    <button type="button" class="btn btn-danger" @onclick="ConfirmDelete">Slett</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop show"></div>
+}
+
+@code {
+    private List<Leverandor> leverandorer = new();
+    private bool loading = true;
+    private string? error;
+    private bool showModal = false;
+    private bool isEdit = false;
+    private bool showDeleteConfirm = false;
+    private int? deleteId;
+    private Leverandor editLeverandor = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadLeverandorer();
+    }
+
+    private async Task LoadLeverandorer()
+    {
+        loading = true;
+        error = null;
+        try
+        {
+            leverandorer = await Api.GetLeverandørerAsync();
+        }
+        catch (Exception ex)
+        {
+            error = $"Kunne ikke laste leverandører: {ex.Message}";
+        }
+        loading = false;
+    }
+
+    private void ShowCreateModal()
+    {
+        editLeverandor = new Leverandor { Aktiv = true };
+        isEdit = false;
+        showModal = true;
+    }
+
+    private void ShowEditModal(Leverandor leverandor)
+    {
+        editLeverandor = new Leverandor
+        {
+            Id = leverandor.Id,
+            Navn = leverandor.Navn,
+            Kontaktperson = leverandor.Kontaktperson,
+            Telefon = leverandor.Telefon,
+            Epost = leverandor.Epost,
+            Adresse = leverandor.Adresse,
+            Postnr = leverandor.Postnr,
+            Poststed = leverandor.Poststed,
+            OrgNr = leverandor.OrgNr,
+            Kommentar = leverandor.Kommentar,
+            Aktiv = leverandor.Aktiv
+        };
+        isEdit = true;
+        showModal = true;
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+    }
+
+    private async Task SaveLeverandor()
+    {
+        try
+        {
+            if (isEdit)
+            {
+                var request = new UpdateLeverandorRequest(
+                    editLeverandor.Navn,
+                    editLeverandor.Kontaktperson,
+                    editLeverandor.Telefon,
+                    editLeverandor.Epost,
+                    editLeverandor.Adresse,
+                    editLeverandor.Postnr,
+                    editLeverandor.Poststed,
+                    editLeverandor.OrgNr,
+                    editLeverandor.Kommentar,
+                    editLeverandor.Aktiv
+                );
+                await Api.UpdateLeverandorAsync(editLeverandor.Id, request);
+            }
+            else
+            {
+                var request = new CreateLeverandorRequest(
+                    editLeverandor.Navn,
+                    editLeverandor.Kontaktperson,
+                    editLeverandor.Telefon,
+                    editLeverandor.Epost,
+                    editLeverandor.Adresse,
+                    editLeverandor.Postnr,
+                    editLeverandor.Poststed,
+                    editLeverandor.OrgNr,
+                    editLeverandor.Kommentar
+                );
+                await Api.CreateLeverandorAsync(request);
+            }
+            CloseModal();
+            await LoadLeverandorer();
+        }
+        catch (Exception ex)
+        {
+            error = $"Feil ved lagring: {ex.Message}";
+        }
+    }
+
+    private void DeleteLeverandor(int id)
+    {
+        showDeleteConfirm = true;
+        deleteId = id;
+    }
+
+    private async Task ConfirmDelete()
+    {
+        if (deleteId.HasValue)
+        {
+            try
+            {
+                await Api.DeleteLeverandorAsync(deleteId.Value);
+                await LoadLeverandorer();
+            }
+            catch (Exception ex)
+            {
+                error = $"Feil ved sletting: {ex.Message}";
+            }
+        }
+        showDeleteConfirm = false;
+        deleteId = null;
+    }
+
+    private void CancelDelete()
+    {
+        showDeleteConfirm = false;
+        deleteId = null;
+    }
+}

@@ -1,5 +1,8 @@
 using System.Net.Http.Json;
 using LagerPro.Web.Models;
+using LagerPro.Contracts.Requests.Kunder;
+using LagerPro.Contracts.Requests.Leverandorer;
+using LagerPro.Contracts.Requests.Resepter;
 
 namespace LagerPro.Web.Services;
 
@@ -187,6 +190,27 @@ public class ApiService
         return await response.Content.ReadFromJsonAsync<List<Kunde>>() ?? new();
     }
 
+    // Kunder CRUD
+    public async Task<int> CreateKundeAsync(CreateKundeRequest request)
+    {
+        var response = await _http.PostAsJsonAsync("/api/kunder", request);
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<Dictionary<string, int>>();
+        return result?["id"] ?? 0;
+    }
+
+    public async Task<bool> UpdateKundeAsync(int id, UpdateKundeRequest request)
+    {
+        var response = await _http.PutAsJsonAsync($"/api/kunder/{id}", request);
+        return response.IsSuccessStatusCode;
+    }
+
+    public async Task<bool> DeleteKundeAsync(int id)
+    {
+        var response = await _http.DeleteAsync($"/api/kunder/{id}");
+        return response.IsSuccessStatusCode;
+    }
+
     // Leverandører
     public async Task<List<Leverandor>> GetLeverandørerAsync()
     {
@@ -195,11 +219,53 @@ public class ApiService
         return await response.Content.ReadFromJsonAsync<List<Leverandor>>() ?? new();
     }
 
+    // Leverandører CRUD
+    public async Task<int> CreateLeverandorAsync(CreateLeverandorRequest request)
+    {
+        var response = await _http.PostAsJsonAsync("/api/leverandorer", request);
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<Dictionary<string, int>>();
+        return result?["id"] ?? 0;
+    }
+
+    public async Task<bool> UpdateLeverandorAsync(int id, UpdateLeverandorRequest request)
+    {
+        var response = await _http.PutAsJsonAsync($"/api/leverandorer/{id}", request);
+        return response.IsSuccessStatusCode;
+    }
+
+    public async Task<bool> DeleteLeverandorAsync(int id)
+    {
+        var response = await _http.DeleteAsync($"/api/leverandorer/{id}");
+        return response.IsSuccessStatusCode;
+    }
+
     // Resepter
     public async Task<List<Resept>> GetResepterAsync()
     {
         var response = await _http.GetAsync("/api/resepter");
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<List<Resept>>() ?? new();
+    }
+
+    // Resepter CRUD
+    public async Task<int> CreateReseptAsync(CreateReseptRequest request)
+    {
+        var response = await _http.PostAsJsonAsync("/api/resepter", request);
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<Dictionary<string, int>>();
+        return result?["id"] ?? 0;
+    }
+
+    public async Task<bool> UpdateReseptAsync(int id, UpdateReseptRequest request)
+    {
+        var response = await _http.PutAsJsonAsync($"/api/resepter/{id}", request);
+        return response.IsSuccessStatusCode;
+    }
+
+    public async Task<bool> DeleteReseptAsync(int id)
+    {
+        var response = await _http.DeleteAsync($"/api/resepter/{id}");
+        return response.IsSuccessStatusCode;
     }
 }

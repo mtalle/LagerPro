@@ -1,0 +1,254 @@
+@page "/resepter"
+@using LagerPro.Web.Models
+@using LagerPro.Web.Services
+@using LagerPro.Contracts.Requests.Resepter
+@inject ApiService Api
+
+<h3>Resepter</h3>
+
+@if (loading)
+{
+    <p>Laster...</p>
+}
+else if (error != null)
+{
+    <p class="text-danger">@error</p>
+}
+else
+{
+    <button class="btn btn-primary mb-3" @onclick="ShowCreateModal">Ny resept</button>
+
+    <div class="table-wrapper">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Navn</th>
+                <th>Ferdigvare</th>
+                <th>Beskrivelse</th>
+                <th>Antall porsjoner</th>
+                <th>Aktiv</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var resept in resepter)
+            {
+                <tr>
+                    <td>@resept.Navn</td>
+                    <td>@(resept.FerdigvareNavn ?? "-")</td>
+                    <td>@(resept.Beskrivelse ?? "-")</td>
+                    <td>@resept.AntallPortjoner</td>
+                    <td>@(resept.Aktiv ? "Ja" : "Nei")</td>
+                    <td>
+                        <button class="btn btn-sm btn-secondary" @onclick="() => ShowEditModal(resept)">Rediger</button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteResept(resept.Id)">Slett</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    </div>
+}
+
+@if (showModal)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(isEdit ? "Rediger resept" : "Ny resept")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-2">
+                        <div class="col">
+                            <label>Navn</label>
+                            <input class="form-control" @bind="editResept.Navn" />
+                        </div>
+                        <div class="col">
+                            <label>Ferdigvare ID</label>
+                            <input class="form-control" type="number" @bind="editResept.FerdigvareId" />
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label>Beskrivelse</label>
+                        <textarea class="form-control" rows="2" @bind="editResept.Beskrivelse"></textarea>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col">
+                            <label>Antall porsjoner</label>
+                            <input class="form-control" type="number" step="0.01" @bind="editResept.AntallPortjoner" />
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label>Instruksjoner</label>
+                        <textarea class="form-control" rows="3" @bind="editResept.Instruksjoner"></textarea>
+                    </div>
+                    @if (isEdit)
+                    {
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" @bind="editResept.Aktiv" />
+                            <label class="form-check-label">Aktiv</label>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Avbryt</button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveResept">Lagre</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop show"></div>
+}
+
+@if (showDeleteConfirm)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Bekreft sletting</h5>
+                    <button type="button" class="btn-close" @onclick="CancelDelete"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Er du sikker på at du vil slette denne resepten?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CancelDelete">Avbryt</button>
+                    <button type="button" class="btn btn-danger" @onclick="ConfirmDelete">Slett</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop show"></div>
+}
+
+@code {
+    private List<Resept> resepter = new();
+    private bool loading = true;
+    private string? error;
+    private bool showModal = false;
+    private bool isEdit = false;
+    private bool showDeleteConfirm = false;
+    private int? deleteId;
+    private Resept editResept = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadResepter();
+    }
+
+    private async Task LoadResepter()
+    {
+        loading = true;
+        error = null;
+        try
+        {
+            resepter = await Api.GetResepterAsync();
+        }
+        catch (Exception ex)
+        {
+            error = $"Kunne ikke laste resepter: {ex.Message}";
+        }
+        loading = false;
+    }
+
+    private void ShowCreateModal()
+    {
+        editResept = new Resept { Aktiv = true, AntallPortjoner = 1 };
+        isEdit = false;
+        showModal = true;
+    }
+
+    private void ShowEditModal(Resept resept)
+    {
+        editResept = new Resept
+        {
+            Id = resept.Id,
+            Navn = resept.Navn,
+            FerdigvareId = resept.FerdigvareId,
+            FerdigvareNavn = resept.FerdigvareNavn,
+            Beskrivelse = resept.Beskrivelse,
+            AntallPortjoner = resept.AntallPortjoner,
+            Instruksjoner = resept.Instruksjoner,
+            Aktiv = resept.Aktiv,
+            Linjer = resept.Linjer
+        };
+        isEdit = true;
+        showModal = true;
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+    }
+
+    private async Task SaveResept()
+    {
+        try
+        {
+            if (isEdit)
+            {
+                var request = new UpdateReseptRequest(
+                    editResept.Navn,
+                    editResept.FerdigvareId,
+                    editResept.Beskrivelse,
+                    editResept.AntallPortjoner,
+                    editResept.Instruksjoner,
+                    editResept.Aktiv,
+                    new List<UpdateReseptLinjeRequest>()
+                );
+                await Api.UpdateReseptAsync(editResept.Id, request);
+            }
+            else
+            {
+                var request = new CreateReseptRequest(
+                    editResept.Navn,
+                    editResept.FerdigvareId,
+                    editResept.Beskrivelse,
+                    editResept.AntallPortjoner,
+                    editResept.Instruksjoner,
+                    new List<ReseptLinjeRequest>()
+                );
+                await Api.CreateReseptAsync(request);
+            }
+            CloseModal();
+            await LoadResepter();
+        }
+        catch (Exception ex)
+        {
+            error = $"Feil ved lagring: {ex.Message}";
+        }
+    }
+
+    private void DeleteResept(int id)
+    {
+        showDeleteConfirm = true;
+        deleteId = id;
+    }
+
+    private async Task ConfirmDelete()
+    {
+        if (deleteId.HasValue)
+        {
+            try
+            {
+                await Api.DeleteReseptAsync(deleteId.Value);
+                await LoadResepter();
+            }
+            catch (Exception ex)
+            {
+                error = $"Feil ved sletting: {ex.Message}";
+            }
+        }
+        showDeleteConfirm = false;
+        deleteId = null;
+    }
+
+    private void CancelDelete()
+    {
+        showDeleteConfirm = false;
+        deleteId = null;
+    }
+}

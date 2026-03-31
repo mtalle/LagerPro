@@ -1,0 +1,286 @@
+@page "/kunder"
+@using LagerPro.Web.Models
+@using LagerPro.Web.Services
+@using LagerPro.Contracts.Requests.Kunder
+@inject ApiService Api
+
+<h3>Kunder</h3>
+
+@if (loading)
+{
+    <p>Laster...</p>
+}
+else if (error != null)
+{
+    <p class="text-danger">@error</p>
+}
+else
+{
+    <button class="btn btn-primary mb-3" @onclick="ShowCreateModal">Ny kunde</button>
+
+    <div class="table-wrapper">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Navn</th>
+                <th>Kontaktperson</th>
+                <th>Telefon</th>
+                <th>E-post</th>
+                <th>OrgNr</th>
+                <th>Aktiv</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var kunde in kunder)
+            {
+                <tr>
+                    <td>@kunde.Navn</td>
+                    <td>@(kunde.Kontaktperson ?? "-")</td>
+                    <td>@(kunde.Telefon ?? "-")</td>
+                    <td>@(kunde.Epost ?? "-")</td>
+                    <td>@(kunde.OrgNr ?? "-")</td>
+                    <td>@(kunde.Aktiv ? "Ja" : "Nei")</td>
+                    <td>
+                        <button class="btn btn-sm btn-secondary" @onclick="() => ShowEditModal(kunde)">Rediger</button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteKunde(kunde.Id)">Slett</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    </div>
+}
+
+@if (showModal)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(isEdit ? "Rediger kunde" : "Ny kunde")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-2">
+                        <div class="col">
+                            <label>Navn</label>
+                            <input class="form-control" @bind="editKunde.Navn" />
+                        </div>
+                        <div class="col">
+                            <label>Kontaktperson</label>
+                            <input class="form-control" @bind="editKunde.Kontaktperson" />
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col">
+                            <label>Telefon</label>
+                            <input class="form-control" @bind="editKunde.Telefon" />
+                        </div>
+                        <div class="col">
+                            <label>E-post</label>
+                            <input class="form-control" type="email" @bind="editKunde.Epost" />
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col">
+                            <label>Adresse</label>
+                            <input class="form-control" @bind="editKunde.Adresse" />
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col">
+                            <label>Postnr</label>
+                            <input class="form-control" @bind="editKunde.Postnr" />
+                        </div>
+                        <div class="col">
+                            <label>Poststed</label>
+                            <input class="form-control" @bind="editKunde.Poststed" />
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col">
+                            <label>OrgNr</label>
+                            <input class="form-control" @bind="editKunde.OrgNr" />
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label>Kommentar</label>
+                        <textarea class="form-control" rows="2" @bind="editKunde.Kommentar"></textarea>
+                    </div>
+                    @if (isEdit)
+                    {
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" @bind="editKunde.Aktiv" />
+                            <label class="form-check-label">Aktiv</label>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Avbryt</button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveKunde">Lagre</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop show"></div>
+}
+
+@if (showDeleteConfirm)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Bekreft sletting</h5>
+                    <button type="button" class="btn-close" @onclick="CancelDelete"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Er du sikker på at du vil slette denne kunden?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CancelDelete">Avbryt</button>
+                    <button type="button" class="btn btn-danger" @onclick="ConfirmDelete">Slett</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop show"></div>
+}
+
+@code {
+    private List<Kunde> kunder = new();
+    private bool loading = true;
+    private string? error;
+    private bool showModal = false;
+    private bool isEdit = false;
+    private bool showDeleteConfirm = false;
+    private int? deleteId;
+    private Kunde editKunde = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadKunder();
+    }
+
+    private async Task LoadKunder()
+    {
+        loading = true;
+        error = null;
+        try
+        {
+            kunder = await Api.GetKunderAsync();
+        }
+        catch (Exception ex)
+        {
+            error = $"Kunne ikke laste kunder: {ex.Message}";
+        }
+        loading = false;
+    }
+
+    private void ShowCreateModal()
+    {
+        editKunde = new Kunde { Aktiv = true };
+        isEdit = false;
+        showModal = true;
+    }
+
+    private void ShowEditModal(Kunde kunde)
+    {
+        editKunde = new Kunde
+        {
+            Id = kunde.Id,
+            Navn = kunde.Navn,
+            Kontaktperson = kunde.Kontaktperson,
+            Telefon = kunde.Telefon,
+            Epost = kunde.Epost,
+            Adresse = kunde.Adresse,
+            Postnr = kunde.Postnr,
+            Poststed = kunde.Poststed,
+            OrgNr = kunde.OrgNr,
+            Kommentar = kunde.Kommentar,
+            Aktiv = kunde.Aktiv
+        };
+        isEdit = true;
+        showModal = true;
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+    }
+
+    private async Task SaveKunde()
+    {
+        try
+        {
+            if (isEdit)
+            {
+                var request = new UpdateKundeRequest(
+                    editKunde.Navn,
+                    editKunde.Kontaktperson,
+                    editKunde.Telefon,
+                    editKunde.Epost,
+                    editKunde.Adresse,
+                    editKunde.Postnr,
+                    editKunde.Poststed,
+                    editKunde.OrgNr,
+                    editKunde.Kommentar,
+                    editKunde.Aktiv
+                );
+                await Api.UpdateKundeAsync(editKunde.Id, request);
+            }
+            else
+            {
+                var request = new CreateKundeRequest(
+                    editKunde.Navn,
+                    editKunde.Kontaktperson,
+                    editKunde.Telefon,
+                    editKunde.Epost,
+                    editKunde.Adresse,
+                    editKunde.Postnr,
+                    editKunde.Poststed,
+                    editKunde.OrgNr,
+                    editKunde.Kommentar
+                );
+                await Api.CreateKundeAsync(request);
+            }
+            CloseModal();
+            await LoadKunder();
+        }
+        catch (Exception ex)
+        {
+            error = $"Feil ved lagring: {ex.Message}";
+        }
+    }
+
+    private void DeleteKunde(int id)
+    {
+        showDeleteConfirm = true;
+        deleteId = id;
+    }
+
+    private async Task ConfirmDelete()
+    {
+        if (deleteId.HasValue)
+        {
+            try
+            {
+                await Api.DeleteKundeAsync(deleteId.Value);
+                await LoadKunder();
+            }
+            catch (Exception ex)
+            {
+                error = $"Feil ved sletting: {ex.Message}";
+            }
+        }
+        showDeleteConfirm = false;
+        deleteId = null;
+    }
+
+    private void CancelDelete()
+    {
+        showDeleteConfirm = false;
+        deleteId = null;
+    }
+}

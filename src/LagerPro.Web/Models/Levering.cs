@@ -47,8 +47,14 @@ public class Kunde
 {
     public int Id { get; set; }
     public string Navn { get; set; } = string.Empty;
-    public string? Epost { get; set; }
+    public string? Kontaktperson { get; set; }
     public string? Telefon { get; set; }
+    public string? Epost { get; set; }
+    public string? Adresse { get; set; }
+    public string? Postnr { get; set; }
+    public string? Poststed { get; set; }
+    public string? OrgNr { get; set; }
+    public string? Kommentar { get; set; }
     public bool Aktiv { get; set; }
 }
 
@@ -56,7 +62,13 @@ public class Leverandor
 {
     public int Id { get; set; }
     public string Navn { get; set; } = string.Empty;
-    public string? Epost { get; set; }
+    public string? Kontaktperson { get; set; }
     public string? Telefon { get; set; }
+    public string? Epost { get; set; }
+    public string? Adresse { get; set; }
+    public string? Postnr { get; set; }
+    public string? Poststed { get; set; }
+    public string? OrgNr { get; set; }
+    public string? Kommentar { get; set; }
     public bool Aktiv { get; set; }
 }

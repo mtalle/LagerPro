@@ -46,6 +46,20 @@ public class Resept
     public string Navn { get; set; } = string.Empty;
     public int FerdigvareId { get; set; }
     public string? FerdigvareNavn { get; set; }
+    public string? Beskrivelse { get; set; }
     public decimal AntallPortjoner { get; set; }
+    public string? Instruksjoner { get; set; }
     public bool Aktiv { get; set; }
+    public List<ReseptLinje> Linjer { get; set; } = new();
+}
+
+public class ReseptLinje
+{
+    public int Id { get; set; }
+    public int RavareId { get; set; }
+    public string? RavareNavn { get; set; }
+    public decimal Mengde { get; set; }
+    public string Enhet { get; set; } = string.Empty;
+    public int Rekkefolge { get; set; }
+    public string? Kommentar { get; set; }
 }
