@@ -54,6 +54,14 @@ export async function del(path: string): Promise<void> {
   if (!res.ok) throw new Error(`${path}: ${res.status}`);
 }
 
+export async function getMe(): Promise<Bruker> {
+  const uid = typeof window !== 'undefined' ? localStorage.getItem('lagerpro_bruker_id') : null;
+  if (!uid) throw new Error('Ingen bruker logget inn');
+  const res = await fetch(`${API_BASE}/brukere/me`, { headers: { 'X-Bruker-Id': uid } });
+  if (!res.ok) throw new Error(`/brukere/me: ${res.status}`);
+  return res.json();
+}
+
 // Types matching the API contracts
 export interface Article {
   id: number;

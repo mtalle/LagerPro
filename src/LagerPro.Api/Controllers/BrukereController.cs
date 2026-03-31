@@ -38,6 +38,15 @@ public class BrukereController : ControllerBase
         return Ok(brukere);
     }
 
+    [HttpGet("me")]
+    public async Task<IActionResult> GetCurrent([FromHeader(Name = "X-Bruker-Id")] int? brukerId, CancellationToken cancellationToken)
+    {
+        if (brukerId is null) return Unauthorized(new { message = "X-Bruker-Id header kreves." });
+        var bruker = await _getByIdHandler.Handle(new GetBrukerByIdQuery(brukerId.Value), cancellationToken);
+        if (bruker is null) return NotFound(new { message = $"Bruker med id {brukerId} ble ikke funnet." });
+        return Ok(bruker);
+    }
+
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
     {
