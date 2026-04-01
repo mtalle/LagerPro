@@ -62,19 +62,13 @@ export default function DashboardPage() {
 
   useEffect(() => { setVisibleWidgets(loadVisibleWidgets()); }, []);
   useEffect(() => {
-    async function init() {
-      // Last brukar for å populera localStorage X-Bruker-Id
-      try {
-        const b: Bruker = await getMe();
-        localStorage.setItem('lagerpro_bruker_navn', b.navn);
-        localStorage.setItem('lagerpro_bruker_id', String(b.id));
-      } catch {
-        // Ikkje logga inn enno — vent
-        return;
-      }
-      load();
-    }
-    init();
+    // Prøv å lasta brukar for å populera localStorage
+    getMe().then(b => {
+      localStorage.setItem('lagerpro_bruker_navn', b.navn);
+      localStorage.setItem('lagerpro_bruker_id', String(b.id));
+    }).catch(() => {
+      // Ikkje logga inn enno — berre last data utan auth
+    }).finally(() => load());
   }, []);
 
   async function load() {
