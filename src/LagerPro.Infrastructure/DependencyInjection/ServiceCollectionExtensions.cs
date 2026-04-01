@@ -16,7 +16,7 @@ public static class ServiceCollectionExtensions
             ?? "Data Source=/home/ubuntu/.openclaw/workspace/LagerPro.db";
 
         services.AddDbContext<LagerProDbContext>(options =>
-            options.UseSqlServer(connectionString));
+            options.UseNpgsql(connectionString));
 
         // Unit of Work
         services.AddScoped<IUnitOfWork, UnitOfWork>();

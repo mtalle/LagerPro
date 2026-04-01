@@ -8,7 +8,7 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<LagerProDb
     public LagerProDbContext CreateDbContext(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<LagerProDbContext>();
-        optionsBuilder.UseSqlServer("Server=localhost,14333;Database=LagerProDb;User Id=sa;Password=LagerPro123!;Encrypt=False;TrustServerCertificate=True;");
+        optionsBuilder.UseNpgsql("Host=localhost;Database=lagerpro;Username=lagerpro;Password=LagerPro123");
 
         return new LagerProDbContext(optionsBuilder.Options);
     }
