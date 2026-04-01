@@ -314,3 +314,69 @@ export interface Ressurs {
   navn: string;
   beskrivelse: string;
 }
+
+// ---- Rapporter ----
+export interface LagrerapportArtikkel {
+  artikkelId: number;
+  artikkelNr: string;
+  artikkelNavn: string;
+  enhet: string;
+  totalMengde: number;
+  innpris: number;
+  totalVerdi: number;
+  antallLots: number;
+  minBeholdning?: number;
+  kritisk: boolean;
+}
+
+export interface Lagrerapport {
+  generert: string;
+  antallArtikler: number;
+  totalLagerverdi: number;
+  artikler: LagrerapportArtikkel[];
+}
+
+export interface SalgsrapportArtikkel {
+  artikkelId: number;
+  artikkelNr: string;
+  artikkelNavn: string;
+  antallLeveringer: number;
+  totalMengde: number;
+  enhet: string;
+  sisteInnpris?: number;
+  sisteUtpris?: number;
+}
+
+export interface SalgsrapportArtikkelGruppe {
+  fraDato: string;
+  tilDato: string;
+  antallArtikler: number;
+  totaltAntallLeveringer: number;
+  artikler: SalgsrapportArtikkel[];
+}
+
+export interface SalgsrapportKundeDetaljer {
+  leveringId: number;
+  leveringsDato: string;
+  referanse?: string;
+  status: string;
+  antallLinjer: number;
+  totalMengde: number;
+}
+
+export interface SalgsrapportKunde {
+  kundeId: number;
+  kundeNavn: string;
+  orgNr?: string;
+  antallLeveringer: number;
+  totalMengde: number;
+  leveringer: SalgsrapportKundeDetaljer[];
+}
+
+export interface SalgsrapportKundeGruppe {
+  fraDato: string;
+  tilDato: string;
+  antallKunder: number;
+  totaltAntallLeveringer: number;
+  kunder: SalgsrapportKunde[];
+}

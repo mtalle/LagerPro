@@ -118,12 +118,13 @@ export default function LeveringPage() {
           placeholder="Søk kunde, referanse, fraktbrev..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          style={{ padding: '0.4rem 0.8rem', border: '1px solid #d1d5db', borderRadius: 6, width: 300, fontSize: '0.9rem' }}
+          style={{ padding: '0.4rem 0.8rem', border: '1px solid #d1d5db', borderRadius: 6, width: 300, fontSize: '0.9rem', minHeight: 44 }}
         />
         <span style={{ marginLeft: 'auto', fontSize: '0.85rem', color: '#6b7280' }}>{filtered.length} av {leveringer.length}</span>
       </div>
 
-      <table className="table-scroll">
+      <div className="table-wrapper">
+      <table>
         <thead>
           <tr><th>ID</th><th>Dato</th><th>Kunde</th><th>Referanse</th><th>Fraktbrev</th><th>Status</th><th></th></tr>
         </thead>
@@ -159,6 +160,7 @@ export default function LeveringPage() {
           ))}
         </tbody>
       </table>
+      </div>
 
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
