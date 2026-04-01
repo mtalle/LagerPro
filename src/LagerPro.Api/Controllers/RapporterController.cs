@@ -7,7 +7,7 @@ namespace LagerPro.Api.Controllers;
 
 [ApiController]
 [Route("api/rapporter")]
-[RequireTilgang(1)] // Admin — rapporter krever admin-tilgang
+[RequireTilgang(10)] // Admin — rapporter krever admin-tilgang
 public class RapporterController : ControllerBase
 {
     private readonly LagrerapportHandler _lagrerapportHandler;
