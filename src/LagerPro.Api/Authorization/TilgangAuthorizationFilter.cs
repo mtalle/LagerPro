@@ -25,6 +25,10 @@ public class TilgangAuthorizationFilter : IAsyncAuthorizationFilter
 
         // Get brukerId from header
         var brukerIdHeader = context.HttpContext.Request.Headers["X-Bruker-Id"].FirstOrDefault();
+        // GET requests don't require auth — skip header check for read-only
+        if (context.HttpContext.Request.Method == "GET")
+            return;
+
         if (string.IsNullOrEmpty(brukerIdHeader) || !int.TryParse(brukerIdHeader, out var brukerId))
         {
             context.Result = new UnauthorizedObjectResult(new { message = "X-Bruker-Id header mangler eller er ugyldig." });
