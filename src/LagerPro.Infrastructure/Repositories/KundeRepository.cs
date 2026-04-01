@@ -17,9 +17,11 @@ public class KundeRepository : IKundeRepository
     public Task<Kunde?> GetByIdAsync(int id, CancellationToken cancellationToken)
         => _dbContext.Kunder.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
-    public Task<IReadOnlyList<Kunde>> GetAllAsync(CancellationToken cancellationToken)
-        => _dbContext.Kunder.OrderBy(x => x.Navn).ToListAsync(cancellationToken)
-            .ContinueWith(t => (IReadOnlyList<Kunde>)t.Result, cancellationToken);
+    public async Task<IReadOnlyList<Kunde>> GetAllAsync(CancellationToken cancellationToken)
+    {
+        var kunder = await _dbContext.Kunder.OrderBy(x => x.Navn).ToListAsync(cancellationToken);
+        return kunder;
+    }
 
     public Task<Kunde?> GetByOrgNrAsync(string orgNr, CancellationToken cancellationToken = default)
         => _dbContext.Kunder.FirstOrDefaultAsync(x => x.OrgNr == orgNr, cancellationToken);
