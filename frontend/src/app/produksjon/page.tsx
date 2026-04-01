@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { ProduksjonsOrdre, Resept, Plukkliste, FerdigmeldPrefill, FerdigmeldLinje, get, post, patch, del } from '../../lib/api';
+import { useTilgang } from '../../lib/useTilgang';
 
 const STATUS_MAP: Record<string, string> = {
   Planlagt: 'badge-planlagt',
@@ -21,6 +22,7 @@ export default function ProduksjonPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [error, setError] = useState('');
+  const kanRedigere = useTilgang(4);
 
   const [resepter, setResepter] = useState<Resept[]>([]);
 
@@ -202,12 +204,10 @@ export default function ProduksjonPage() {
               <td><span className={`badge ${STATUS_MAP[o.status] ?? ''}`}>{o.status}</span></td>
               <td>{o.utfortAv ?? '—'}</td>
               <td>
-                {(o.status === 'Planlagt' || o.status === 'Kansellert') && (
-                  <button className="btn btn-sm btn-danger" style={{ marginRight: 4 }} onClick={() => handleDelete(o.id)}>Slett</button>
-                )}
-                {o.status === 'Planlagt' && <button className="btn btn-sm btn-primary" style={{ marginRight: 4 }} onClick={() => setStatus(o.id, 'IProduksjon')}>Start</button>}
-                {o.status === 'IProduksjon' && <button className="btn btn-sm btn-primary" style={{ marginRight: 4 }} onClick={() => openFerdigmeld(o)}>Ferdigmeld</button>}
-                {o.status !== 'Ferdigmeldt' && o.status !== 'Kansellert' && <button className="btn btn-sm btn-danger" onClick={() => setStatus(o.id, 'Kansellert')}>Kanseller</button>}
+                {kanRedigere && (o.status === 'Planlagt' || o.status === 'Kansellert') && <button className="btn btn-sm btn-danger" style={{ marginRight: 4 }} onClick={() => handleDelete(o.id)}>Slett</button>}
+                {kanRedigere && o.status === 'Planlagt' && <button className="btn btn-sm btn-primary" style={{ marginRight: 4 }} onClick={() => setStatus(o.id, 'IProduksjon')}>Start</button>}
+                {kanRedigere && o.status === 'IProduksjon' && <button className="btn btn-sm btn-primary" style={{ marginRight: 4 }} onClick={() => openFerdigmeld(o)}>Ferdigmeld</button>}
+                {kanRedigere && o.status !== 'Ferdigmeldt' && o.status !== 'Kansellert' && <button className="btn btn-sm btn-danger" onClick={() => setStatus(o.id, 'Kansellert')}>Kanseller</button>}
               </td>
             </tr>
           ))}

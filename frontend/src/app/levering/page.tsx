@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState, Fragment } from 'react';
 import { Levering, Kunde, LagerBeholdning, get, post, patch, del } from '../../lib/api';
+import { useTilgang } from '../../lib/useTilgang';
 
 const STATUS_MAP: Record<string, string> = {
   Planlagt: 'badge-planlagt',
@@ -19,6 +20,7 @@ export default function LeveringPage() {
   const [expanded, setExpanded] = useState<number | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState('');
+  const kanRedigere = useTilgang(6);
 
   const [form, setForm] = useState({
     kundeId: 0, leveringsDato: new Date().toISOString().slice(0, 10),
@@ -141,10 +143,10 @@ export default function LeveringPage() {
                 <td>{l.fraktBrev ?? '—'}</td>
                 <td><span className={`badge ${STATUS_MAP[l.status] ?? ''}`}>{l.status}</span></td>
                 <td onClick={e => e.stopPropagation()}>
-                  {l.status === 'Planlagt' && <button className="btn btn-sm btn-primary" style={{ marginRight: 4 }} onClick={() => setStatus(l.id, 'Plukket')}>Plukket</button>}
-                  {l.status === 'Plukket' && <button className="btn btn-sm btn-primary" style={{ marginRight: 4 }} onClick={() => setStatus(l.id, 'Sendt')}>Sendt</button>}
-                  {l.status === 'Sendt' && <button className="btn btn-sm btn-primary" style={{ marginRight: 4 }} onClick={() => setStatus(l.id, 'Levert')}>Levert</button>}
-                  {l.status !== 'Levert' && l.status !== 'Kansellert' && <button className="btn btn-sm btn-danger" onClick={() => setStatus(l.id, 'Kansellert')}>Kanseller</button>}
+                  {kanRedigere && l.status === 'Planlagt' && <button className="btn btn-sm btn-primary" style={{ marginRight: 4 }} onClick={() => setStatus(l.id, 'Plukket')}>Plukket</button>}
+                  {kanRedigere && l.status === 'Plukket' && <button className="btn btn-sm btn-primary" style={{ marginRight: 4 }} onClick={() => setStatus(l.id, 'Sendt')}>Sendt</button>}
+                  {kanRedigere && l.status === 'Sendt' && <button className="btn btn-sm btn-primary" style={{ marginRight: 4 }} onClick={() => setStatus(l.id, 'Levert')}>Levert</button>}
+                  {kanRedigere && l.status !== 'Levert' && l.status !== 'Kansellert' && <button className="btn btn-sm btn-danger" onClick={() => setStatus(l.id, 'Kansellert')}>Kanseller</button>}
                 </td>
               </tr>
               {expanded === l.id && l.linjer.map(linje => (
@@ -215,7 +217,7 @@ export default function LeveringPage() {
                       <td><input type="number" required min="0.01" step="0.01" value={linje.mengde} onChange={e => updateLine(i, 'mengde', parseFloat(e.target.value) || 0)} style={{ width: 80 }} /></td>
                       <td><input value={linje.enhet} onChange={e => updateLine(i, 'enhet', e.target.value)} style={{ width: 60 }} /></td>
                       <td><input value={linje.kommentar ?? ''} onChange={e => updateLine(i, 'kommentar', e.target.value)} placeholder="Merknad..." style={{ width: 100 }} /></td>
-                      <td><button type="button" className="btn btn-sm btn-danger" onClick={() => removeLine(i)}>×</button></td>
+                      <td>{kanRedigere && <button type="button" className="btn btn-sm btn-danger" onClick={() => removeLine(i)}>×</button>}</td>
                     </tr>
                   ))}
                 </tbody>

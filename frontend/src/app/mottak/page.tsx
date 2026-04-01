@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState, Fragment } from 'react';
 import { Mottak, Article, Leverandor, UpdateMottakLinje, get, post, patch, del } from '../../lib/api';
+import { useTilgang } from '../../lib/useTilgang';
 
 const ENHETER = ['STK', 'KG', 'L', 'M', 'SETT', 'PAKKE', 'BOKS'];
 
@@ -15,6 +16,7 @@ export default function MottakPage() {
   const [expanded, setExpanded] = useState<number | null>(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const kanRedigere = useTilgang(1);
 
   const [form, setForm] = useState({
     leverandorId: 0, mottaksDato: new Date().toISOString().slice(0, 10),
@@ -135,12 +137,10 @@ export default function MottakPage() {
           <td>{statusBadge(m.status)}</td>
           <td>{m.mottattAv ?? '—'}</td>
           <td>
-            {m.status === 'Registrert' && (
-              <button className="btn btn-sm btn-danger" style={{ marginRight: 4 }} onClick={e => { e.stopPropagation(); handleDelete(m.id); }}>Slett</button>
-            )}
-            {m.status === 'Registrert' && <button className="btn btn-sm btn-primary" style={{ marginRight: 4 }} onClick={e => { e.stopPropagation(); updateStatus(m.id, 'Mottatt'); }}>Mottatt</button>}
-            {m.status === 'Mottatt' && <button className="btn btn-sm btn-primary" style={{ marginRight: 4 }} onClick={e => { e.stopPropagation(); updateStatus(m.id, 'Godkjent'); }}>Godkjenn</button>}
-            {m.status === 'Mottatt' && <button className="btn btn-sm btn-danger" style={{ marginRight: 4 }} onClick={e => { e.stopPropagation(); updateStatus(m.id, 'Avvist'); }}>Avvis</button>}
+            {m.status === 'Registrert' && kanRedigere && <button className="btn btn-sm btn-danger" style={{ marginRight: 4 }} onClick={e => { e.stopPropagation(); handleDelete(m.id); }}>Slett</button>}
+            {kanRedigere && m.status === 'Registrert' && <button className="btn btn-sm btn-primary" style={{ marginRight: 4 }} onClick={e => { e.stopPropagation(); updateStatus(m.id, 'Mottatt'); }}>Mottatt</button>}
+            {kanRedigere && m.status === 'Mottatt' && <button className="btn btn-sm btn-primary" style={{ marginRight: 4 }} onClick={e => { e.stopPropagation(); updateStatus(m.id, 'Godkjent'); }}>Godkjenn</button>}
+            {kanRedigere && m.status === 'Mottatt' && <button className="btn btn-sm btn-danger" style={{ marginRight: 4 }} onClick={e => { e.stopPropagation(); updateStatus(m.id, 'Avvist'); }}>Avvis</button>}
           </td>
         </tr>
         {expanded === m.id && m.linjer.map(l => (
@@ -166,8 +166,8 @@ export default function MottakPage() {
             <td>
               {m.status === 'Mottatt' && (
                 <>
-                  <button className="btn btn-sm btn-primary" style={{ marginRight: 4 }} onClick={() => updateLinjeGodkjenning(m.id, l.id, true)}>Godkjenn</button>
-                  <button className="btn btn-sm btn-danger" onClick={() => { const a = prompt('Avvik:', l.avvik ?? ''); if (a !== null) updateLinjeGodkjenning(m.id, l.id, false, a || (l.avvik ?? '')); }}>Avvis</button>
+                  {kanRedigere && <button className="btn btn-sm btn-primary" style={{ marginRight: 4 }} onClick={() => updateLinjeGodkjenning(m.id, l.id, true)}>Godkjenn</button>}
+                  {kanRedigere && <button className="btn btn-sm btn-danger" onClick={() => { const a = prompt('Avvik:', l.avvik ?? ''); if (a !== null) updateLinjeGodkjenning(m.id, l.id, false, a || (l.avvik ?? '')); }}>Avvis</button>}
                 </>
               )}
             </td>
@@ -261,7 +261,7 @@ export default function MottakPage() {
               <hr style={{ margin: '1rem 0' }} />
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                 <strong>Linjer</strong>
-                <button type="button" className="btn btn-sm btn-secondary" onClick={addLine}>+ Linje</button>
+                {kanRedigere && <button type="button" className="btn btn-sm btn-secondary" onClick={addLine}>+ Linje</button>}
               </div>
               {form.linjer.map((linje, i) => (
                 <div key={i} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr auto', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'end' }}>
@@ -302,7 +302,7 @@ export default function MottakPage() {
                     <label>Kommentar</label>
                     <input value={linje.kommentar ?? ''} onChange={e => updateLine(i, 'kommentar', e.target.value)} placeholder="Merknad..." />
                   </div>
-                  <button type="button" className="btn btn-sm btn-danger" onClick={() => removeLine(i)}>✕</button>
+                  {kanRedigere && <button type="button" className="btn btn-sm btn-danger" onClick={() => removeLine(i)}>✕</button>}
                 </div>
               ))}
               {error && <div className="alert alert-error" style={{ marginTop: '0.5rem' }}>{error}</div>}

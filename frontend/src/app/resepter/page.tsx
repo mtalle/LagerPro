@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { Article, Resept, get, post, put, del } from '../../lib/api';
+import { useTilgang } from '../../lib/useTilgang';
 import { Fragment } from 'react';
 
 interface ReseptLinjeForm {
@@ -31,6 +32,7 @@ export default function ResepterPage() {
   const [expanded, setExpanded] = useState<number | null>(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const kanRedigere = useTilgang(7);
 
   const emptyForm: ReseptForm = {
     navn: '', ferdigvareId: 0, beskrivelse: '', antallPortjoner: 1,
@@ -203,11 +205,11 @@ export default function ResepterPage() {
                   <td>{r.linjer.length}</td>
                   <td><span className={`badge ${r.aktiv ? 'badge-aktiv' : 'badge-inactive'}`}>{r.aktiv ? 'Aktiv' : 'Inaktiv'}</span></td>
                   <td onClick={e => e.stopPropagation()}>
-                    <div style={{ display: 'flex', gap: '0.4rem' }}>
+                    {kanRedigere && <div style={{ display: 'flex', gap: '0.4rem' }}>
                       <button className="btn btn-sm btn-secondary" onClick={() => openEdit(r)}>Rediger</button>
                       <button className="btn btn-sm btn-secondary" onClick={() => handleToggleActive(r)}>{r.aktiv ? 'Deaktiver' : 'Aktiver'}</button>
                       <button className="btn btn-sm btn-danger" onClick={() => handleDelete(r.id)}>Slett</button>
-                    </div>
+                    </div>}
                   </td>
                 </tr>
                 {expanded === r.id && (
@@ -292,7 +294,7 @@ export default function ResepterPage() {
               <hr style={{ margin: '1rem 0' }} />
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                 <strong>Råvarer</strong>
-                <button type="button" className="btn btn-sm btn-secondary" onClick={addLine}>+ Linje</button>
+                {kanRedigere && <button type="button" className="btn btn-sm btn-secondary" onClick={addLine}>+ Linje</button>}
               </div>
 
               {form.linjer.map((linje, i) => (
@@ -320,7 +322,7 @@ export default function ResepterPage() {
                     <label>Kommentar</label>
                     <input value={linje.kommentar} onChange={e => updateLine(i, 'kommentar', e.target.value)} />
                   </div>
-                  <button type="button" className="btn btn-sm btn-danger" onClick={() => removeLine(i)}>✕</button>
+                  {kanRedigere && <button type="button" className="btn btn-sm btn-danger" onClick={() => removeLine(i)}>✕</button>}
                 </div>
               ))}
 

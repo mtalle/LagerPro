@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState, Fragment } from 'react';
 import { Kunde, get, post, put, del } from '../../lib/api';
+import { useTilgang } from '../../lib/useTilgang';
 
 export default function KunderPage() {
   const [kunder, setKunder] = useState<Kunde[]>([]);
@@ -11,6 +12,7 @@ export default function KunderPage() {
   const [editKunde, setEditKunde] = useState<Kunde | null>(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const kanRedigere = useTilgang(8);
 
   const [form, setForm] = useState({
     navn: '', kontaktperson: '', telefon: '', epost: '',
@@ -164,13 +166,13 @@ export default function KunderPage() {
                   </span>
                 </td>
                 <td>
-                  <div style={{ display: 'flex', gap: '0.4rem' }}>
+                  {kanRedigere && <div style={{ display: 'flex', gap: '0.4rem' }}>
                     <button className="btn btn-sm btn-secondary" onClick={() => openEdit(k)}>Rediger</button>
                     <button className="btn btn-sm btn-secondary" onClick={() => handleToggleActive(k)}>
                       {k.aktiv ? 'Deaktiver' : 'Aktiver'}
                     </button>
                     <button className="btn btn-sm btn-danger" onClick={() => handleDelete(k.id)}>Slett</button>
-                  </div>
+                  </div>}
                 </td>
               </tr>
             ))}
