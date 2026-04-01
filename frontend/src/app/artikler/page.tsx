@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState, Fragment } from 'react';
 import { Article, CreateArticle, UpdateArticle, LagerBeholdning, get, post, put, del } from '../../lib/api';
+import { useTilgang } from '../../lib/useTilgang';
 
 const ARTICLE_TYPES = ['Råvare', 'Ferdigvare', 'Halvfabrikat', 'Emballasje', 'Annet'];
 const ENHETER = ['STK', 'KG', 'L', 'M', 'SETT', 'PAKKE', 'BOKS'];
@@ -17,6 +18,7 @@ export default function ArtiklerPage() {
   const [expanded, setExpanded] = useState<number | null>(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const kanSlette = useTilgang(2);
 
   const [form, setForm] = useState<CreateArticle>({
     artikkelNr: '', navn: '', enhet: 'STK', type: 'Råvare',
@@ -180,9 +182,9 @@ export default function ArtiklerPage() {
                     <td>{a.utpris > 0 ? `${a.utpris.toFixed(2)} kr` : '—'}</td>
                     <td>{a.minBeholdning > 0 ? a.minBeholdning : '—'}</td>
                     <td onClick={e => e.stopPropagation()}>
-                      <button className="btn btn-sm btn-secondary" style={{ marginRight: 4 }} onClick={() => openEdit(a)}>Rediger</button>
-                      <button className="btn btn-sm btn-secondary" style={{ marginRight: 4 }} onClick={() => handleToggleActive(a)}>{a.aktiv ? 'Deaktiver' : 'Aktiver'}</button>
-                      <button className="btn btn-sm btn-danger" onClick={() => handleDelete(a.id)}>Slett</button>
+                      {kanSlette && <button className="btn btn-sm btn-secondary" style={{ marginRight: 4 }} onClick={() => openEdit(a)}>Rediger</button>}
+                      {kanSlette && <button className="btn btn-sm btn-secondary" style={{ marginRight: 4 }} onClick={() => handleToggleActive(a)}>{a.aktiv ? 'Deaktiver' : 'Aktiver'}</button>}
+                      {kanSlette && <button className="btn btn-sm btn-danger" onClick={() => handleDelete(a.id)}>Slett</button>}
                     </td>
                   </tr>
                   {expanded === a.id && artBeh.length > 0 && (
