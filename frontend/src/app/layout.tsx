@@ -27,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         const b = await getMe();
         setBruker(b);
         localStorage.setItem('lagerpro_bruker_navn', b.navn);
+        localStorage.setItem('lagerpro_bruker_id', String(b.id));
       } catch {
         setBruker(null);
       } finally {

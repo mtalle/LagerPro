@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Article, ProduksjonsOrdre, Mottak, Levering, LagerBeholdning, Kunde, Leverandor, Resept, get } from '../lib/api';
+import { Article, ProduksjonsOrdre, Mottak, Levering, LagerBeholdning, Kunde, Leverandor, Resept, get, Bruker, getMe } from '../lib/api';
 
 interface DashboardStats {
   artikler: number;
@@ -61,7 +61,21 @@ export default function DashboardPage() {
   const [showWidgetPicker, setShowWidgetPicker] = useState(false);
 
   useEffect(() => { setVisibleWidgets(loadVisibleWidgets()); }, []);
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    async function init() {
+      // Last brukar for å populera localStorage X-Bruker-Id
+      try {
+        const b: Bruker = await getMe();
+        localStorage.setItem('lagerpro_bruker_navn', b.navn);
+        localStorage.setItem('lagerpro_bruker_id', String(b.id));
+      } catch {
+        // Ikkje logga inn enno — vent
+        return;
+      }
+      load();
+    }
+    init();
+  }, []);
 
   async function load() {
     try {
