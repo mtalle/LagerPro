@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Article, Resept, get, post, put, del } from '../../lib/api';
+import { Article, Resept, get, post, put, del, getMe } from '../../lib/api';
 import { useTilgang } from '../../lib/useTilgang';
 import { Fragment } from 'react';
 
@@ -40,7 +40,10 @@ export default function ResepterPage() {
   };
   const [form, setForm] = useState<ReseptForm>(emptyForm);
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    async function init() { try { await getMe(); } catch { return; } load(); }
+    init();
+  }, []);
 
   async function load() {
     try {

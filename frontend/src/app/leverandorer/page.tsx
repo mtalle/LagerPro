@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Leverandor, get, post, put, del } from '../../lib/api';
+import { Leverandor, get, post, put, del, getMe } from '../../lib/api';
 import { useTilgang } from '../../lib/useTilgang';
 
 export default function LeverandorerPage() {
@@ -19,7 +19,10 @@ export default function LeverandorerPage() {
     adresse: '', postnr: '', poststed: '', orgNr: '', kommentar: '', aktiv: true,
   });
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    async function init() { try { await getMe(); } catch { return; } load(); }
+    init();
+  }, []);
 
   async function load() {
     try {

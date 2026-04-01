@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState, Fragment } from 'react';
-import { Kunde, get, post, put, del } from '../../lib/api';
+import { Kunde, get, post, put, del, getMe } from '../../lib/api';
 import { useTilgang } from '../../lib/useTilgang';
 
 export default function KunderPage() {
@@ -19,7 +19,10 @@ export default function KunderPage() {
     adresse: '', postnr: '', poststed: '', orgNr: '', kommentar: '', aktiv: true,
   });
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    async function init() { try { await getMe(); } catch { return; } load(); }
+    init();
+  }, []);
 
   async function load() {
     try {

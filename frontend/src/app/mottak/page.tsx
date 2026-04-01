@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState, Fragment } from 'react';
-import { Mottak, Article, Leverandor, UpdateMottakLinje, get, post, patch, del } from '../../lib/api';
+import { Mottak, Article, Leverandor, UpdateMottakLinje, get, post, patch, del, getMe } from '../../lib/api';
 import { useTilgang } from '../../lib/useTilgang';
 
 const ENHETER = ['STK', 'KG', 'L', 'M', 'SETT', 'PAKKE', 'BOKS'];
@@ -24,7 +24,10 @@ export default function MottakPage() {
     linjer: [{ artikkelId: 0, lotNr: '', mengde: 1, enhet: 'STK', bestForDato: '', temperatur: 0, strekkode: '', avvik: '', kommentar: '' }],
   });
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => {
+    async function init() { try { await getMe(); } catch { return; } loadData(); }
+    init();
+  }, []);
 
   async function loadData() {
     try {

@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState, Fragment } from 'react';
-import { Article, CreateArticle, UpdateArticle, LagerBeholdning, get, post, put, del } from '../../lib/api';
+import { Article, CreateArticle, UpdateArticle, LagerBeholdning, get, post, put, del, getMe } from '../../lib/api';
 import { useTilgang } from '../../lib/useTilgang';
 
 const ARTICLE_TYPES = ['Råvare', 'Ferdigvare', 'Halvfabrikat', 'Emballasje', 'Annet'];
@@ -26,7 +26,10 @@ export default function ArtiklerPage() {
     innpris: 0, utpris: 0, minBeholdning: 0,
   });
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    async function init() { try { await getMe(); } catch { return; } load(); }
+    init();
+  }, []);
 
   async function load() {
     try {

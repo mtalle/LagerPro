@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { LagerBeholdning, get, patch } from '../../lib/api';
+import { LagerBeholdning, get, patch, getMe } from '../../lib/api';
 
 export default function LagerPage() {
   const [beholdninger, setBeholdninger] = useState<LagerBeholdning[]>([]);
@@ -14,7 +14,10 @@ export default function LagerPage() {
   const [adjustSuccess, setAdjustSuccess] = useState('');
   const [adjustLoading, setAdjustLoading] = useState(false);
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => {
+    async function init() { try { await getMe(); } catch { return; } loadData(); }
+    init();
+  }, []);
 
   async function loadData() {
     try {

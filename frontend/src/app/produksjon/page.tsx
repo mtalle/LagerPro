@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { ProduksjonsOrdre, Resept, Plukkliste, FerdigmeldPrefill, FerdigmeldLinje, get, post, patch, del } from '../../lib/api';
+import { ProduksjonsOrdre, Resept, Plukkliste, FerdigmeldPrefill, FerdigmeldLinje, get, post, patch, del, getMe } from '../../lib/api';
 import { useTilgang } from '../../lib/useTilgang';
 
 const STATUS_MAP: Record<string, string> = {
@@ -35,7 +35,10 @@ export default function ProduksjonPage() {
     forbruk: [] as { artikkelId: number; lotNr: string; mengdeBrukt: number; enhet: string; overstyrt: boolean; kommentar: string }[],
   });
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    async function init() { try { await getMe(); } catch { return; } load(); }
+    init();
+  }, []);
 
   async function load() {
     try {

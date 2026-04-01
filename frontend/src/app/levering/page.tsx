@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState, Fragment } from 'react';
-import { Levering, Kunde, LagerBeholdning, get, post, patch, del } from '../../lib/api';
+import { Levering, Kunde, LagerBeholdning, get, post, patch, del, getMe } from '../../lib/api';
 import { useTilgang } from '../../lib/useTilgang';
 
 const STATUS_MAP: Record<string, string> = {
@@ -28,7 +28,10 @@ export default function LeveringPage() {
     linjer: [{ artikkelId: 0, lotNr: '', mengde: 1, enhet: 'STK', kommentar: '' }],
   });
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    async function init() { try { await getMe(); } catch { return; } load(); }
+    init();
+  }, []);
 
   async function load() {
     try {
