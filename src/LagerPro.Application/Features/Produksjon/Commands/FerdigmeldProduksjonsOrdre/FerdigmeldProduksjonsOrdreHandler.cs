@@ -59,7 +59,8 @@ public class FerdigmeldProduksjonsOrdreHandler
         {
             foreach (var fb in command.Forbruk)
             {
-                // Trekk fra fra lager
+                // Mengdene fra frontend er allerede skalert med ferdigVareFaktor (plukkliste beregner dette).
+                // Vi lagrer dem direkte uten å skalere på nytt.
                 var beholdning = await _lagerRepository.GetByArtikkelOgLotAsync(fb.ArtikkelId, fb.LotNr, cancellationToken);
                 if (beholdning is not null)
                 {
