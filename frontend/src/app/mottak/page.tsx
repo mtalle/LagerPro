@@ -216,7 +216,7 @@ export default function MottakPage() {
       </div>
 
       <div className="table-wrapper">
-      <table>
+      <table className="table-scroll">
         <thead>
           <tr><th>ID</th><th>Dato</th><th>Leverandør</th><th>Referanse</th><th>Status</th><th>Mottatt av</th><th></th></tr>
         </thead>

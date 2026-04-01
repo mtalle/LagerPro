@@ -124,7 +124,7 @@ export default function LeveringPage() {
       </div>
 
       <div className="table-wrapper">
-      <table>
+      <table className="table-scroll">
         <thead>
           <tr><th>ID</th><th>Dato</th><th>Kunde</th><th>Referanse</th><th>Fraktbrev</th><th>Status</th><th></th></tr>
         </thead>
@@ -199,7 +199,7 @@ export default function LeveringPage() {
               </div>
 
               <div style={{ marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem', color: '#374151' }}>Linjer</div>
-              <table style={{ marginBottom: '1rem' }}>
+              <table className="table-scroll" style={{ marginBottom: '1rem' }}>
                 <thead>
                   <tr><th>Artikkel/LOT</th><th>Mengde</th><th>Enhet</th><th>Kommentar</th><th></th></tr>
                 </thead>

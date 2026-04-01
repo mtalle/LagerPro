@@ -189,7 +189,7 @@ export default function ResepterPage() {
         <div style={{ textAlign: 'center', color: '#9ca3af', padding: '2rem' }}>Ingen resepter funnet</div>
       ) : (
         <div className="table-wrapper">
-        <table>
+        <table className="table-scroll">
           <thead>
             <tr><th>Navn</th><th>Ferdigvare</th><th>Porsjoner</th><th>Linjer</th><th>Status</th><th></th></tr>
           </thead>
@@ -215,7 +215,7 @@ export default function ResepterPage() {
                     <td colSpan={6} style={{ padding: '0.75rem 1rem' }}>
                       {r.beskrivelse && <p style={{ marginBottom: '0.5rem', color: '#6b7280', fontSize: '0.875rem' }}>{r.beskrivelse}</p>}
                       {r.linjer.length > 0 && (
-                        <table style={{ width: 'auto', fontSize: '0.85rem', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 6 }}>
+                        <table className="table-scroll" style={{ width: 'auto', fontSize: '0.85rem', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 6 }}>
                           <thead>
                             <tr style={{ background: '#f3f4f6' }}>
                               <th style={{ padding: '0.3rem 0.6rem' }}>#</th>

@@ -136,7 +136,7 @@ export default function LeverandorerPage() {
         <div className="empty">Ingen leverandører funnet</div>
       ) : (
         <div className="table-wrapper">
-        <table>
+        <table className="table-scroll">
           <thead>
             <tr>
               <th>Navn</th>

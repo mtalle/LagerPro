@@ -136,7 +136,7 @@ export default function KunderPage() {
         <div className="empty">Ingen kunder funnet</div>
       ) : (
         <div className="table-wrapper">
-        <table>
+        <table className="table-scroll">
           <thead>
             <tr>
               <th>Navn</th>

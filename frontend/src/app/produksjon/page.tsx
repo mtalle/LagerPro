@@ -183,7 +183,7 @@ export default function ProduksjonPage() {
       </div>
 
       <div className="table-wrapper">
-      <table>
+      <table className="table-scroll">
         <thead>
           <tr><th>OrdreNr</th><th>Resept</th><th>Ferdigvare</th><th>Planlagt</th><th>Ferdigmeldt</th><th>Antall</th><th>Lot</th><th>Status</th><th>Utfort</th><th></th></tr>
         </thead>
