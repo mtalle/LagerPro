@@ -7,7 +7,6 @@ namespace LagerPro.Api.Controllers;
 
 [ApiController]
 [Route("api/rapporter")]
-[RequireTilgang(10)] // Admin — rapporter krever admin-tilgang
 public class RapporterController : ControllerBase
 {
     private readonly LagrerapportHandler _lagrerapportHandler;
@@ -28,6 +27,7 @@ public class RapporterController : ControllerBase
     /// Lagrerapport — viser lagerverdi per artikkel (innpris × beholdning).
     /// </summary>
     [HttpGet("lager")]
+    [RequireTilgang(10)] // Admin — rapporter krever admin-tilgang
     public async Task<IActionResult> Lagrerapport(CancellationToken cancellationToken)
     {
         var rapport = await _lagrerapportHandler.Handle(new LagrerapportQuery(), cancellationToken);
@@ -38,6 +38,7 @@ public class RapporterController : ControllerBase
     /// Salgsrapport — leveringar gruppert på artikkel.
     /// </summary>
     [HttpGet("salg/artikkel")]
+    [RequireTilgang(10)]
     public async Task<IActionResult> SalgsrapportArtikkel(
         [FromQuery] DateTime? fraDato,
         [FromQuery] DateTime? tilDato,
@@ -52,6 +53,7 @@ public class RapporterController : ControllerBase
     /// Salgsrapport — leveringar gruppert på kunde.
     /// </summary>
     [HttpGet("salg/kunde")]
+    [RequireTilgang(10)]
     public async Task<IActionResult> SalgsrapportKunde(
         [FromQuery] DateTime? fraDato,
         [FromQuery] DateTime? tilDato,

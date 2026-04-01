@@ -11,7 +11,6 @@ namespace LagerPro.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[RequireTilgang(10)] // Brukere
 public class BrukereController : ControllerBase
 {
     private readonly GetAllBrukereHandler _getAllHandler;
@@ -63,6 +62,7 @@ public class BrukereController : ControllerBase
     }
 
     [HttpPut("{id:int}/tilganger")]
+    [RequireTilgang(10)] // Berre admin
     public async Task<IActionResult> UpdateTilganger(int id, [FromBody] UpdateBrukerTilgangerRequest request, CancellationToken cancellationToken)
     {
         var success = await _updateTilgangerHandler.Handle(new UpdateBrukerTilgangerCommand(id, request.RessursIder), cancellationToken);
