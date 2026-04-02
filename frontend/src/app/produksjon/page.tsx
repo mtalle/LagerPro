@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { ProduksjonsOrdre, Resept, Plukkliste, FerdigmeldPrefill, FerdigmeldLinje, get, post, patch, del, getMe } from '../../lib/api';
+import { ProduksjonsOrdre, Resept, Plukkliste, PlukklisteLinje, FerdigmeldPrefill, FerdigmeldLinje, get, post, patch, del, getMe } from '../../lib/api';
 import { useTilgang } from '../../lib/useTilgang';
 
 const STATUS_MAP: Record<string, string> = {
@@ -15,8 +15,10 @@ export default function ProduksjonPage() {
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showFerdigmeldModal, setShowFerdigmeldModal] = useState(false);
+  const [expandedOrdreId, setExpandedOrdreId] = useState<number | null>(null);
   const [showPlukklisteModal, setShowPlukklisteModal] = useState(false);
   const [plukkliste, setPlukkliste] = useState<Plukkliste | null>(null);
+  const [plukklisteOrdreId, setPlukklisteOrdreId] = useState<number | null>(null);
   const [plukklisteLoading, setPlukklisteLoading] = useState(false);
   const [ferdigmeldPrefill, setFerdigmeldPrefill] = useState<FerdigmeldPrefill | null>(null);
   const [search, setSearch] = useState('');
@@ -32,6 +34,7 @@ export default function ProduksjonPage() {
     antallProdusert: 1,
     kommentar: '',
     utfortAv: '',
+    bekreftLagring: false,
     forbruk: [] as { artikkelId: number; lotNr: string; mengdeBrukt: number; enhet: string; overstyrt: boolean; kommentar: string }[],
   });
 
@@ -52,12 +55,16 @@ export default function ProduksjonPage() {
     finally { setLoading(false); }
   }
 
-  async function openPlukkliste() {
+  async function openPlukkliste(ordreId?: number) {
+    setPlukklisteOrdreId(ordreId ?? null);
     setShowPlukklisteModal(true);
-    if (plukkliste) return; // already loaded
+    if (ordreId !== undefined && plukkliste && plukklisteOrdreId === ordreId) return; // already loaded for this order
+    if (ordreId === undefined && plukkliste && plukklisteOrdreId === null) return; // already loaded global
     setPlukklisteLoading(true);
+    setPlukkliste(null);
     try {
-      const data = await get<Plukkliste>('/production/plukkliste');
+      const url = ordreId !== undefined ? `/production/${ordreId}/plukkliste` : '/production/plukkliste';
+      const data = await get<Plukkliste>(url);
       setPlukkliste(data);
     } catch (e) { setError((e as Error).message); }
     finally { setPlukklisteLoading(false); }
@@ -72,7 +79,7 @@ export default function ProduksjonPage() {
       setShowCreateModal(false);
       setCreateForm({ reseptId: 0, planlagtDato: new Date().toISOString().slice(0, 10), kommentar: '' });
       load();
-    } catch (e) { alert('Feil: ' + (e as Error).message); }
+    } catch (e) { setError('Feil: ' + (e as Error).message); }
   }
 
   async function openFerdigmeld(o: ProduksjonsOrdre) {
@@ -95,7 +102,7 @@ export default function ProduksjonPage() {
       });
       setShowFerdigmeldModal(true);
     } catch (e) {
-      alert('Kunne ikke laste ferdigmeld-data: ' + (e as Error).message);
+      setError('Kunne ikke laste ferdigmeld-data: ' + (e as Error).message);
     }
   }
 
@@ -108,6 +115,10 @@ export default function ProduksjonPage() {
   async function handleFerdigmeld(e: React.FormEvent) {
     e.preventDefault();
     if (!ferdigmeldPrefill) return;
+    if (!ferdigmeldForm.bekreftLagring) {
+      setError('Du må bekrefte før lagring.');
+      return;
+    }
     try {
       await post(`/production/${ferdigmeldPrefill.ordreId}/ferdigmeld`, {
         antallProdusert: ferdigmeldForm.antallProdusert,
@@ -124,19 +135,20 @@ export default function ProduksjonPage() {
       });
       setShowFerdigmeldModal(false);
       setFerdigmeldPrefill(null);
+      setFerdigmeldForm({ ...ferdigmeldForm, bekreftLagring: false });
       load();
-    } catch (e) { alert('Feil: ' + (e as Error).message); }
+    } catch (e) { setError('Feil: ' + (e as Error).message); }
   }
 
   async function setStatus(id: number, status: string) {
     try { await patch(`/production/${id}/status`, { status }); load(); }
-    catch (e) { alert('Feil: ' + (e as Error).message); }
+    catch (e) { setError('Feil: ' + (e as Error).message); }
   }
 
   async function handleDelete(id: number) {
     if (!confirm('Er du sikker på at du vil slette denne produksjonsordren?')) return;
     try { await del(`/production/${id}`); load(); }
-    catch (e) { alert('Feil: ' + (e as Error).message); }
+    catch (e) { setError('Feil: ' + (e as Error).message); }
   }
 
   if (loading) return <div className="loading">Laster produksjonsordrer...</div>;
@@ -156,7 +168,6 @@ export default function ProduksjonPage() {
       <div className="page-header">
         <h1>🏗 Produksjon</h1>
         <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>+ Ny produksjonsordre</button>
-        <button className="btn btn-secondary" onClick={openPlukkliste}>📋 Plukkliste</button>
       </div>
 
       <div className="filter-bar">
@@ -176,29 +187,55 @@ export default function ProduksjonPage() {
       <div className="table-wrapper">
       <table className="table-scroll">
         <thead>
-          <tr><th>OrdreNr</th><th>Resept</th><th>Ferdigvare</th><th>Planlagt</th><th>Ferdigmeldt</th><th>Antall</th><th>Lot</th><th>Status</th><th>Utfort</th><th></th></tr>
+          <tr><th>OrdreNr</th><th>Resept</th><th>Ferdigvare</th><th>Planlagt</th><th>Ferdigmeldt</th><th>Antall</th><th>Lot</th><th>Status</th><th>Utfort</th></tr>
         </thead>
         <tbody>
           {filtered.length === 0 ? (
             <tr><td colSpan={9} style={{ textAlign: 'center', color: '#9ca3af', padding: '2rem' }}>{ordre.length === 0 ? 'Ingen produksjonsordrer' : 'Ingen resultater'}</td></tr>
           ) : filtered.map(o => (
-            <tr key={o.id}>
-              <td><code>{o.ordreNr}</code></td>
-              <td>{o.reseptNavn ?? `Resept.ID ${o.reseptId}`}</td>
-              <td>{o.ferdigvareNavn ?? '—'}{o.ferdigvareEnhet ? ` (${o.ferdigvareEnhet})` : ''}</td>
-              <td>{new Date(o.planlagtDato).toLocaleDateString('no-NO')}</td>
-              <td>{o.ferdigmeldtDato ? new Date(o.ferdigmeldtDato).toLocaleDateString('no-NO') : '—'}</td>
-              <td>{o.antallProdusert}</td>
-              <td><code>{o.ferdigvareLotNr}</code></td>
-              <td><span className={`badge ${STATUS_MAP[o.status] ?? ''}`}>{o.status}</span></td>
-              <td>{o.utfortAv ?? '—'}</td>
-              <td>
-                {kanRedigere && (o.status === 'Planlagt' || o.status === 'Kansellert') && <button className="btn btn-sm btn-danger" style={{ marginRight: 4 }} onClick={() => handleDelete(o.id)}>Slett</button>}
-                {kanRedigere && o.status === 'Planlagt' && <button className="btn btn-sm btn-primary" style={{ marginRight: 4 }} onClick={() => setStatus(o.id, 'IProduksjon')}>Start</button>}
-                {kanRedigere && o.status === 'IProduksjon' && <button className="btn btn-sm btn-primary" style={{ marginRight: 4 }} onClick={() => openFerdigmeld(o)}>Ferdigmeld</button>}
-                {kanRedigere && o.status !== 'Ferdigmeldt' && o.status !== 'Kansellert' && <button className="btn btn-sm btn-danger" onClick={() => setStatus(o.id, 'Kansellert')}>Kanseller</button>}
-              </td>
-            </tr>
+            <>
+              <tr key={o.id} className={expandedOrdreId === o.id ? 'expanded-row' : ''}
+                onClick={() => setExpandedOrdreId(expandedOrdreId === o.id ? null : o.id)}
+                style={{ cursor: 'pointer' }}>
+                <td><code>{o.ordreNr}</code></td>
+                <td>{o.reseptNavn ?? `Resept.ID ${o.reseptId}`}</td>
+                <td>{o.ferdigvareNavn ?? '—'}{o.ferdigvareEnhet ? ` (${o.ferdigvareEnhet})` : ''}</td>
+                <td>{new Date(o.planlagtDato).toLocaleDateString('no-NO')}</td>
+                <td>{o.ferdigmeldtDato ? new Date(o.ferdigmeldtDato).toLocaleDateString('no-NO') : '—'}</td>
+                <td>{o.antallProdusert}</td>
+                <td><code>{o.ferdigvareLotNr}</code></td>
+                <td><span className={`badge ${STATUS_MAP[o.status] ?? ''}`}>{o.status}</span></td>
+                <td>{o.utfortAv ?? '—'}</td>
+              </tr>
+              {expandedOrdreId === o.id && (
+                <tr key={`${o.id}-expanded`} className="expanded-actions-row">
+                  <td colSpan={9} style={{ padding: '0.75rem 1rem', background: '#f9fafb', borderTop: '1px solid #e5e7eb' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                      {kanRedigere && o.status === 'Planlagt' && (
+                        <button className="btn btn-sm btn-primary" onClick={(e) => { e.stopPropagation(); setStatus(o.id, 'IProduksjon'); setExpandedOrdreId(null); }}>Start</button>
+                      )}
+                      {kanRedigere && o.status === 'IProduksjon' && (
+                        <button className="btn btn-sm btn-primary" onClick={(e) => { e.stopPropagation(); openFerdigmeld(o); }}>Ferdigmeld</button>
+                      )}
+                      {(o.status === 'IProduksjon' || o.status === 'Ferdigmeldt') && (
+                        <button className="btn btn-sm btn-secondary" onClick={(e) => { e.stopPropagation(); openPlukkliste(o.id); }}>📋 Plukkliste</button>
+                      )}
+                      {kanRedigere && o.status === 'Planlagt' && (
+                        <button className="btn btn-sm btn-danger" onClick={(e) => { e.stopPropagation(); handleDelete(o.id); }}>Slett</button>
+                      )}
+                      {kanRedigere && o.status !== 'Ferdigmeldt' && o.status !== 'Kansellert' && (
+                        <button className="btn btn-sm btn-danger" onClick={(e) => { e.stopPropagation(); setStatus(o.id, 'Kansellert'); }}>Kanseller</button>
+                      )}
+                      {kanRedigere && (o.status === 'Planlagt' || o.status === 'IProduksjon') && (
+                        <span style={{ marginLeft: 'auto', fontSize: '0.8rem', color: '#6b7280' }}>
+                          Planlagt mengde: <strong>{o.antallProdusert}</strong> {o.ferdigvareEnhet ?? 'STK'}
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </>
           ))}
         </tbody>
       </table>
@@ -245,6 +282,11 @@ export default function ProduksjonPage() {
             </p>
             <form onSubmit={handleFerdigmeld}>
               <div className="form-grid">
+                <div className="form-group">
+                  <label>Planlagt mengde</label>
+                  <input type="number" disabled value={ferdigmeldPrefill.foreslattAntall} style={{ background: '#f3f4f6', color: '#6b7280' }} />
+                  <small style={{ color: '#9ca3af', fontSize: '0.75rem' }}>Planlagt mengde fra ordren</small>
+                </div>
                 <div className="form-group">
                   <label>Antall produsert *</label>
                   <input type="number" required min="0.01" step="0.01"
@@ -326,9 +368,17 @@ export default function ProduksjonPage() {
                 <textarea rows={2} value={ferdigmeldForm.kommentar}
                   onChange={e => setFerdigmeldForm({ ...ferdigmeldForm, kommentar: e.target.value })} />
               </div>
+              {error && <div className="alert alert-error" style={{ marginBottom: '1rem' }}>{error}</div>}
+              <div className="form-group" style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={ferdigmeldForm.bekreftLagring}
+                    onChange={e => { setFerdigmeldForm({ ...ferdigmeldForm, bekreftLagring: e.target.checked }); setError(''); }} />
+                  <span> Bekreft ferdigmelding av {ferdigmeldForm.antallProdusert} {ferdigmeldPrefill.ferdigvareEnhet ?? 'STK'}</span>
+                </label>
+              </div>
               <div className="form-actions">
                 <button type="button" className="btn btn-secondary" onClick={() => { setShowFerdigmeldModal(false); setFerdigmeldPrefill(null); }}>Avbryt</button>
-                <button type="submit" className="btn btn-primary">Ferdigmeld</button>
+                <button type="submit" className="btn btn-primary" disabled={!ferdigmeldForm.bekreftLagring}>Ferdigmeld</button>
               </div>
             </form>
           </div>
@@ -336,7 +386,7 @@ export default function ProduksjonPage() {
       )}
 
       {showPlukklisteModal && (
-        <div className="modal-overlay" onClick={() => setShowPlukklisteModal(false)}>
+        <div className="modal-overlay" onClick={() => { setShowPlukklisteModal(false); setPlukkliste(null); setPlukklisteOrdreId(null); }}>
           <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 900 }}>
             <h2>📋 Plukkliste</h2>
             {plukklisteLoading ? (
@@ -344,7 +394,7 @@ export default function ProduksjonPage() {
             ) : plukkliste && plukkliste.linjer.length > 0 ? (
               <>
                 <p style={{ color: '#6b7280', fontSize: '0.875rem', marginBottom: '1rem' }}>
-                  {plukkliste.linjer.length} linjer fra aktive produksjonsordrer
+                  {plukklisteOrdreId ? `Plukkliste for ordre #${plukklisteOrdreId}` : 'Alle aktive produksjonsordrer'} — {plukkliste.linjer.length} linjer
                 </p>
                 <div style={{ overflowX: 'auto' }}>
                   <table style={{ width: '100%', fontSize: '0.85rem' }}>
