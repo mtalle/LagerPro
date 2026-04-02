@@ -87,45 +87,36 @@ export default function BrukerePage() {
       {error && <div className="alert alert-error">{error}</div>}
       {success && <div className="alert alert-success">{success}</div>}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(240px, 1fr) 2fr', gap: '1.5rem', alignItems: 'start' }}>
+      <div className="split-grid">
         {/* Brukerliste */}
         <div className="card">
-          <h3 style={{ marginBottom: '1rem' }}>Brukere</h3>
+          <h3>Brukere</h3>
           {brukere.map(b => (
             <div
               key={b.id}
               onClick={() => selectBruker(b)}
-              style={{
-                padding: '0.75rem',
-                borderRadius: 6,
-                marginBottom: '0.5rem',
-                cursor: 'pointer',
-                border: selected?.id === b.id ? '2px solid #4f46e5' : '2px solid transparent',
-                background: selected?.id === b.id ? '#eef2ff' : '#f9fafb',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
+              className="bruker-item"
+              data-selected={selected?.id === b.id}
             >
               <div>
                 <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>{b.navn}</div>
                 <div style={{ fontSize: '0.8rem', color: '#6b7280' }}>{b.brukernavn}</div>
               </div>
-              <div style={{ display: 'flex', gap: 4 }}>
+              <div className="flex-gap-4">
                 {b.erAdmin && <span className="badge badge-registrert">Admin</span>}
                 {!b.aktiv && <span className="badge badge-inactive">Inaktiv</span>}
               </div>
             </div>
           ))}
-          {brukere.length === 0 && <div style={{ color: '#9ca3af', fontSize: '0.9rem' }}>Ingen brukere funnet.</div>}
+          {brukere.length === 0 && <div className="empty">Ingen brukere funnet.</div>}
         </div>
 
         {/* Tilganger-editor */}
         {selected ? (
           <div className="card">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <div className="card-header">
               <div>
-                <h3 style={{ margin: 0 }}>Tilganger for {selected.navn}</h3>
+                <h3 className="card-title" style={{ margin: 0 }}>Tilganger for {selected.navn}</h3>
                 <span style={{ fontSize: '0.8rem', color: '#6b7280' }}>
                   {selected.erAdmin ? 'Administrator – alle tilganger' : 'Vanlig bruker'}
                 </span>
