@@ -120,7 +120,7 @@ export default function LeveringPage() {
 
       <div className="filter-bar">
         <input className="search-input" placeholder="Søk kunde, referanse, fraktbrev..." value={search} onChange={e => setSearch(e.target.value)} />
-        <span style={{ marginLeft: 'auto', fontSize: '0.85rem', color: '#6b7280' }}>{filtered.length} av {leveringer.length}</span>
+        <span className="filter-count">{filtered.length} av {leveringer.length}</span>
       </div>
 
       <div className="table-wrapper">
