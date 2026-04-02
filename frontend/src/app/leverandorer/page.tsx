@@ -28,7 +28,7 @@ export default function LeverandorerPage() {
     try {
       const data = await get<Leverandor[]>('/leverandorer');
       setLeverandorer(data);
-    } catch (e) { console.error(e); }
+    } catch (e) { setError((e as Error).message); }
     finally { setLoading(false); }
   }
 

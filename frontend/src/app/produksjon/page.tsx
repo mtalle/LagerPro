@@ -48,7 +48,7 @@ export default function ProduksjonPage() {
       ]);
       setOrdre(o);
       setResepter(r);
-    } catch (e) { console.error(e); }
+    } catch (e) { setError((e as Error).message); }
     finally { setLoading(false); }
   }
 
@@ -59,7 +59,7 @@ export default function ProduksjonPage() {
     try {
       const data = await get<Plukkliste>('/production/plukkliste');
       setPlukkliste(data);
-    } catch (e) { console.error(e); }
+    } catch (e) { setError((e as Error).message); }
     finally { setPlukklisteLoading(false); }
   }
 

@@ -28,7 +28,7 @@ export default function KunderPage() {
     try {
       const data = await get<Kunde[]>('/kunder');
       setKunder(data);
-    } catch (e) { console.error(e); }
+    } catch (e) { setError((e as Error).message); }
     finally { setLoading(false); }
   }
 

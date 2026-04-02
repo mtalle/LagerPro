@@ -57,6 +57,7 @@ function DashboardWidget({ title, children, href, seeAll }: { title: string; chi
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [visibleWidgets, setVisibleWidgets] = useState<string[]>([]);
   const [showWidgetPicker, setShowWidgetPicker] = useState(false);
 
@@ -98,7 +99,7 @@ export default function DashboardPage() {
         apneMottakListe: mottak.filter(m => m.status === 'Registrert' || m.status === 'Mottatt').slice(0, 5),
         lavBeholdningListe: lavBeholdningListe.slice(0, 5),
       });
-    } catch (e) { console.error(e); }
+    } catch (e) { setError((e as Error).message); }
     finally { setLoading(false); }
   }
 
@@ -130,6 +131,8 @@ export default function DashboardPage() {
           {showWidgetPicker ? 'Lukk' : '⚙️ Velg widgets'}
         </button>
       </div>
+
+      {error && <div className="alert alert-error" style={{ marginBottom: '1rem' }}>{error}</div>}
 
       {showWidgetPicker && (
         <div className="card" style={{ marginBottom: '1.5rem' }}>

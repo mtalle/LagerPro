@@ -39,7 +39,7 @@ export default function ArtiklerPage() {
       ]);
       setArticles(a);
       setBeholdning(b);
-    } catch (e) { console.error(e); }
+    } catch (e) { setError((e as Error).message); }
     finally { setLoading(false); }
   }
 

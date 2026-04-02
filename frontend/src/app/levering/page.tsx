@@ -43,7 +43,7 @@ export default function LeveringPage() {
       setLeveringer(l);
       setKunder(k);
       setBeholdning(b);
-    } catch (e) { console.error(e); }
+    } catch (e) { setError((e as Error).message); }
     finally { setLoading(false); }
   }
 

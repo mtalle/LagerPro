@@ -50,7 +50,7 @@ export default function ResepterPage() {
       const [r, a] = await Promise.all([get<Resept[]>('/recipes'), get<Article[]>('/articles')]);
       setResepter(r);
       setArticles(a);
-    } catch (e) { console.error(e); }
+    } catch (e) { setError((e as Error).message); }
     finally { setLoading(false); }
   }
 
