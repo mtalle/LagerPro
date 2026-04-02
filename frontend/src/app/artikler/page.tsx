@@ -144,11 +144,11 @@ export default function ArtiklerPage() {
           <option value="">Alle typer</option>
           {uniqueTypes.map(t => <option key={t} value={t}>{t}</option>)}
         </select>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none', color: '#374151' }}>
+        <label className="filter-label">
           <input type="checkbox" checked={visInactive} onChange={e => setVisInactive(e.target.checked)} />
           Vis inaktive
         </label>
-        <span style={{ marginLeft: 'auto', fontSize: '0.85rem', color: '#6b7280' }}>{filtered.length} av {articles.length} artikler</span>
+        <span className="filter-count">{filtered.length} av {articles.length} artikler</span>
       </div>
       {loading ? <div className="loading">Laster artikler...</div>
         : filtered.length === 0 ? <div className="empty">Ingen artikler funnet</div>
