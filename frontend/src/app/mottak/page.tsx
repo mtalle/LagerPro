@@ -39,7 +39,7 @@ export default function MottakPage() {
       setMottak(m);
       setArticles(a);
       setLeverandorer(l);
-    } catch (e) { console.error(e); }
+    } catch (e) { setError('Kunne ikke laste mottak: ' + (e as Error).message); }
     finally { setLoading(false); }
   }
 
@@ -92,20 +92,20 @@ export default function MottakPage() {
     try {
       await patch(`/mottak/${id}/status`, { status });
       loadData();
-    } catch (e) { alert('Feil: ' + (e as Error).message); }
+    } catch (e) { setError('Feil: ' + (e as Error).message); }
   }
 
   async function updateLinjeGodkjenning(mottakId: number, linjeId: number, godkjent: boolean, avvik?: string) {
     try {
       await patch(`/mottak/${mottakId}/linjer/${linjeId}/godkjenning`, { godkjent, avvik } as UpdateMottakLinje);
       loadData();
-    } catch (e) { alert('Feil: ' + (e as Error).message); }
+    } catch (e) { setError('Feil: ' + (e as Error).message); }
   }
 
   async function handleDelete(id: number) {
     if (!confirm('Er du sikker på at du vil slette dette mottaket?')) return;
     try { await del(`/mottak/${id}`); loadData(); }
-    catch (e) { alert('Feil: ' + (e as Error).message); }
+    catch (e) { setError('Feil: ' + (e as Error).message); }
   }
 
   const statusBadge = (s: string) => {

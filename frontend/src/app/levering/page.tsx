@@ -83,18 +83,18 @@ export default function LeveringPage() {
       setError('');
       setForm({ kundeId: 0, leveringsDato: new Date().toISOString().slice(0, 10), referanse: '', fraktBrev: '', kommentar: '', levertAv: '', linjer: [{ artikkelId: 0, lotNr: '', mengde: 1, enhet: 'STK', kommentar: '' }] });
       load();
-    } catch (e) { alert('Feil: ' + (e as Error).message); }
+    } catch (e) { setError('Feil: ' + (e as Error).message); }
   }
 
   async function setStatus(id: number, status: string) {
     try { await patch(`/levering/${id}/status`, { status }); load(); }
-    catch (e) { alert('Feil: ' + (e as Error).message); }
+    catch (e) { setError('Feil: ' + (e as Error).message); }
   }
 
   async function handleDelete(id: number) {
     if (!confirm('Er du sikker på at du vil slette denne leveringen?')) return;
     try { await del(`/levering/${id}`); load(); }
-    catch (e) { alert('Feil: ' + (e as Error).message); }
+    catch (e) { setError('Feil: ' + (e as Error).message); }
   }
 
   if (loading) return <div className="loading">Laster leveringer...</div>;

@@ -87,7 +87,7 @@ export default function KunderPage() {
   async function handleDelete(id: number) {
     if (!confirm('Er du sikker på at du vil slette denne kunden?')) return;
     try { await del(`/kunder/${id}`); load(); }
-    catch (err) { alert('Feil: ' + (err as Error).message); }
+    catch (err) { setError('Feil: ' + (err as Error).message); }
   }
 
   async function handleToggleActive(k: Kunde) {
@@ -104,7 +104,7 @@ export default function KunderPage() {
       aktiv: !k.aktiv,
     };
     try { await put(`/kunder/${k.id}`, updated); load(); }
-    catch (err) { alert('Feil: ' + (err as Error).message); }
+    catch (err) { setError('Feil: ' + (err as Error).message); }
   }
 
   function showSuccess(msg: string) {

@@ -105,7 +105,7 @@ export default function ArtiklerPage() {
   async function handleDelete(id: number) {
     if (!confirm('Er du sikker på at du vil slette denne artikkelen?')) return;
     try { await del(`/articles/${id}`); load(); }
-    catch (err) { alert('Feil ved sletting: ' + (err as Error).message); }
+    catch (err) { setError('Feil ved sletting: ' + (err as Error).message); }
   }
 
   async function handleToggleActive(a: Article) {
@@ -117,7 +117,7 @@ export default function ArtiklerPage() {
         innpris: a.innpris, utpris: a.utpris, minBeholdning: a.minBeholdning, aktiv: nyAktiv,
       } as UpdateArticle);
       load();
-    } catch (err) { alert('Feil: ' + (err as Error).message); }
+    } catch (err) { setError('Feil: ' + (err as Error).message); }
   }
 
   function showSuccess(msg: string) { setSuccess(msg); setTimeout(() => setSuccess(''), 3000); }

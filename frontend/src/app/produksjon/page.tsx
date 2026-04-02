@@ -91,6 +91,7 @@ export default function ProduksjonPage() {
         antallProdusert: scale,
         kommentar: '',
         utfortAv: '',
+        bekreftLagring: false,
         forbruk: prefill.reseptLinjer.map(linje => ({
           artikkelId: linje.ravareId,
           lotNr: linje.foreslattLotNr ?? '',
