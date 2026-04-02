@@ -159,13 +159,8 @@ export default function ProduksjonPage() {
         <button className="btn btn-secondary" onClick={openPlukkliste}>📋 Plukkliste</button>
       </div>
 
-      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap' }}>
-        <input
-          placeholder="Søk ordrenr, resept..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          style={{ padding: '0.4rem 0.8rem', border: '1px solid #d1d5db', borderRadius: 6, width: 300, fontSize: '0.9rem', minHeight: 44 }}
-        />
+      <div className="filter-bar">
+        <input className="search-input" placeholder="Søk ordrenr, resept..." value={search} onChange={e => setSearch(e.target.value)} />
         <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
           {['', 'Planlagt', 'IProduksjon', 'Ferdigmeldt', 'Kansellert'].map(s => (
             <button key={s} type="button"

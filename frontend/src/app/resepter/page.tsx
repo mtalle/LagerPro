@@ -177,13 +177,8 @@ export default function ResepterPage() {
       {success && <div className="alert alert-success">{success}</div>}
       {error && <div className="alert alert-error">{error}</div>}
 
-      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap' }}>
-        <input
-          placeholder="Søk reseptnavn..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          style={{ padding: '0.4rem 0.8rem', border: '1px solid #d1d5db', borderRadius: 6, width: 280, fontSize: '0.9rem' }}
-        />
+      <div className="filter-bar">
+        <input className="search-input" placeholder="Søk reseptnavn..." value={search} onChange={e => setSearch(e.target.value)} />
         <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.9rem', cursor: 'pointer', userSelect: 'none' }}>
           <input type="checkbox" checked={visKunAktive} onChange={e => setVisKunAktive(e.target.checked)} />
           Vis kun aktive
@@ -191,7 +186,7 @@ export default function ResepterPage() {
       </div>
 
       {filtered.length === 0 ? (
-        <div style={{ textAlign: 'center', color: '#9ca3af', padding: '2rem' }}>Ingen resepter funnet</div>
+        <div className="empty">Ingen resepter funnet</div>
       ) : (
         <div className="table-wrapper">
         <table className="table-scroll">

@@ -138,11 +138,9 @@ export default function ArtiklerPage() {
       </div>
       {success && <div className="alert alert-success">{success}</div>}
       {error && <div className="alert alert-error">{error}</div>}
-      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap' }}>
-        <input placeholder="Søk artikkelnr, navn, kategori..." value={search} onChange={e => setSearch(e.target.value)}
-          style={{ padding: '0.4rem 0.8rem', border: '1px solid #d1d5db', borderRadius: 6, width: 260, fontSize: '0.9rem', minHeight: 40 }} />
-        <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)}
-          style={{ padding: '0.35rem 0.6rem', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.9rem' }}>
+      <div className="filter-bar">
+        <input className="search-input" placeholder="Søk artikkelnr, navn, kategori..." value={search} onChange={e => setSearch(e.target.value)} />
+        <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} style={{ minHeight: 40 }}>
           <option value="">Alle typer</option>
           {uniqueTypes.map(t => <option key={t} value={t}>{t}</option>)}
         </select>

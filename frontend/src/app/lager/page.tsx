@@ -82,19 +82,15 @@ export default function LagerPage() {
         <h1>🏭 Lagerbeholdning</h1>
       </div>
 
-      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap' }}>
+      <div className="filter-bar">
         <input
+          className="search-input"
           placeholder="Søk artikkel, lotnr eller lokasjon..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          style={{ padding: '0.4rem 0.8rem', border: '1px solid #d1d5db', borderRadius: 6, width: 320, fontSize: '0.9rem' }}
         />
         <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.9rem', cursor: 'pointer', userSelect: 'none' }}>
-          <input
-            type="checkbox"
-            checked={visKunLav}
-            onChange={e => setVisKunLav(e.target.checked)}
-          />
+          <input type="checkbox" checked={visKunLav} onChange={e => setVisKunLav(e.target.checked)} />
           Vis kun lav beholdning
         </label>
         <span style={{ marginLeft: 'auto', fontSize: '0.85rem', color: '#6b7280' }}>{filtered.length} av {beholdninger.length}</span>

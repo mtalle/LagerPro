@@ -190,12 +190,13 @@ export default function MottakPage() {
       {error && <div className="alert alert-error">{error}</div>}
       {success && <div className="alert alert-success">{success}</div>}
 
-      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap' }}>
+      <div className="filter-bar">
         <input
+          className="search-input"
           placeholder="Søk leverandør, referanse..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          style={{ padding: '0.4rem 0.8rem', border: '1px solid #d1d5db', borderRadius: 6, width: 300, fontSize: '0.9rem', minHeight: 44 }}
+          style={{ flex: 1, minWidth: 160 }}
         />
         <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
           {['', 'Registrert', 'Mottatt', 'Godkjent', 'Avvist'].map(s => (

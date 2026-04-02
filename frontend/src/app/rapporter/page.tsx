@@ -96,11 +96,15 @@ function LagrerapportView({ loading, lagerRapport, fmt, fmtDato }: {
 
   return (
     <>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
-        <StatCard label="Artikler" value={lagerRapport.antallArtikler} />
-        <StatCard label="Total lagerverdi" value={"kr " + fmt(lagerRapport.totalLagerverdi)} valueColor="#16a34a" />
-        <StatCard label="Kritiske" value={kritiske} valueColor={kritiske > 0 ? '#dc2626' : '#16a34a'} />
-        <StatCard label="Generert" value={fmtDato(lagerRapport.generert)} />
+      <div className="stats-grid" style={{ marginBottom: '2rem' }}>
+        <div className="stat-card"><div className="card-title" style={{ fontSize: '0.8rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Artikler</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a2e', marginTop: '0.25rem' }}>{lagerRapport.antallArtikler}</div></div>
+        <div className="stat-card"><div className="card-title" style={{ fontSize: '0.8rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total lagerverdi</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#16a34a', marginTop: '0.25rem' }}>kr {fmt(lagerRapport.totalLagerverdi)}</div></div>
+        <div className="stat-card"><div className="card-title" style={{ fontSize: '0.8rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Kritiske</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: kritiske > 0 ? '#dc2626' : '#16a34a', marginTop: '0.25rem' }}>{kritiske}</div></div>
+        <div className="stat-card"><div className="card-title" style={{ fontSize: '0.8rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Generert</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a2e', marginTop: '0.25rem' }}>{fmtDato(lagerRapport.generert)}</div></div>
       </div>
       <table className="table-scroll">
         <thead>
@@ -137,10 +141,13 @@ function SalgArtikkelView({ loading, rapport, fraDato, tilDato, setFraDato, setT
       <DateFilter fraDato={fraDato} tilDato={tilDato} setFraDato={setFraDato} setTilDato={setTilDato} onApply={onApply} />
       {loading ? <div className="loading">Laster...</div> : rapport ? (
         <>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
-            <StatCard label="Artikler solgt" value={rapport.antallArtikler} />
-            <StatCard label="Leveringar" value={rapport.totaltAntallLeveringer} />
-            <StatCard label="Periode" value={fmtDato(rapport.fraDato) + ' – ' + fmtDato(rapport.tilDato)} />
+          <div className="stats-grid" style={{ marginBottom: '2rem' }}>
+            <div className="stat-card"><div className="card-title" style={{ fontSize: '0.8rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Artikler solgt</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a2e', marginTop: '0.25rem' }}>{rapport.antallArtikler}</div></div>
+            <div className="stat-card"><div className="card-title" style={{ fontSize: '0.8rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Leveringar</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a2e', marginTop: '0.25rem' }}>{rapport.totaltAntallLeveringer}</div></div>
+            <div className="stat-card"><div className="card-title" style={{ fontSize: '0.8rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Periode</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a2e', marginTop: '0.25rem' }}>{fmtDato(rapport.fraDato)} – {fmtDato(rapport.tilDato)}</div></div>
           </div>
           <table className="table-scroll">
             <thead>
@@ -179,10 +186,13 @@ function SalgKundeView({ loading, rapport, fraDato, tilDato, setFraDato, setTilD
       <DateFilter fraDato={fraDato} tilDato={tilDato} setFraDato={setFraDato} setTilDato={setTilDato} onApply={onApply} />
       {loading ? <div className="loading">Laster...</div> : rapport ? (
         <>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
-            <StatCard label="Kunder" value={rapport.antallKunder} />
-            <StatCard label="Leveringar" value={rapport.totaltAntallLeveringer} />
-            <StatCard label="Periode" value={fmtDato(rapport.fraDato) + ' – ' + fmtDato(rapport.tilDato)} />
+          <div className="stats-grid" style={{ marginBottom: '2rem' }}>
+            <div className="stat-card"><div className="card-title" style={{ fontSize: '0.8rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Kunder</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a2e', marginTop: '0.25rem' }}>{rapport.antallKunder}</div></div>
+            <div className="stat-card"><div className="card-title" style={{ fontSize: '0.8rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Leveringar</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a2e', marginTop: '0.25rem' }}>{rapport.totaltAntallLeveringer}</div></div>
+            <div className="stat-card"><div className="card-title" style={{ fontSize: '0.8rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Periode</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a2e', marginTop: '0.25rem' }}>{fmtDato(rapport.fraDato)} – {fmtDato(rapport.tilDato)}</div></div>
           </div>
           {rapport.kunder.length === 0 ? (
             <div style={{ textAlign: 'center', color: '#9ca3af', padding: '2rem' }}>Ingen leveringar i perioden</div>
@@ -230,7 +240,7 @@ function SalgKundeView({ loading, rapport, fraDato, tilDato, setFraDato, setTilD
 
 function StatCard({ label, value, valueColor }: { label: string; value: string | number; valueColor?: string }) {
   return (
-    <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: '1.25rem' }}>
+    <div className="card" style={{ padding: '1.25rem' }}>
       <div style={{ fontSize: '0.8rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</div>
       <div style={{ fontSize: '1.5rem', fontWeight: 700, color: valueColor || '#1a1a2e', marginTop: '0.25rem' }}>{value}</div>
     </div>

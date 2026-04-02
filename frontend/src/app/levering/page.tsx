@@ -118,13 +118,8 @@ export default function LeveringPage() {
 
       {error && <div className="alert alert-error">{error}</div>}
 
-      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
-        <input
-          placeholder="Søk kunde, referanse, fraktbrev..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          style={{ padding: '0.4rem 0.8rem', border: '1px solid #d1d5db', borderRadius: 6, width: 300, fontSize: '0.9rem', minHeight: 44 }}
-        />
+      <div className="filter-bar">
+        <input className="search-input" placeholder="Søk kunde, referanse, fraktbrev..." value={search} onChange={e => setSearch(e.target.value)} />
         <span style={{ marginLeft: 'auto', fontSize: '0.85rem', color: '#6b7280' }}>{filtered.length} av {leveringer.length}</span>
       </div>
 

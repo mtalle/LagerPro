@@ -122,13 +122,8 @@ export default function LeverandorerPage() {
       {success && <div className="alert alert-success">{success}</div>}
       {error && <div className="alert alert-error">{error}</div>}
 
-      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap' }}>
-        <input
-          placeholder="Søk navn, orgnr eller e-post..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          style={{ padding: '0.4rem 0.8rem', border: '1px solid #d1d5db', borderRadius: 6, width: 300, fontSize: '0.9rem' }}
-        />
+      <div className="filter-bar">
+        <input className="search-input" placeholder="Søk navn, orgnr eller e-post..." value={search} onChange={e => setSearch(e.target.value)} />
         <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.9rem', cursor: 'pointer', userSelect: 'none' }}>
           <input type="checkbox" checked={visKunAktive} onChange={e => setVisKunAktive(e.target.checked)} />
           Vis kun aktive
