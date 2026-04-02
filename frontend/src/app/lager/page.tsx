@@ -89,11 +89,11 @@ export default function LagerPage() {
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
-        <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.9rem', cursor: 'pointer', userSelect: 'none' }}>
+        <label className="filter-label">
           <input type="checkbox" checked={visKunLav} onChange={e => setVisKunLav(e.target.checked)} />
           Vis kun lav beholdning
         </label>
-        <span style={{ marginLeft: 'auto', fontSize: '0.85rem', color: '#6b7280' }}>{filtered.length} av {beholdninger.length}</span>
+        <span className="filter-count">{filtered.length} av {beholdninger.length}</span>
       </div>
 
       <table className="table-scroll">
