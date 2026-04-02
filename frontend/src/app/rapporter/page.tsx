@@ -71,7 +71,7 @@ export default function RapporterPage() {
         <h1>Rapporter</h1>
       </div>
 
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+      <div className="tabs-bar">
         <button onClick={() => setActiveTab('lager')} className={'btn ' + (activeTab === 'lager' ? 'btn-primary' : 'btn-secondary')}>Lagrerapport</button>
         <button onClick={() => setActiveTab('salg-artikkel')} className={'btn ' + (activeTab === 'salg-artikkel' ? 'btn-primary' : 'btn-secondary')}>Salg per artikkel</button>
         <button onClick={() => setActiveTab('salg-kunde')} className={'btn ' + (activeTab === 'salg-kunde' ? 'btn-primary' : 'btn-secondary')}>Salg per kunde</button>
@@ -96,16 +96,17 @@ function LagrerapportView({ loading, lagerRapport, fmt, fmtDato }: {
 
   return (
     <>
-      <div className="stats-grid" style={{ marginBottom: '2rem' }}>
-        <div className="stat-card"><div className="card-title" style={{ fontSize: '0.8rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Artikler</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a2e', marginTop: '0.25rem' }}>{lagerRapport.antallArtikler}</div></div>
-        <div className="stat-card"><div className="card-title" style={{ fontSize: '0.8rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total lagerverdi</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#16a34a', marginTop: '0.25rem' }}>kr {fmt(lagerRapport.totalLagerverdi)}</div></div>
-        <div className="stat-card"><div className="card-title" style={{ fontSize: '0.8rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Kritiske</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: kritiske > 0 ? '#dc2626' : '#16a34a', marginTop: '0.25rem' }}>{kritiske}</div></div>
-        <div className="stat-card"><div className="card-title" style={{ fontSize: '0.8rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Generert</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a2e', marginTop: '0.25rem' }}>{fmtDato(lagerRapport.generert)}</div></div>
+      <div className="stats-grid">
+        <div className="stat-card"><div className="card-title">Artikler</div>
+          <div className="stat-value">{lagerRapport.antallArtikler}</div></div>
+        <div className="stat-card"><div className="card-title">Total lagerverdi</div>
+          <div className="stat-value" style={{ color: '#16a34a' }}>kr {fmt(lagerRapport.totalLagerverdi)}</div></div>
+        <div className="stat-card"><div className="card-title">Kritiske</div>
+          <div className="stat-value" style={{ color: kritiske > 0 ? '#dc2626' : '#16a34a' }}>{kritiske}</div></div>
+        <div className="stat-card"><div className="card-title">Generert</div>
+          <div className="stat-value">{fmtDato(lagerRapport.generert)}</div></div>
       </div>
+      <div className="table-wrapper">
       <table className="table-scroll">
         <thead>
           <tr><th></th><th>Artikkelnr</th><th>Navn</th><th>Beholdning</th><th>Enhet</th><th>Innpris</th><th>Totalverdi</th><th>LOT</th><th>Min</th></tr>
@@ -126,6 +127,7 @@ function LagrerapportView({ loading, lagerRapport, fmt, fmtDato }: {
           ))}
         </tbody>
       </table>
+      </div>
     </>
   );
 }
@@ -141,14 +143,15 @@ function SalgArtikkelView({ loading, rapport, fraDato, tilDato, setFraDato, setT
       <DateFilter fraDato={fraDato} tilDato={tilDato} setFraDato={setFraDato} setTilDato={setTilDato} onApply={onApply} />
       {loading ? <div className="loading">Laster...</div> : rapport ? (
         <>
-          <div className="stats-grid" style={{ marginBottom: '2rem' }}>
-            <div className="stat-card"><div className="card-title" style={{ fontSize: '0.8rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Artikler solgt</div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a2e', marginTop: '0.25rem' }}>{rapport.antallArtikler}</div></div>
-            <div className="stat-card"><div className="card-title" style={{ fontSize: '0.8rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Leveringar</div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a2e', marginTop: '0.25rem' }}>{rapport.totaltAntallLeveringer}</div></div>
-            <div className="stat-card"><div className="card-title" style={{ fontSize: '0.8rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Periode</div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a2e', marginTop: '0.25rem' }}>{fmtDato(rapport.fraDato)} – {fmtDato(rapport.tilDato)}</div></div>
+          <div className="stats-grid">
+            <div className="stat-card"><div className="card-title">Artikler solgt</div>
+              <div className="stat-value">{rapport.antallArtikler}</div></div>
+            <div className="stat-card"><div className="card-title">Leveringar</div>
+              <div className="stat-value">{rapport.totaltAntallLeveringer}</div></div>
+            <div className="stat-card"><div className="card-title">Periode</div>
+              <div className="stat-value">{fmtDato(rapport.fraDato)} – {fmtDato(rapport.tilDato)}</div></div>
           </div>
+          <div className="table-wrapper">
           <table className="table-scroll">
             <thead>
               <tr><th>Artikkelnr</th><th>Navn</th><th>Mengde</th><th>Enhet</th><th>Leveringar</th><th>Innpris</th><th>Utpris</th></tr>
@@ -169,6 +172,7 @@ function SalgArtikkelView({ loading, rapport, fraDato, tilDato, setFraDato, setT
               ))}
             </tbody>
           </table>
+        </div>
         </>
       ) : null}
     </>
@@ -186,13 +190,13 @@ function SalgKundeView({ loading, rapport, fraDato, tilDato, setFraDato, setTilD
       <DateFilter fraDato={fraDato} tilDato={tilDato} setFraDato={setFraDato} setTilDato={setTilDato} onApply={onApply} />
       {loading ? <div className="loading">Laster...</div> : rapport ? (
         <>
-          <div className="stats-grid" style={{ marginBottom: '2rem' }}>
-            <div className="stat-card"><div className="card-title" style={{ fontSize: '0.8rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Kunder</div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a2e', marginTop: '0.25rem' }}>{rapport.antallKunder}</div></div>
-            <div className="stat-card"><div className="card-title" style={{ fontSize: '0.8rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Leveringar</div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a2e', marginTop: '0.25rem' }}>{rapport.totaltAntallLeveringer}</div></div>
-            <div className="stat-card"><div className="card-title" style={{ fontSize: '0.8rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Periode</div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a2e', marginTop: '0.25rem' }}>{fmtDato(rapport.fraDato)} – {fmtDato(rapport.tilDato)}</div></div>
+          <div className="stats-grid">
+            <div className="stat-card"><div className="card-title">Kunder</div>
+              <div className="stat-value">{rapport.antallKunder}</div></div>
+            <div className="stat-card"><div className="card-title">Leveringar</div>
+              <div className="stat-value">{rapport.totaltAntallLeveringer}</div></div>
+            <div className="stat-card"><div className="card-title">Periode</div>
+              <div className="stat-value">{fmtDato(rapport.fraDato)} – {fmtDato(rapport.tilDato)}</div></div>
           </div>
           {rapport.kunder.length === 0 ? (
             <div style={{ textAlign: 'center', color: '#9ca3af', padding: '2rem' }}>Ingen leveringar i perioden</div>
@@ -252,12 +256,12 @@ function DateFilter({ fraDato, tilDato, setFraDato, setTilDato, onApply }: {
   setFraDato: (v: string) => void; setTilDato: (v: string) => void; onApply: () => void;
 }) {
   return (
-    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-      <label style={{ fontSize: '0.9rem', color: '#374151' }}>Fra:
-        <input type="date" value={fraDato} onChange={e => setFraDato(e.target.value)} style={{ marginLeft: '0.5rem', padding: '0.35rem 0.6rem', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.9rem' }} />
+    <div className="tabs-bar">
+      <label>Fra:
+        <input type="date" value={fraDato} onChange={e => setFraDato(e.target.value)} />
       </label>
-      <label style={{ fontSize: '0.9rem', color: '#374151' }}>Til:
-        <input type="date" value={tilDato} onChange={e => setTilDato(e.target.value)} style={{ marginLeft: '0.5rem', padding: '0.35rem 0.6rem', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.9rem' }} />
+      <label>Til:
+        <input type="date" value={tilDato} onChange={e => setTilDato(e.target.value)} />
       </label>
       <button onClick={onApply} className="btn btn-primary">Oppdater</button>
     </div>
