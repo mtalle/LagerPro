@@ -77,7 +77,7 @@ public class ShippingController : ControllerBase
         }
     }
 
-    [HttpPatch("{id}/status")]
+    [HttpPatch("{id:int}/status")]
     public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateLeveringStatusRequest request, CancellationToken cancellationToken)
     {
         try

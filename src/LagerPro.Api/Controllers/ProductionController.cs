@@ -90,7 +90,7 @@ public class ProductionController : ControllerBase
         }
     }
 
-    [HttpPatch("{id}/status")]
+    [HttpPatch("{id:int}/status")]
     public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateProduksjonsOrdreStatusRequest request, CancellationToken cancellationToken)
     {
         try

@@ -44,9 +44,9 @@ function saveVisibleWidgets(ids: string[]) {
 
 function DashboardWidget({ title, children, href, seeAll }: { title: string; children: React.ReactNode; href: string; seeAll: string }) {
   return (
-    <div style={{ background: 'white', borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e5e7eb', overflow: 'hidden' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.25rem', borderBottom: '1px solid #f3f4f6' }}>
-        <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}>{title}</h3>
+    <div className="card">
+      <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 0 1rem 0', borderBottom: '1px solid #f3f4f6', marginBottom: '0.5rem' }}>
+        <h3 className="card-title" style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}>{title}</h3>
         <a href={href} style={{ fontSize: '0.8rem', color: '#3b82f6', textDecoration: 'none' }}>{seeAll}</a>
       </div>
       <div style={{ padding: '0.5rem' }}>{children}</div>
@@ -149,10 +149,10 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+      <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
         {statCards.map(card => (
           <a key={card.label} href={card.href} style={{ textDecoration: 'none' }}>
-            <div style={{ background: 'white', borderRadius: 12, padding: '1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e5e7eb' }}>
+            <div className="stat-card" style={{ background: 'white', borderRadius: 12, padding: '1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e5e7eb' }}>
               <div style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: 4, fontWeight: 500 }}>{card.label}</div>
               <div style={{ fontSize: '2rem', fontWeight: 700, color: card.color }}>{card.value}</div>
               <div style={{ fontSize: '0.8rem', color: '#9ca3af', marginTop: 4 }}>{card.sub}</div>
@@ -165,8 +165,9 @@ export default function DashboardPage() {
         {visibleWidgets.includes('salg_i_dag') && (
           <DashboardWidget title="🚚 Dagens leveringer" href="/levering" seeAll="Se alle leveringer →">
             {stats.nyligeLeveringer.length === 0 ? (
-              <div style={{ color: '#9ca3af', textAlign: 'center', padding: '1.5rem', fontSize: '0.9rem' }}>Ingen leveringer planlagt i dag</div>
+              <div className="empty" style={{ textAlign: 'center', padding: '1.5rem', fontSize: '0.9rem' }}>Ingen leveringer planlagt i dag</div>
             ) : (
+              <div className="table-wrapper">
               <table style={{ width: '100%', fontSize: '0.85rem' }}>
                 <thead><tr style={{ textAlign: 'left', background: '#f9fafb' }}><th>Kunde</th><th>Dato</th><th>Status</th></tr></thead>
                 <tbody>{stats.nyligeLeveringer.slice(0, 5).map(l => (
@@ -177,6 +178,7 @@ export default function DashboardPage() {
                   </tr>
                 ))}</tbody>
               </table>
+              </div>
             )}
           </DashboardWidget>
         )}
@@ -184,8 +186,9 @@ export default function DashboardPage() {
         {visibleWidgets.includes('aktive_ordre') && (
           <DashboardWidget title="🏗 Aktive produksjonsordre" href="/produksjon" seeAll="Se alle ordre →">
             {stats.aktiveOrdre.length === 0 ? (
-              <div style={{ color: '#9ca3af', textAlign: 'center', padding: '1.5rem', fontSize: '0.9rem' }}>Ingen aktive produksjonsordre</div>
+              <div className="empty" style={{ textAlign: 'center', padding: '1.5rem', fontSize: '0.9rem' }}>Ingen aktive produksjonsordre</div>
             ) : (
+              <div className="table-wrapper">
               <table style={{ width: '100%', fontSize: '0.85rem' }}>
                 <thead><tr style={{ textAlign: 'left', background: '#f9fafb' }}><th>OrdreNr</th><th>Resept</th><th>Status</th></tr></thead>
                 <tbody>{stats.aktiveOrdre.map(o => (
@@ -196,6 +199,7 @@ export default function DashboardPage() {
                   </tr>
                 ))}</tbody>
               </table>
+              </div>
             )}
           </DashboardWidget>
         )}
@@ -203,8 +207,9 @@ export default function DashboardPage() {
         {visibleWidgets.includes('lav_beholdning') && (
           <DashboardWidget title="⚠️ Lav beholdning" href="/lager" seeAll="Se alle →">
             {stats.lavBeholdningListe.length === 0 ? (
-              <div style={{ color: '#22c55e', textAlign: 'center', padding: '1.5rem', fontSize: '0.9rem' }}>✅ Alle artikler er over minBeholdning</div>
+              <div className="empty" style={{ textAlign: 'center', padding: '1.5rem', fontSize: '0.9rem', color: '#22c55e' }}>✅ Alle artikler er over minBeholdning</div>
             ) : (
+              <div className="table-wrapper">
               <table style={{ width: '100%', fontSize: '0.85rem' }}>
                 <thead><tr style={{ textAlign: 'left', background: '#f9fafb' }}><th>Artikkel</th><th>LOT</th><th>Beholdning</th><th>Min</th></tr></thead>
                 <tbody>{stats.lavBeholdningListe.map(b => (
@@ -215,6 +220,7 @@ export default function DashboardPage() {
                   </tr>
                 ))}</tbody>
               </table>
+              </div>
             )}
           </DashboardWidget>
         )}
@@ -222,8 +228,9 @@ export default function DashboardPage() {
         {visibleWidgets.includes('apne_mottak') && (
           <DashboardWidget title="📥 Åpne mottak" href="/mottak" seeAll="Se alle mottak →">
             {stats.apneMottakListe.length === 0 ? (
-              <div style={{ color: '#22c55e', textAlign: 'center', padding: '1.5rem', fontSize: '0.9rem' }}>✅ Ingen åpne mottak</div>
+              <div className="empty" style={{ textAlign: 'center', padding: '1.5rem', fontSize: '0.9rem', color: '#22c55e' }}>✅ Ingen åpne mottak</div>
             ) : (
+              <div className="table-wrapper">
               <table style={{ width: '100%', fontSize: '0.85rem' }}>
                 <thead><tr style={{ textAlign: 'left', background: '#f9fafb' }}><th>Leverandør</th><th>Dato</th><th>Status</th></tr></thead>
                 <tbody>{stats.apneMottakListe.map(m => (
@@ -234,6 +241,7 @@ export default function DashboardPage() {
                   </tr>
                 ))}</tbody>
               </table>
+              </div>
             )}
           </DashboardWidget>
         )}
@@ -254,16 +262,7 @@ export default function DashboardPage() {
 function QuickAction({ title, href, desc }: { title: string; href: string; desc: string }) {
   return (
     <a href={href} style={{ textDecoration: 'none' }}>
-      <div style={{
-        background: 'white',
-        borderRadius: 12,
-        padding: '1rem 1.25rem',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-        border: '1px solid #e5e7eb',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.75rem',
-      }}>
+      <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem 1.25rem' }}>
         <div>
           <div style={{ fontWeight: 600, color: '#111827' }}>{title}</div>
           <div style={{ fontSize: '0.8rem', color: '#6b7280', marginTop: 2 }}>{desc}</div>

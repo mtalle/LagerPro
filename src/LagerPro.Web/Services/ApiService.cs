@@ -3,17 +3,19 @@ using LagerPro.Web.Models;
 using LagerPro.Contracts.Requests.Kunder;
 using LagerPro.Contracts.Requests.Leverandorer;
 using LagerPro.Contracts.Requests.Resepter;
+using Microsoft.Extensions.Configuration;
 
 namespace LagerPro.Web.Services;
 
 public class ApiService
 {
     private readonly HttpClient _http;
-    private readonly string _baseUrl = "http://localhost:5000";
+    private readonly string _baseUrl;
 
-    public ApiService(HttpClient http)
+    public ApiService(HttpClient http, IConfiguration configuration)
     {
         _http = http;
+        _baseUrl = configuration["ApiBaseUrl"] ?? "http://localhost:5000";
         _http.BaseAddress = new Uri(_baseUrl);
     }
 
@@ -105,7 +107,7 @@ public class ApiService
 
     public async Task<bool> UpdateMottakStatusAsync(int id, string status)
     {
-        var response = await _http.PutAsJsonAsync($"/api/mottak/{id}/status", new { status });
+        var response = await _http.PatchAsJsonAsync($"/api/mottak/{id}/status", new { status });
         return response.IsSuccessStatusCode;
     }
 
@@ -134,7 +136,7 @@ public class ApiService
 
     public async Task<bool> UpdateProduksjonsOrdreStatusAsync(int id, string status)
     {
-        var response = await _http.PutAsJsonAsync($"/api/produksjon/{id}/status", new { status });
+        var response = await _http.PatchAsJsonAsync($"/api/produksjon/{id}/status", new { status });
         return response.IsSuccessStatusCode;
     }
 
@@ -178,7 +180,7 @@ public class ApiService
 
     public async Task<bool> UpdateLeveringStatusAsync(int id, string status)
     {
-        var response = await _http.PutAsJsonAsync($"/api/levering/{id}/status", new { status });
+        var response = await _http.PatchAsJsonAsync($"/api/levering/{id}/status", new { status });
         return response.IsSuccessStatusCode;
     }
 
