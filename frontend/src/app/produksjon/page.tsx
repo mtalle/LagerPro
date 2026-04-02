@@ -161,25 +161,16 @@ export default function ProduksjonPage() {
 
       <div className="filter-bar">
         <input className="search-input" placeholder="Søk ordrenr, resept..." value={search} onChange={e => setSearch(e.target.value)} />
-        <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
+        <div className="status-filter">
           {['', 'Planlagt', 'IProduksjon', 'Ferdigmeldt', 'Kansellert'].map(s => (
             <button key={s} type="button"
               onClick={() => setStatusFilter(s)}
-              style={{
-                padding: '0.3rem 0.7rem',
-                borderRadius: 16,
-                fontSize: '0.8rem',
-                border: 'none',
-                cursor: 'pointer',
-                background: statusFilter === s ? '#3b82f6' : '#e5e7eb',
-                color: statusFilter === s ? '#fff' : '#374151',
-                fontWeight: statusFilter === s ? 600 : 400,
-              }}>
+              className={statusFilter === s ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm'}>
               {s || 'Alle'}
             </button>
           ))}
         </div>
-        <span style={{ marginLeft: 'auto', fontSize: '0.85rem', color: '#6b7280' }}>{filtered.length} av {ordre.length}</span>
+        <span className="filter-count">{filtered.length} av {ordre.length}</span>
       </div>
 
       <div className="table-wrapper">
