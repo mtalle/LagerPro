@@ -141,7 +141,7 @@ export default function ResepterPage() {
   async function handleDelete(id: number) {
     if (!confirm('Er du sikker på at du vil slette denne resepten?')) return;
     try { await del(`/recipes/${id}`); load(); }
-    catch (err) { alert('Feil: ' + (err as Error).message); }
+    catch (err) { setError('Feil: ' + (err as Error).message); }
   }
 
   async function handleToggleActive(r: Resept) {
@@ -155,7 +155,7 @@ export default function ResepterPage() {
         })),
       });
       load();
-    } catch (err) { alert('Feil: ' + (err as Error).message); }
+    } catch (err) { setError('Feil: ' + (err as Error).message); }
   }
 
   function showSuccess(msg: string) {
@@ -300,9 +300,10 @@ export default function ResepterPage() {
                   <div className="form-group">
                     <label>Råvare</label>
                     <select value={linje.ravareId} onChange={e => {
-                      const a = articles.find(x => x.id === parseInt(e.target.value));
-                      updateLine(i, 'ravareId', parseInt(e.target.value));
-                      if (a) updateLine(i, 'enhet', a.enhet);
+                      const ravareId = parseInt(e.target.value);
+                      const a = articles.find(x => x.id === ravareId);
+                      const linjer = form.linjer.map((l, idx) => idx === i ? { ...l, ravareId, enhet: a ? a.enhet : l.enhet } : l);
+                      setForm({ ...form, linjer });
                     }}>
                       <option value={0}>Velg...</option>
                       {articles.map(a => <option key={a.id} value={a.id}>{a.navn} ({a.artikkelNr})</option>)}
