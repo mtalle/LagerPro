@@ -116,7 +116,7 @@ export default function KunderPage() {
     <>
       <div className="page-header">
         <h1>👥 Kunder</h1>
-        <button className="btn btn-primary" onClick={openCreate}>+ Ny kunde</button>
+        <button className="btn btn-sm btn-primary" onClick={openCreate}>+ Ny kunde</button>
       </div>
 
       {success && <div className="alert alert-success">{success}</div>}
@@ -159,12 +159,12 @@ export default function KunderPage() {
                 <td>{k.epost ?? '—'}</td>
                 <td>{k.poststed ? `${k.postnr ?? ''} ${k.poststed}` : '—'}</td>
                 <td>
-                  <span className={`badge ${k.aktiv ? 'badge-aktiv' : 'badge-inactive'}`}>
+                  <span className={`badge ${k.aktiv ? 'badge-success' : 'badge-danger'}`}>
                     {k.aktiv ? 'Aktiv' : 'Inaktiv'}
                   </span>
                 </td>
                 <td>
-                  {kanRedigere && <div style={{ display: 'flex', gap: '0.4rem' }}>
+                  {kanRedigere && <div className="btn-group">
                     <button className="btn btn-sm btn-secondary" onClick={() => openEdit(k)}>Rediger</button>
                     <button className="btn btn-sm btn-secondary" onClick={() => handleToggleActive(k)}>
                       {k.aktiv ? 'Deaktiver' : 'Aktiver'}
