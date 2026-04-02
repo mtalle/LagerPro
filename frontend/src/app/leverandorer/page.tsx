@@ -124,7 +124,7 @@ export default function LeverandorerPage() {
 
       <div className="filter-bar">
         <input className="search-input" placeholder="Søk navn, orgnr eller e-post..." value={search} onChange={e => setSearch(e.target.value)} />
-        <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.9rem', cursor: 'pointer', userSelect: 'none' }}>
+        <label className="filter-label">
           <input type="checkbox" checked={visKunAktive} onChange={e => setVisKunAktive(e.target.checked)} />
           Vis kun aktive
         </label>
