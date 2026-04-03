@@ -42,6 +42,7 @@ export default function LagerPage() {
   const [varetellingConfirm, setVaretellingConfirm] = useState(false);
   const [varetellingSubmitting, setVaretellingSubmitting] = useState(false);
   const [varetellingOk, setVaretellingOk] = useState(false);
+  const [varetellingError, setVaretellingError] = useState('');
 
   // Expanded article rows
   const [expandedArtikkel, setExpandedArtikkel] = useState<number | null>(null);
@@ -99,6 +100,7 @@ export default function LagerPage() {
     setVaretellingOpen(true);
     setVaretellingConfirm(false);
     setVaretellingOk(false);
+    setVaretellingError('');
     try {
       const data = await get<Lageroversigt[]>('/inventory/oversikt');
       const rader: VaretellingRad[] = data.map(a => ({
@@ -145,9 +147,10 @@ export default function LagerPage() {
         }
       }
       setVaretellingOk(true);
+      setVaretellingError('');
       setTimeout(() => { setVaretellingOpen(false); loadData(); }, 1500);
     } catch (err) {
-      alert('Feil ved lagring: ' + (err as Error).message);
+      setVaretellingError('Feil ved lagring: ' + (err as Error).message);
     } finally {
       setVaretellingSubmitting(false);
     }
@@ -391,6 +394,7 @@ export default function LagerPage() {
                     </tbody>
                   </table>
                 </div>
+                {varetellingError && <div className="alert alert-error" style={{ marginBottom: '1rem' }}>{varetellingError}</div>}
                 {!varetellingConfirm ? (
                   <div className="form-actions">
                     <button type="button" className="btn btn-secondary" onClick={() => setVaretellingOpen(false)}>Avbryt</button>
