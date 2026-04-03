@@ -133,7 +133,7 @@ else
                     else if (activeTab == "historikk")
                     {
                         var allTransactions = traceData?.Lots
-                            .SelectMany(l => l.Transaksjoner.Select(t => new { Lot = l.LotNr, Trans = t }))
+                            .SelectMany(l => l.Transaksjoner.Select(t => new { Lot = l.LotNr, Enhet = l.Enhet, Trans = t }))
                             .OrderByDescending(x => x.Trans.Tidspunkt)
                             .ToList() ?? new();
 
@@ -142,10 +142,8 @@ else
                                 <tr>
                                     <th>Tid</th>
                                     <th>Lot</th>
-                                    <th>Type</th>
-                                    <th>Endring</th>
+                                    <th>Hendelse</th>
                                     <th>Etter</th>
-                                    <th>Kilde</th>
                                     <th>Bruker</th>
                                 </tr>
                             </thead>
@@ -155,30 +153,28 @@ else
                                     <tr>
                                         <td>@x.Trans.Tidspunkt.ToString("g")</td>
                                         <td>@x.Lot</td>
-                                        <td>@x.Trans.Type</td>
                                         <td>
                                             @if (x.Trans.Mengde > 0)
                                             {
-                                                <span class="text-success">+@x.Trans.Mengde</span>
+                                                <span class="text-success fw-bold">+@x.Trans.Mengde.ToString("N2") @x.Enhet</span> <span>@x.Trans.Kilde @(x.Trans.KildeId > 0 ? $"({x.Trans.KildeId})" : "")</span>
                                             }
                                             else if (x.Trans.Mengde < 0)
                                             {
-                                                <span class="text-danger">@x.Trans.Mengde</span>
+                                                <span class="text-danger fw-bold">@x.Trans.Mengde.ToString("N2") @x.Enhet</span> <span>@x.Trans.Kilde @(x.Trans.KildeId > 0 ? $"({x.Trans.KildeId})" : "")</span>
                                             }
                                             else
                                             {
-                                                @x.Trans.Mengde
+                                                <span class="fw-bold">@x.Trans.Mengde.ToString("N2") @x.Enhet</span> <span>@x.Trans.Kilde @(x.Trans.KildeId > 0 ? $"({x.Trans.KildeId})" : "")</span>
                                             }
                                         </td>
-                                        <td>@x.Trans.BeholdningEtter</td>
-                                        <td>@x.Trans.Kilde @(x.Trans.KildeId > 0 ? $"({x.Trans.KildeId})" : "")</td>
+                                        <td>@x.Trans.BeholdningEtter.ToString("N2")</td>
                                         <td>@x.Trans.UtfortAv</td>
                                     </tr>
                                 }
                                 @if (allTransactions.Count == 0)
                                 {
                                     <tr>
-                                        <td colspan="7">Ingen historikk funnet.</td>
+                                        <td colspan="5">Ingen historikk funnet.</td>
                                     </tr>
                                 }
                             </tbody>

@@ -95,6 +95,14 @@
 - Sub-agent cron: kvar time via OpenClaw
 - Deploy: DigitalOcean $8/mnd planlagt
 
+### Produksjons-server (DigitalOcean)
+- **IP:** 167.99.195.94
+- **Brukar:** root
+- **Passord:** TalleraaS123m
+- **Frontend:** /root/LagerPro/frontend (npm run dev -- -p 3000)
+- **Backend:** /root/LagerPro (dotnet run --urls "http://0.0.0.0:5000")
+- **Ved opplasting:** Kopier filer direkte med scp/ssh, restart deretter
+
 ### Martin sin hardware:
 - Lenovo laptop (Ryzen 5 7520U, 16GB RAM, Radeon 610M)
 - Windows 11

@@ -8,7 +8,7 @@ Hver gang en heartbeat poll kommer inn:
 
 ## LagerPro
 - OpenClaw sin innebygde cron håndterer LagerPro-jobs hver time
-- Cron job ID: e7d27d91-1669-462e-a325-1175bb13f4b5
+- Cron job ID: f5a82f23-deb0-42fc-a553-2260c8fc96b0 (Kjører på Groq)
 - Sjekk /tmp/lagerpro-task.md for gjeldende jobb-status
 - Ved aktiv sub-agent: la den jobbe uforstyrret
 
