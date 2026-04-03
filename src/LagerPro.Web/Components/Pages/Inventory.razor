@@ -15,7 +15,7 @@ else if (error != null)
 }
 else
 {
-    <table class="table table-striped">
+    <table class="table table-hover">
         <thead>
             <tr>
                 <th>ArtikkelNr</th>
@@ -29,7 +29,7 @@ else
         <tbody>
             @foreach (var item in beholdning)
             {
-                <tr>
+                <tr style="cursor: pointer;" @onclick="() => OpenArticleModal(item)">
                     <td>@item.ArtikkelNr</td>
                     <td>@item.ArtikkelNavn</td>
                     <td>@item.LotNr</td>
@@ -42,10 +42,174 @@ else
     </table>
 }
 
+@if (selectedArticle != null)
+{
+    <div class="modal fade show" style="display: block; background: rgba(0,0,0,0.5);" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@selectedArticle.ArtikkelNavn (@selectedArticle.ArtikkelNr)</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs mb-3">
+                        <li class="nav-item">
+                            <a class="nav-link @(activeTab == "lot" ? "active" : "")" style="cursor: pointer;" @onclick='() => activeTab = "lot"'>Lot-oversikt</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(activeTab == "historikk" ? "active" : "")" style="cursor: pointer;" @onclick='() => activeTab = "historikk"'>Historikk</a>
+                        </li>
+                    </ul>
+
+                    @if (loadingModal)
+                    {
+                        <p>Laster detaljer...</p>
+                    }
+                    else if (activeTab == "lot")
+                    {
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>LotNr</th>
+                                    <th>Beholdning</th>
+                                    <th>Enhet</th>
+                                    <th>Sist Oppdatert</th>
+                                    <th>Handling</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var lot in traceData?.Lots ?? new())
+                                {
+                                    <tr>
+                                        <td><a href="/sporing?lot=@lot.LotNr">@lot.LotNr</a></td>
+                                        <td>@lot.GjeldendeMengde.ToString("N2")</td>
+                                        <td>@lot.Enhet</td>
+                                        <td>@lot.SistOppdatert.ToString("g")</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary" @onclick="() => PrepareJuster(lot)">Juster</button>
+                                        </td>
+                                    </tr>
+                                }
+                                @if (traceData == null || traceData.Lots.Count == 0)
+                                {
+                                    <tr>
+                                        <td colspan="5">Ingen lots funnet.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+
+                        @if (justerLot != null)
+                        {
+                            <div class="card mt-3">
+                                <div class="card-body">
+                                    <h6>Juster antall for lot @justerLot.LotNr</h6>
+                                    <div class="row g-2 align-items-center">
+                                        <div class="col-auto">
+                                            <label>Ny Mengde:</label>
+                                            <input type="number" class="form-control form-control-sm" @bind="nyMengde" step="0.01" />
+                                        </div>
+                                        <div class="col-auto">
+                                            <label>Kommentar:</label>
+                                            <input type="text" class="form-control form-control-sm" @bind="justerKommentar" placeholder="Årsak til justering..." />
+                                        </div>
+                                        <div class="col-auto mt-4">
+                                            <button class="btn btn-primary btn-sm" @onclick="UtførJuster" disabled="@savingJuster">Lagre</button>
+                                            <button class="btn btn-secondary btn-sm" @onclick="() => justerLot = null" disabled="@savingJuster">Avbryt</button>
+                                        </div>
+                                    </div>
+                                    @if (justerError != null)
+                                    {
+                                        <p class="text-danger mt-2 mb-0">@justerError</p>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <div class="mt-4 border-top pt-3">
+                            <a href="/articles" class="btn btn-warning btn-sm">Rediger Artikkel (Admin)</a>
+                        </div>
+                    }
+                    else if (activeTab == "historikk")
+                    {
+                        var allTransactions = traceData?.Lots
+                            .SelectMany(l => l.Transaksjoner.Select(t => new { Lot = l.LotNr, Trans = t }))
+                            .OrderByDescending(x => x.Trans.Tidspunkt)
+                            .ToList() ?? new();
+
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Tid</th>
+                                    <th>Lot</th>
+                                    <th>Type</th>
+                                    <th>Endring</th>
+                                    <th>Etter</th>
+                                    <th>Kilde</th>
+                                    <th>Bruker</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var x in allTransactions)
+                                {
+                                    <tr>
+                                        <td>@x.Trans.Tidspunkt.ToString("g")</td>
+                                        <td>@x.Lot</td>
+                                        <td>@x.Trans.Type</td>
+                                        <td>
+                                            @if (x.Trans.Mengde > 0)
+                                            {
+                                                <span class="text-success">+@x.Trans.Mengde</span>
+                                            }
+                                            else if (x.Trans.Mengde < 0)
+                                            {
+                                                <span class="text-danger">@x.Trans.Mengde</span>
+                                            }
+                                            else
+                                            {
+                                                @x.Trans.Mengde
+                                            }
+                                        </td>
+                                        <td>@x.Trans.BeholdningEtter</td>
+                                        <td>@x.Trans.Kilde @(x.Trans.KildeId > 0 ? $"({x.Trans.KildeId})" : "")</td>
+                                        <td>@x.Trans.UtfortAv</td>
+                                    </tr>
+                                }
+                                @if (allTransactions.Count == 0)
+                                {
+                                    <tr>
+                                        <td colspan="7">Ingen historikk funnet.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Lukk</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     private List<LagerBeholdning> beholdning = new();
     private bool loading = true;
     private string? error;
+
+    // Modal state
+    private LagerBeholdning? selectedArticle;
+    private bool loadingModal = false;
+    private string activeTab = "lot";
+    private ArtikkelTraceabilityDto? traceData;
+
+    // Juster state
+    private LotTraceDto? justerLot;
+    private decimal nyMengde;
+    private string? justerKommentar;
+    private bool savingJuster = false;
+    private string? justerError;
 
     protected override async Task OnInitializedAsync()
     {
@@ -65,5 +229,72 @@ else
             error = $"Kunne ikke laste lagerbeholdning: {ex.Message}";
         }
         loading = false;
+    }
+
+    private async Task OpenArticleModal(LagerBeholdning item)
+    {
+        selectedArticle = item;
+        activeTab = "lot";
+        justerLot = null;
+        justerError = null;
+        await LoadTraceData();
+    }
+
+    private void CloseModal()
+    {
+        selectedArticle = null;
+    }
+
+    private async Task LoadTraceData()
+    {
+        if (selectedArticle == null) return;
+        
+        loadingModal = true;
+        try
+        {
+            traceData = await Api.GetTraceabilityByArtikkelAsync(selectedArticle.ArtikkelId);
+        }
+        catch (Exception)
+        {
+            traceData = null;
+        }
+        loadingModal = false;
+    }
+
+    private void PrepareJuster(LotTraceDto lot)
+    {
+        justerLot = lot;
+        nyMengde = lot.GjeldendeMengde;
+        justerKommentar = "";
+        justerError = null;
+    }
+
+    private async Task UtførJuster()
+    {
+        if (selectedArticle == null || justerLot == null) return;
+
+        savingJuster = true;
+        justerError = null;
+
+        try
+        {
+            var success = await Api.JusterLagerAsync(selectedArticle.ArtikkelId, justerLot.LotNr, nyMengde, justerKommentar);
+            if (success)
+            {
+                justerLot = null;
+                await LoadTraceData();
+                await LoadBeholdning();
+            }
+            else
+            {
+                justerError = "Kunne ikke lagre justering.";
+            }
+        }
+        catch (Exception ex)
+        {
+            justerError = ex.Message;
+        }
+
+        savingJuster = false;
     }
 }

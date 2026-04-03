@@ -270,4 +270,27 @@ public class ApiService
         var response = await _http.DeleteAsync($"/api/resepter/{id}");
         return response.IsSuccessStatusCode;
     }
+
+    // Juster lager
+    public async Task<bool> JusterLagerAsync(int artikkelId, string lotNr, decimal nyMengde, string? kommentar)
+    {
+        var request = new { artikkelId, lotNr, nyMengde, kommentar, utfortAv = "Admin" };
+        var response = await _http.PostAsJsonAsync("/api/lager/juster", request);
+        return response.IsSuccessStatusCode;
+    }
+
+    public async Task<List<LagerBeholdning>> GetLagerByArtikkelAsync(int artikkelId)
+    {
+        var response = await _http.GetAsync($"/api/lager/artikkel/{artikkelId}");
+        if (!response.IsSuccessStatusCode) return new();
+        return await response.Content.ReadFromJsonAsync<List<LagerBeholdning>>() ?? new();
+    }
+
+    // Historikk
+    public async Task<ArtikkelTraceabilityDto?> GetTraceabilityByArtikkelAsync(int artikkelId)
+    {
+        var response = await _http.GetAsync($"/api/traceability/artikkel/{artikkelId}");
+        if (!response.IsSuccessStatusCode) return null;
+        return await response.Content.ReadFromJsonAsync<ArtikkelTraceabilityDto>();
+    }
 }
