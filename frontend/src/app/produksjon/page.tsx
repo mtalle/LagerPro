@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Fragment } from 'react';
 import { ProduksjonsOrdre, Resept, Plukkliste, PlukklisteLinje, FerdigmeldPrefill, FerdigmeldLinje, get, post, patch, del, getMe } from '../../lib/api';
 import { useTilgang } from '../../lib/useTilgang';
 
@@ -194,8 +194,8 @@ export default function ProduksjonPage() {
           {filtered.length === 0 ? (
             <tr><td colSpan={9} style={{ textAlign: 'center', color: '#9ca3af', padding: '2rem' }}>{ordre.length === 0 ? 'Ingen produksjonsordrer' : 'Ingen resultater'}</td></tr>
           ) : filtered.map(o => (
-            <>
-              <tr key={o.id} className={expandedOrdreId === o.id ? 'expanded-row' : ''}
+            <Fragment key={o.id}>
+              <tr className={expandedOrdreId === o.id ? 'expanded-row' : ''}
                 onClick={() => setExpandedOrdreId(expandedOrdreId === o.id ? null : o.id)}
                 style={{ cursor: 'pointer' }}>
                 <td><code>{o.ordreNr}</code></td>
@@ -236,7 +236,7 @@ export default function ProduksjonPage() {
                   </td>
                 </tr>
               )}
-            </>
+            </Fragment>
           ))}
         </tbody>
       </table>

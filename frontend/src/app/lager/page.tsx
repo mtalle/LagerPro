@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Fragment } from 'react';
 import { LagerBeholdning, get, patch, getMe } from '../../lib/api';
 
 interface Lageroversigt {
@@ -227,9 +227,8 @@ export default function LagerPage() {
             const erLav = a.minBeholdning != null && a.totalMengde < a.minBeholdning;
             const isExpanded = expandedArtikkel === a.artikkelId;
             return (
-              <>
+              <Fragment key={a.artikkelId}>
                 <tr
-                  key={a.artikkelId}
                   style={erLav ? { background: '#fef2f2', cursor: 'pointer' } : { cursor: 'pointer' }}
                   onClick={() => setExpandedArtikkel(isExpanded ? null : a.artikkelId)}
                 >
@@ -289,7 +288,7 @@ export default function LagerPage() {
                     </tr>
                   );
                 })}
-              </>
+              </Fragment>
             );
           })}
         </tbody>
