@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { href: '/resepter', label: 'Resepter', ressursKrav: [7] },
   { href: '/brukere', label: '👤 Admin', ressursKrav: [10] },
   { href: '/rapporter', label: '📊 Rapporter', ressursKrav: [10] },
+  { href: '/sporing', label: '🧭 Sporing', ressursKrav: [7] },
 ];
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
