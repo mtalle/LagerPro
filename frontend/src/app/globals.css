@@ -591,6 +591,13 @@ tr:last-child td { border-bottom: none; }
 }
 
 /* Responsive */
+@media (min-width: 769px) {
+  .hamburger { display: none !important; }
+  .mobile-menu { display: none !important; }
+  .nav-links { display: flex !important; }
+  .nav-user { display: flex !important; }
+}
+
 @media (max-width: 768px) {
   .nav-links { display: none; }
   .hamburger { display: block; }
