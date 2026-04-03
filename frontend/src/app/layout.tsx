@@ -44,6 +44,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     return item.ressursKrav.every(rid => bruker.tilganger.some(t => t.ressursId === rid));
   }
 
+  const synligeLenker = NAV_ITEMS.filter(kanVise);
+
   return (
     <html lang="no">
       <head>
@@ -51,22 +53,41 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <nav className="navbar">
-          <div className="nav-brand">
-            <span className="logo">📦 LagerPro</span>
-            <button className="hamburger" onClick={() => setMenuOpen(!menuOpen)} aria-label="Meny">
-              <span className={menuOpen ? 'hamburger-icon open' : 'hamburger-icon'}></span>
-            </button>
+          <div className="nav-inner">
+            <div className="nav-brand">
+              <span className="nav-brand-icon">📦</span>
+              <span className="logo">LagerPro</span>
+            </div>
+            
+            <div className="nav-links">
+              {synligeLenker.map(item => (
+                <a key={item.href} href={item.href}>{item.label}</a>
+              ))}
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              {!brukerLaster && bruker && (
+                <div className="nav-user">
+                  Innlogget: <strong>{bruker.navn}</strong>
+                </div>
+              )}
+              
+              <button className="hamburger" onClick={() => setMenuOpen(!menuOpen)} aria-label="Meny">
+                <span className={menuOpen ? 'hamburger-icon open' : 'hamburger-icon'}></span>
+              </button>
+            </div>
           </div>
-          <div className={`nav-links ${menuOpen ? 'open' : ''}`}>
-            {NAV_ITEMS.filter(kanVise).map(item => (
+          
+          <div className={`mobile-menu ${menuOpen ? 'open' : ''}`}>
+            {synligeLenker.map(item => (
               <a key={item.href} href={item.href} onClick={() => setMenuOpen(false)}>{item.label}</a>
             ))}
+            {!brukerLaster && bruker && (
+              <div className="nav-user-mobile">
+                Innlogget som <strong>{bruker.navn}</strong>
+              </div>
+            )}
           </div>
-          {!brukerLaster && bruker && (
-            <div className="nav-bruker" style={{ marginLeft: 'auto', padding: '0 1rem', fontSize: '0.85rem', color: '#6b7280' }}>
-              Innlogget: <strong>{bruker.navn}</strong>
-            </div>
-          )}
         </nav>
         <main className="container">{children}</main>
       </body>
