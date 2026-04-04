@@ -159,13 +159,27 @@ public static class DbSeeder
         var admin = new Bruker
         {
             Navn = "Administrator",
-            Brukernavn = "admin",
+            Brukernavn = "Admin",
+            Passord = "admin",
             Epost = "admin@lagerpro.no",
             ErAdmin = true,
             Aktiv = true,
             OpprettetDato = now
         };
         context.Brukere.Add(admin);
+
+        var vanligBruker = new Bruker
+        {
+            Navn = "Standard Bruker",
+            Brukernavn = "Bruker",
+            Passord = "bruker",
+            Epost = "bruker@lagerpro.no",
+            ErAdmin = false,
+            Aktiv = true,
+            OpprettetDato = now
+        };
+        context.Brukere.Add(vanligBruker);
+
         await context.SaveChangesAsync();
 
         var alleTilganger = ressurser.Select(r => new BrukerRessursTilgang

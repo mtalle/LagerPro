@@ -12,6 +12,7 @@ public class BrukerConfiguration : IEntityTypeConfiguration<Bruker>
         builder.HasKey(b => b.Id);
         builder.Property(b => b.Navn).HasMaxLength(100).IsRequired();
         builder.Property(b => b.Brukernavn).HasMaxLength(100).IsRequired();
+        builder.Property(b => b.Passord).HasMaxLength(255).IsRequired().HasDefaultValue("password");
         builder.Property(b => b.Epost).HasMaxLength(255);
         builder.Property(b => b.ErAdmin).HasDefaultValue(false);
         builder.Property(b => b.Aktiv).HasDefaultValue(true);

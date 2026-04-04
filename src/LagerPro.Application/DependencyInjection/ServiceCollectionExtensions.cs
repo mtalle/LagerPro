@@ -46,6 +46,7 @@ using LagerPro.Application.Features.Brukere.Queries.GetAllBrukere;
 using LagerPro.Application.Features.Brukere.Queries.GetBrukerById;
 using LagerPro.Application.Features.Brukere.Queries.GetAllRessurser;
 using LagerPro.Application.Features.Brukere.Commands.UpdateBrukerTilganger;
+using LagerPro.Application.Features.Brukere.Commands.LoginBruker;
 using LagerPro.Application.Features.Rapporter.Queries.Lagrerapport;
 using LagerPro.Application.Features.Rapporter.Queries.Salgsrapporter;
 using LagerPro.Application.Features.Traceability.Queries.GetTraceabilityByArtikkel;
@@ -137,6 +138,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<GetBrukerByIdHandler>();
         services.AddScoped<GetAllRessurserHandler>();
         services.AddScoped<UpdateBrukerTilgangerHandler>();
+        services.AddScoped<LoginBrukerHandler>();
 
         return services;
     }

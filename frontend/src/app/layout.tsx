@@ -25,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     async function loadBruker() {
+      const isLoginPage = window.location.pathname === '/login';
       try {
         const b = await getMe();
         setBruker(b);
@@ -32,6 +33,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         localStorage.setItem('lagerpro_bruker_id', String(b.id));
       } catch {
         setBruker(null);
+        if (!isLoginPage) {
+          window.location.href = '/login';
+        }
       } finally {
         setBrukerLaster(false);
       }

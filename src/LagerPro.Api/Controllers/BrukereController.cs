@@ -17,17 +17,30 @@ public class BrukereController : ControllerBase
     private readonly GetBrukerByIdHandler _getByIdHandler;
     private readonly GetAllRessurserHandler _getRessurserHandler;
     private readonly UpdateBrukerTilgangerHandler _updateTilgangerHandler;
+    private readonly LagerPro.Application.Features.Brukere.Commands.LoginBruker.LoginBrukerHandler _loginHandler;
 
     public BrukereController(
         GetAllBrukereHandler getAllHandler,
         GetBrukerByIdHandler getByIdHandler,
         GetAllRessurserHandler getRessurserHandler,
-        UpdateBrukerTilgangerHandler updateTilgangerHandler)
+        UpdateBrukerTilgangerHandler updateTilgangerHandler,
+        LagerPro.Application.Features.Brukere.Commands.LoginBruker.LoginBrukerHandler loginHandler)
     {
         _getAllHandler = getAllHandler;
         _getByIdHandler = getByIdHandler;
         _getRessurserHandler = getRessurserHandler;
         _updateTilgangerHandler = updateTilgangerHandler;
+        _loginHandler = loginHandler;
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
+    {
+        var result = await _loginHandler.Handle(request, cancellationToken);
+        if (result == null)
+            return Unauthorized(new { message = "Feil brukernavn eller passord." });
+        
+        return Ok(result);
     }
 
     [HttpGet]

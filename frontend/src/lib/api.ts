@@ -62,6 +62,16 @@ export async function getMe(): Promise<Bruker> {
   return res.json();
 }
 
+export async function loginBruker(brukernavn: string, passord: string): Promise<Bruker> {
+  const res = await fetch(`${API_BASE}/brukere/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ brukernavn, passord }),
+  });
+  if (!res.ok) throw new Error('Innlogging feilet');
+  return res.json();
+}
+
 // Types matching the API contracts
 export interface Article {
   id: number;

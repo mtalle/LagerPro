@@ -6,6 +6,7 @@ public class Bruker : AuditableEntity
 {
     public string Navn { get; set; } = string.Empty;
     public string Brukernavn { get; set; } = string.Empty;
+    public string Passord { get; set; } = string.Empty;
     public string? Epost { get; set; }
     public bool ErAdmin { get; set; }
     public bool Aktiv { get; set; } = true;

@@ -27,6 +27,14 @@ public class BrukerRepository : IBrukerRepository
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
 
+    public async Task<Bruker?> GetByBrukernavnAsync(string brukernavn, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Brukere
+            .Include(b => b.Tilganger)
+            .ThenInclude(t => t.Ressurs)
+            .FirstOrDefaultAsync(x => x.Brukernavn == brukernavn, cancellationToken);
+    }
+
     public async Task<IReadOnlyList<Bruker>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return await _dbContext.Brukere
