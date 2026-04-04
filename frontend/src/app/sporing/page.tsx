@@ -2,6 +2,21 @@
 import { useEffect, useState } from 'react';
 import { get } from '../../lib/api';
 
+interface Kunde {
+  id: number;
+  navn: string;
+  kontaktperson?: string;
+  telefon?: string;
+  epost?: string;
+  adresse?: string;
+  postnr?: string;
+  poststed?: string;
+  orgNr?: string;
+  kommentar?: string;
+  aktiv: boolean;
+  opprettetDato: string;
+}
+
 // Types matching API contracts
 interface SporbarhetTransaksjon {
   id: number;
@@ -60,6 +75,38 @@ export default function SporingPage() {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<SporbarhetData | null>(null);
   const [error, setError] = useState('');
+  const [kunder, setKunder] = useState<Kunde[]>([]);
+  const [showKundeSuggestions, setShowKundeSuggestions] = useState(false);
+  const [filteredKunder, setFilteredKunder] = useState<Kunde[]>([]);
+
+  // Hent kundeliste ved første lasting
+  useEffect(() => {
+    async function loadKunder() {
+      try {
+        const data = await get<Kunde[]>('/kunder');
+        setKunder(data.filter(k => k.aktiv)); // Bare aktive kunder
+      } catch (err) {
+        console.error('Kunne ikke laste kunder:', err);
+      }
+    }
+    loadKunder();
+  }, []);
+
+  // Filtrer kunder basert på søk
+  useEffect(() => {
+    if (searchType === 'kunde' && searchInput.trim()) {
+      const query = searchInput.toLowerCase();
+      const filtered = kunder.filter(k => 
+        k.navn.toLowerCase().includes(query) || 
+        (k.orgNr && k.orgNr.includes(query)) ||
+        (k.id.toString() === query)
+      );
+      setFilteredKunder(filtered.slice(0, 5)); // Vis maks 5 forslag
+      setShowKundeSuggestions(filtered.length > 0);
+    } else {
+      setShowKundeSuggestions(false);
+    }
+  }, [searchInput, searchType, kunder]);
 
   async function sok(e: React.FormEvent) {
     e.preventDefault();
@@ -67,6 +114,7 @@ export default function SporingPage() {
     setLoading(true);
     setError('');
     setData(null);
+    setShowKundeSuggestions(false);
     
     try {
       let result;
@@ -74,18 +122,32 @@ export default function SporingPage() {
         result = await get<SporbarhetData>(`/traceability/lot/${encodeURIComponent(searchInput.trim())}`);
         setData(result);
       } else if (searchType === 'kunde') {
-        const kundeId = parseInt(searchInput.trim());
-        if (isNaN(kundeId)) {
-          setError('Skriv inn kunde-ID (nummer)');
-          return;
+        // Søk kan være kunde-ID, navn eller org.nr
+        let kundeId: number;
+        
+        // Sjekk om input er et tall (kunde-ID)
+        if (!isNaN(parseInt(searchInput))) {
+          kundeId = parseInt(searchInput);
+        } else {
+          // Søk på navn eller org.nr
+          const kunde = kunder.find(k => 
+            k.navn.toLowerCase() === searchInput.toLowerCase() ||
+            k.orgNr === searchInput
+          );
+          
+          if (!kunde) {
+            setError(`Ingen kunde funnet med "${searchInput}". Prøv kunde-ID, navn eller org.nr.`);
+            return;
+          }
+          kundeId = kunde.id;
         }
-        // For now, just search for lot - we'll implement kunde search later
-        setError('Kunde-søk er under utvikling. Bruk lot-søk for nå.');
-        return;
+        
+        // Bruk traceability/kunde API
+        result = await get<SporbarhetData>(`/traceability/kunde/${kundeId}`);
+        setData(result);
       } else if (searchType === 'batch') {
-        // For now, just search for lot - we'll implement batch search later
-        setError('Produksjons-søk er under utvikling. Bruk lot-søk for nå.');
-        return;
+        result = await get<SporbarhetData>(`/traceability/batch/${encodeURIComponent(searchInput.trim())}`);
+        setData(result);
       }
     } catch (err) {
       const msg = (err as Error).message || '';
@@ -166,20 +228,42 @@ export default function SporingPage() {
             </div>
           </div>
           
-          <div className="search-row">
+          <div className="search-row position-relative">
             <input
               type="text"
               className="search-input"
               placeholder={searchType === 'lot' ? 'Skriv inn lot-nummer, f.eks. LOT-2024-001...' : 
-                         searchType === 'kunde' ? 'Skriv inn kunde-ID (nummer)...' : 
+                         searchType === 'kunde' ? 'Skriv kunde-ID, navn eller org.nr...' : 
                          'Skriv inn produksjonsnummer...'}
               value={searchInput}
               onChange={e => setSearchInput(e.target.value)}
+              onFocus={() => searchType === 'kunde' && setShowKundeSuggestions(true)}
               autoFocus
             />
             <button type="submit" className="btn btn-primary" disabled={loading || !searchInput.trim()}>
               {loading ? 'Søker...' : '🔍 Spor'}
             </button>
+            
+            {/* Kunde-forslag */}
+            {showKundeSuggestions && filteredKunder.length > 0 && (
+              <div className="suggestions-dropdown">
+                {filteredKunder.map(kunde => (
+                  <div 
+                    key={kunde.id} 
+                    className="suggestion-item"
+                    onClick={() => {
+                      setSearchInput(kunde.navn);
+                      setShowKundeSuggestions(false);
+                    }}
+                  >
+                    <div className="fw-medium">{kunde.navn}</div>
+                    <div className="small text-muted">
+                      ID: {kunde.id} • {kunde.orgNr ? `Org.nr: ${kunde.orgNr}` : 'Ingen org.nr'}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           
           <div className="mt-2 text-muted small">
@@ -426,6 +510,31 @@ export default function SporingPage() {
         .empty-hint { font-size: 13px; }
         .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
         .badge-aktiv { background: #dcfce7; color: #16a34a; }
+        .suggestions-dropdown { 
+          position: absolute; 
+          top: 100%; 
+          left: 0; 
+          right: 0; 
+          background: white; 
+          border: 1px solid #e2e8f0; 
+          border-radius: 8px; 
+          box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+          z-index: 1000; 
+          margin-top: 4px; 
+          max-height: 300px; 
+          overflow-y: auto; 
+        }
+        .suggestion-item { 
+          padding: 12px 16px; 
+          cursor: pointer; 
+          border-bottom: 1px solid #f1f5f9; 
+        }
+        .suggestion-item:hover { 
+          background: #f8fafc; 
+        }
+        .suggestion-item:last-child { 
+          border-bottom: none; 
+        }
       `}</style>
     </div>
   );
