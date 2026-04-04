@@ -376,15 +376,25 @@ export default function LagerPage() {
       {selectedArticle && (
         <div className="modal-overlay" onClick={closeArticleModal}>
           <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 900, maxHeight: '85vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            <div className="modal-header d-flex justify-content-between align-items-center">
+            <div className="modal-header position-relative">
               <div>
                 <h4 className="mb-0">{selectedArticle.artikkelNavn}</h4>
                 <small className="text-muted">Artikkelnr: {selectedArticle.artikkelNr}</small>
               </div>
               <button 
-                className="btn btn-sm btn-outline-danger" 
+                className="btn btn-sm btn-outline-danger position-absolute" 
                 onClick={closeArticleModal}
-                style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                style={{ 
+                  top: '0.5rem', 
+                  right: '0.5rem', 
+                  width: '32px', 
+                  height: '32px', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  padding: 0,
+                  zIndex: 10
+                }}
               >
                 ×
               </button>
