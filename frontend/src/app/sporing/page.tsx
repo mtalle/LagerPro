@@ -137,15 +137,6 @@ export default function SporingPage() {
   }
   
   // Funksjon for å hente kunde-ID fra levering
-  async function getKundeIdFromLevering(leveringsId: number): Promise<number | null> {
-    try {
-      const levering = await get<any>(`/levering/${leveringsId}`);
-      return levering.kundeId || null;
-    } catch (err) {
-      console.error('Kunne ikke hente leveringsdetaljer:', err);
-      return null;
-    }
-  }
 
   // Hent kundeliste og produksjonsliste ved første lasting
   useEffect(() => {
