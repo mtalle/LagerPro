@@ -28,6 +28,8 @@ interface SporbarhetData {
   transaksjoner: SporbarhetTransaksjon[];
 }
 
+type SearchType = 'lot' | 'kunde' | 'batch';
+
 function transaksjonTypeLabel(type: string): string {
   switch (type) {
     case 'Mottak': return '📥 Mottak';
@@ -53,25 +55,42 @@ function transaksjonFarge(type: string): string {
 }
 
 export default function SporingPage() {
-  const [lotNr, setLotNr] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  const [searchType, setSearchType] = useState<SearchType>('lot');
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<SporbarhetData | null>(null);
   const [error, setError] = useState('');
-  const [sokLast, setSokLast] = useState('');
 
   async function sok(e: React.FormEvent) {
     e.preventDefault();
-    if (!lotNr.trim()) return;
+    if (!searchInput.trim()) return;
     setLoading(true);
     setError('');
     setData(null);
+    
     try {
-      const result = await get<SporbarhetData>(`/traceability/lot/${encodeURIComponent(lotNr.trim())}`);
-      setData(result);
+      let result;
+      if (searchType === 'lot') {
+        result = await get<SporbarhetData>(`/traceability/lot/${encodeURIComponent(searchInput.trim())}`);
+        setData(result);
+      } else if (searchType === 'kunde') {
+        const kundeId = parseInt(searchInput.trim());
+        if (isNaN(kundeId)) {
+          setError('Skriv inn kunde-ID (nummer)');
+          return;
+        }
+        // For now, just search for lot - we'll implement kunde search later
+        setError('Kunde-søk er under utvikling. Bruk lot-søk for nå.');
+        return;
+      } else if (searchType === 'batch') {
+        // For now, just search for lot - we'll implement batch search later
+        setError('Produksjons-søk er under utvikling. Bruk lot-søk for nå.');
+        return;
+      }
     } catch (err) {
       const msg = (err as Error).message || '';
       if (msg.includes('404')) {
-        setError(`Ingen lot funnet med nummer "${lotNr}".`);
+        setError(`Ingen ${searchType === 'lot' ? 'lot' : searchType === 'kunde' ? 'kunde' : 'batch'} funnet med "${searchInput}".`);
       } else {
         setError('Feil ved lasting: ' + msg);
       }
@@ -80,12 +99,29 @@ export default function SporingPage() {
     }
   }
 
+  function handleLotClick(lotNr: string) {
+    setSearchType('lot');
+    setSearchInput(lotNr);
+    setTimeout(() => {
+      const form = document.querySelector('form');
+      if (form) form.requestSubmit();
+    }, 100);
+  }
+
   function formatDato(dato: string): string {
     try {
       return new Date(dato).toLocaleString('nb-NO', {
         day: '2-digit', month: '2-digit', year: 'numeric',
         hour: '2-digit', minute: '2-digit'
       });
+    } catch {
+      return dato;
+    }
+  }
+
+  function formatDatoKort(dato: string): string {
+    try {
+      return new Date(dato).toLocaleDateString('nb-NO');
     } catch {
       return dato;
     }
@@ -104,18 +140,52 @@ export default function SporingPage() {
 
       <div className="search-section">
         <form onSubmit={sok} className="search-form">
+          <div className="mb-3">
+            <div className="btn-group" role="group">
+              <button 
+                type="button" 
+                className={`btn ${searchType === 'lot' ? 'btn-primary' : 'btn-outline-primary'}`}
+                onClick={() => setSearchType('lot')}
+              >
+                🔍 Lot-nummer
+              </button>
+              <button 
+                type="button" 
+                className={`btn ${searchType === 'kunde' ? 'btn-primary' : 'btn-outline-primary'}`}
+                onClick={() => setSearchType('kunde')}
+              >
+                👥 Kunde
+              </button>
+              <button 
+                type="button" 
+                className={`btn ${searchType === 'batch' ? 'btn-primary' : 'btn-outline-primary'}`}
+                onClick={() => setSearchType('batch')}
+              >
+                🏭 Produksjon
+              </button>
+            </div>
+          </div>
+          
           <div className="search-row">
             <input
               type="text"
               className="search-input"
-              placeholder="Skriv inn lot-nummer, f.eks. LOT-2024-001..."
-              value={lotNr}
-              onChange={e => setLotNr(e.target.value)}
+              placeholder={searchType === 'lot' ? 'Skriv inn lot-nummer, f.eks. LOT-2024-001...' : 
+                         searchType === 'kunde' ? 'Skriv inn kunde-ID (nummer)...' : 
+                         'Skriv inn produksjonsnummer...'}
+              value={searchInput}
+              onChange={e => setSearchInput(e.target.value)}
               autoFocus
             />
-            <button type="submit" className="btn btn-primary" disabled={loading || !lotNr.trim()}>
+            <button type="submit" className="btn btn-primary" disabled={loading || !searchInput.trim()}>
               {loading ? 'Søker...' : '🔍 Spor'}
             </button>
+          </div>
+          
+          <div className="mt-2 text-muted small">
+            {searchType === 'lot' && 'Søk på lot-nummer for å se full historikk, produksjoner og leveringer.'}
+            {searchType === 'kunde' && 'Søk på kunde-ID for å se alle leveringer til kunden.'}
+            {searchType === 'batch' && 'Søk på produksjonsnummer for å se forbrukte råvarer og ferdigvarer.'}
           </div>
         </form>
       </div>
@@ -150,7 +220,7 @@ export default function SporingPage() {
               </div>
               <div className="trace-info-item">
                 <span className="trace-label">Best før</span>
-                <span className="trace-value">{data.bestForDato ? new Date(data.bestForDato).toLocaleDateString('nb-NO') : 'Ikke angitt'}</span>
+                <span className="trace-value">{data.bestForDato ? formatDatoKort(data.bestForDato) : 'Ikke angitt'}</span>
               </div>
               <div className="trace-info-item">
                 <span className="trace-label">Sist oppdatert</span>
@@ -158,6 +228,108 @@ export default function SporingPage() {
               </div>
             </div>
           </div>
+
+          {/* Produksjonsinformasjon */}
+          {data.transaksjoner.some(t => t.type === 'ProduksjonInn' || t.type === 'ProduksjonUt') && (
+            <div className="trace-card">
+              <div className="trace-card-header">
+                <h3>🏭 Produksjonsinformasjon</h3>
+              </div>
+              
+              {data.transaksjoner.filter(t => t.type === 'ProduksjonInn').length > 0 && (
+                <div className="mb-4">
+                  <h4 className="mb-2">Gått inn i produksjon:</h4>
+                  <div className="table-responsive">
+                    <table className="table table-sm table-hover">
+                      <thead>
+                        <tr>
+                          <th>Produksjonsnummer</th>
+                          <th>Tidspunkt</th>
+                          <th>Mengde</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.transaksjoner
+                          .filter(t => t.type === 'ProduksjonInn')
+                          .map((tx, idx) => (
+                            <tr key={idx}>
+                              <td>{tx.kilde} #{tx.kildeId}</td>
+                              <td>{formatDato(tx.tidspunkt)}</td>
+                              <td>{formatNummer(tx.mengde)} {data.enhet}</td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+              
+              {data.transaksjoner.filter(t => t.type === 'ProduksjonUt').length > 0 && (
+                <div>
+                  <h4 className="mb-2">Produsert fra:</h4>
+                  <div className="table-responsive">
+                    <table className="table table-sm table-hover">
+                      <thead>
+                        <tr>
+                          <th>Produksjonsnummer</th>
+                          <th>Tidspunkt</th>
+                          <th>Mengde</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.transaksjoner
+                          .filter(t => t.type === 'ProduksjonUt')
+                          .map((tx, idx) => (
+                            <tr key={idx}>
+                              <td>{tx.kilde} #{tx.kildeId}</td>
+                              <td>{formatDato(tx.tidspunkt)}</td>
+                              <td>{formatNummer(tx.mengde)} {data.enhet}</td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Leveringsinformasjon */}
+          {data.transaksjoner.some(t => t.type === 'Levering' || t.type === 'LeveringBekreftet') && (
+            <div className="trace-card">
+              <div className="trace-card-header">
+                <h3>📤 Levert til kunder</h3>
+              </div>
+              <div className="table-responsive">
+                <table className="table table-sm table-hover">
+                  <thead>
+                    <tr>
+                      <th>Leveringsnummer</th>
+                      <th>Tidspunkt</th>
+                      <th>Mengde</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.transaksjoner
+                      .filter(t => t.type === 'Levering' || t.type === 'LeveringBekreftet')
+                      .map((tx, idx) => (
+                        <tr key={idx}>
+                          <td>{tx.kilde} #{tx.kildeId}</td>
+                          <td>{formatDato(tx.tidspunkt)}</td>
+                          <td>{formatNummer(tx.mengde)} {data.enhet}</td>
+                          <td>
+                            <span className={`badge ${tx.type === 'LeveringBekreftet' ? 'bg-success' : 'bg-warning'}`}>
+                              {tx.type === 'LeveringBekreftet' ? 'Bekreftet' : 'Planlagt'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
           {/* Transaksjoner */}
           <div className="trace-card">
@@ -183,7 +355,7 @@ export default function SporingPage() {
                         </div>
                         <div className="transaksjon-meta">
                           <span>📅 {formatDato(tx.tidspunkt)}</span>
-                          {tx.kilde && <span>📂 {tx.kilde}</span>}
+                          {tx.kilde && <span>📂 {tx.kilde} {tx.kildeId ? `#${tx.kildeId}` : ''}</span>}
                           {tx.utfortAv && <span>👤 {tx.utfortAv}</span>}
                         </div>
                         {tx.kommentar && (
@@ -201,14 +373,14 @@ export default function SporingPage() {
       {!data && !error && !loading && (
         <div className="empty-state-large">
           <div className="empty-icon">🔍</div>
-          <h3>Søk på lot-nummer</h3>
-          <p>Skriv inn lot-nummeret du vil spore for å se full historikk.</p>
-          <p className="empty-hint">Tips: Lot-nummer finner du på lagersiden eller ved varemottak.</p>
+          <h3>Velg søketype og skriv inn søkeord</h3>
+          <p>Bruk knappene over for å velge om du vil søke på lot-nummer, kunde eller produksjon.</p>
+          <p className="empty-hint">Tips: Klikk på lot-nummer i lagersiden for å gå direkte til sporing.</p>
         </div>
       )}
 
       <style jsx>{`
-        .page-container { padding: 24px; max-width: 900px; margin: 0 auto; }
+        .page-container { padding: 24px; max-width: 1000px; margin: 0 auto; }
         .page-header { margin-bottom: 24px; }
         .page-header h1 { font-size: 28px; margin-bottom: 4px; }
         .page-subtitle { color: #64748b; font-size: 14px; }
