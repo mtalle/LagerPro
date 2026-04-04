@@ -87,6 +87,30 @@ function transaksjonFarge(type: string): string {
   }
 }
 
+// Enkel komponent for kundenavn
+function KundeNavnSimple({ leveringsId }: { leveringsId: number }) {
+  const [kundeNavn, setKundeNavn] = useState<string>('Laster...');
+  
+  useEffect(() => {
+    if (!leveringsId) {
+      setKundeNavn('Ukjent');
+      return;
+    }
+    
+    fetch(`http://167.99.195.94:5000/api/levering/${leveringsId}`)
+      .then(res => res.json())
+      .then(levering => {
+        setKundeNavn(levering.kundeNavn || 'Ukjent');
+      })
+      .catch(err => {
+        console.error('Kunne ikke hente kundenavn:', err);
+        setKundeNavn('Feil');
+      });
+  }, [leveringsId]);
+  
+  return <>{kundeNavn}</>;
+}
+
 export default function SporingPage() {
   const [searchInput, setSearchInput] = useState('');
   const [searchType, setSearchType] = useState<SearchType>('lot');
@@ -538,15 +562,28 @@ export default function SporingPage() {
                   <thead>
                     <tr>
                       <th>Leveringsnummer</th>
+                      <th>Kunde</th>
                       <th>Tidspunkt</th>
                       <th>Mengde</th>
                       <th>Status</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {data.transaksjoner && data.transaksjoner
-                      .filter(t => t.type === 'Levering' || t.type === 'LeveringBekreftet')
-                      .map((tx, idx) => (
+                    {(() => {
+                      // Enkel løsning: grupper leveringer etter kildeId
+                      const leveringerMap = new Map();
+                      data.transaksjoner && data.transaksjoner
+                        .filter(t => t.type === 'Levering' || t.type === 'LeveringBekreftet')
+                        .forEach(tx => {
+                          const key = tx.kildeId;
+                          if (!leveringerMap.has(key) || new Date(tx.tidspunkt) > new Date(leveringerMap.get(key).tidspunkt)) {
+                            leveringerMap.set(key, tx);
+                          }
+                        });
+                      
+                      const leveringer = Array.from(leveringerMap.values());
+                      
+                      return leveringer.map((tx, idx) => (
                         <tr key={idx}>
                           <td>
                             <div className="d-flex gap-1">
@@ -554,7 +591,6 @@ export default function SporingPage() {
                                 className="btn btn-sm btn-outline-info"
                                 title="Vis leveringsdetaljer"
                                 onClick={() => {
-                                  // For nå: søk på lot
                                   setSearchType('lot');
                                   setSearchInput(data.lotNr);
                                   setTimeout(() => {
@@ -569,21 +605,29 @@ export default function SporingPage() {
                                 className="btn btn-sm btn-outline-secondary"
                                 title="Søk på kunden"
                                 onClick={async () => {
-                                  // Hent kunde-ID fra leveringen
-                                  const kundeId = await getKundeIdFromLevering(tx.kildeId || 0);
-                                  if (kundeId) {
-                                    setSearchType('kunde');
-                                    setSearchInput(kundeId.toString());
-                                    setTimeout(() => {
-                                      const form = document.querySelector('form');
-                                      if (form) form.requestSubmit();
-                                    }, 100);
+                                  try {
+                                    const response = await fetch(`http://167.99.195.94:5000/api/levering/${tx.kildeId}`);
+                                    const levering = await response.json();
+                                    if (levering.kundeId) {
+                                      setSearchType('kunde');
+                                      setSearchInput(levering.kundeId.toString());
+                                      setTimeout(() => {
+                                        const form = document.querySelector('form');
+                                        if (form) form.requestSubmit();
+                                      }, 100);
+                                    }
+                                  } catch (err) {
+                                    console.error('Kunne ikke hente leveringsdetaljer:', err);
                                   }
                                 }}
                               >
                                 👥
                               </button>
                             </div>
+                          </td>
+                          <td>
+                            {/* Enkel løsning for kundenavn */}
+                            <KundeNavnSimple leveringsId={tx.kildeId || 0} />
                           </td>
                           <td>{formatDato(tx.tidspunkt)}</td>
                           <td>{formatNummer(tx.mengde)} {data.enhet}</td>
@@ -593,7 +637,8 @@ export default function SporingPage() {
                             </span>
                           </td>
                         </tr>
-                      ))}
+                      ));
+                    })()}
                   </tbody>
                 </table>
               </div>
@@ -610,9 +655,24 @@ export default function SporingPage() {
               <p className="empty-state">Ingen transaksjoner funnet for denne lotten.</p>
             ) : (
               <div className="transaksjon-liste">
-                {data.transaksjoner && data.transaksjoner
-                  .sort((a, b) => new Date(b.tidspunkt).getTime() - new Date(a.tidspunkt).getTime())
-                  .map((tx, idx) => (
+                {(() => {
+                  // Enkel løsning: fjern dupliserte leveringer
+                  const leveringerMap = new Map();
+                  const transaksjoner = data.transaksjoner && data.transaksjoner.map(tx => {
+                    if (tx.type === 'Levering' || tx.type === 'LeveringBekreftet') {
+                      const key = tx.kildeId;
+                      if (!leveringerMap.has(key) || new Date(tx.tidspunkt) > new Date(leveringerMap.get(key).tidspunkt)) {
+                        leveringerMap.set(key, tx);
+                        return tx;
+                      }
+                      return null;
+                    }
+                    return tx;
+                  }).filter(tx => tx !== null);
+                  
+                  return transaksjoner && transaksjoner
+                    .sort((a, b) => new Date(b.tidspunkt).getTime() - new Date(a.tidspunkt).getTime())
+                    .map((tx, idx) => (
                     <div key={tx.id} className={`transaksjon-rad ${transaksjonFarge(tx.type)}`}>
                       <div className="transaksjon-type-badge">
                         <span>{transaksjonTypeLabel(tx.type)}</span>
