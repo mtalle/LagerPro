@@ -376,24 +376,37 @@ export default function LagerPage() {
       {selectedArticle && (
         <div className="modal-overlay" onClick={closeArticleModal}>
           <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 900, maxHeight: '85vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            <div className="modal-header">
-              <h2>{selectedArticle.artikkelNavn} ({selectedArticle.artikkelNr})</h2>
-              <button className="btn-close" onClick={closeArticleModal}>×</button>
+            <div className="modal-header d-flex justify-content-between align-items-center">
+              <div>
+                <h4 className="mb-0">{selectedArticle.artikkelNavn}</h4>
+                <small className="text-muted">Artikkelnr: {selectedArticle.artikkelNr}</small>
+              </div>
+              <button 
+                className="btn btn-sm btn-outline-danger" 
+                onClick={closeArticleModal}
+                style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                ×
+              </button>
             </div>
             <div className="modal-body" style={{ flex: 1, overflow: 'auto' }}>
-              <div className="tab-nav" style={{ display: 'flex', borderBottom: '1px solid #e5e7eb', marginBottom: '1rem' }}>
-                <button
-                  className={`tab-btn ${activeTab === 'lot' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('lot')}
-                >
-                  Lot-oversikt
-                </button>
-                <button
-                  className={`tab-btn ${activeTab === 'historikk' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('historikk')}
-                >
-                  Historikk
-                </button>
+              <div className="tab-nav mb-4">
+                <div className="nav nav-tabs">
+                  <button
+                    className={`nav-link ${activeTab === 'lot' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('lot')}
+                    style={{ fontWeight: 500, padding: '0.5rem 1rem' }}
+                  >
+                    📦 Lot-oversikt
+                  </button>
+                  <button
+                    className={`nav-link ${activeTab === 'historikk' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('historikk')}
+                    style={{ fontWeight: 500, padding: '0.5rem 1rem' }}
+                  >
+                    📊 Historikk
+                  </button>
+                </div>
               </div>
 
               {traceLoading ? (
@@ -408,9 +421,14 @@ export default function LagerPage() {
                   <div className="d-flex justify-content-between align-items-center mb-3">
                     <h4 className="mb-0">Lot-oversikt</h4>
                     {brukerErAdmin && (
-                      <button className="btn btn-sm btn-outline-primary">
-                        📝 Rediger artikkel
-                      </button>
+                      <div className="btn-group">
+                        <button className="btn btn-sm btn-outline-primary">
+                          📝 Rediger artikkel
+                        </button>
+                        <button className="btn btn-sm btn-outline-success">
+                          ➕ Ny lot
+                        </button>
+                      </div>
                     )}
                   </div>
                   
@@ -449,13 +467,22 @@ export default function LagerPage() {
                               ) : '-'}
                             </td>
                             <td>
-                              <button
-                                className="btn btn-sm btn-outline-secondary"
-                                onClick={() => prepareJuster(lot)}
-                                title="Juster beholdning"
-                              >
-                                ✏️ Juster
-                              </button>
+                              <div className="btn-group btn-group-sm">
+                                <button
+                                  className="btn btn-outline-primary"
+                                  onClick={() => prepareJuster(lot)}
+                                  title="Juster beholdning"
+                                >
+                                  ✏️ Juster
+                                </button>
+                                <button
+                                  className="btn btn-outline-info"
+                                  onClick={() => window.open(`/sporing?lot=${lot.lotNr}`, '_blank')}
+                                  title="Gå til sporing"
+                                >
+                                  🔍
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -475,8 +502,9 @@ export default function LagerPage() {
                   <div className="d-flex justify-content-between align-items-center mb-3">
                     <h4 className="mb-0">Transaksjonshistorikk</h4>
                     <div className="btn-group btn-group-sm">
-                      <button className="btn btn-outline-secondary">📊 Eksporter</button>
-                      <button className="btn btn-outline-secondary">🔍 Filter</button>
+                      <button className="btn btn-outline-primary">📊 Eksporter</button>
+                      <button className="btn btn-outline-info">🔍 Filter</button>
+                      <button className="btn btn-outline-secondary">🔄 Oppdater</button>
                     </div>
                   </div>
                   
