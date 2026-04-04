@@ -437,7 +437,21 @@ export default function SporingPage() {
                           .filter(t => t.type === 'ProduksjonInn')
                           .map((tx, idx) => (
                             <tr key={idx}>
-                              <td>{tx.kilde} #{tx.kildeId}</td>
+                              <td>
+                                <button 
+                                  className="btn btn-sm btn-outline-primary"
+                                  onClick={() => {
+                                    setSearchType('batch');
+                                    setSearchInput(tx.kildeId?.toString() || '');
+                                    setTimeout(() => {
+                                      const form = document.querySelector('form');
+                                      if (form) form.requestSubmit();
+                                    }, 100);
+                                  }}
+                                >
+                                  {tx.kilde} #{tx.kildeId}
+                                </button>
+                              </td>
                               <td>{formatDato(tx.tidspunkt)}</td>
                               <td>{formatNummer(tx.mengde)} {data.enhet}</td>
                             </tr>
@@ -465,7 +479,21 @@ export default function SporingPage() {
                           .filter(t => t.type === 'ProduksjonUt')
                           .map((tx, idx) => (
                             <tr key={idx}>
-                              <td>{tx.kilde} #{tx.kildeId}</td>
+                              <td>
+                                <button 
+                                  className="btn btn-sm btn-outline-primary"
+                                  onClick={() => {
+                                    setSearchType('batch');
+                                    setSearchInput(tx.kildeId?.toString() || '');
+                                    setTimeout(() => {
+                                      const form = document.querySelector('form');
+                                      if (form) form.requestSubmit();
+                                    }, 100);
+                                  }}
+                                >
+                                  {tx.kilde} #{tx.kildeId}
+                                </button>
+                              </td>
                               <td>{formatDato(tx.tidspunkt)}</td>
                               <td>{formatNummer(tx.mengde)} {data.enhet}</td>
                             </tr>
@@ -499,7 +527,23 @@ export default function SporingPage() {
                       .filter(t => t.type === 'Levering' || t.type === 'LeveringBekreftet')
                       .map((tx, idx) => (
                         <tr key={idx}>
-                          <td>{tx.kilde} #{tx.kildeId}</td>
+                          <td>
+                            <button 
+                              className="btn btn-sm btn-outline-info"
+                              onClick={() => {
+                                // Her må vi hente kunde-ID fra leveringen
+                                // For nå: søk på leveringsnummer
+                                setSearchType('lot');
+                                setSearchInput(data.lotNr);
+                                setTimeout(() => {
+                                  const form = document.querySelector('form');
+                                  if (form) form.requestSubmit();
+                                }, 100);
+                              }}
+                            >
+                              {tx.kilde} #{tx.kildeId}
+                            </button>
+                          </td>
                           <td>{formatDato(tx.tidspunkt)}</td>
                           <td>{formatNummer(tx.mengde)} {data.enhet}</td>
                           <td>
