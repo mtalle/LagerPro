@@ -43,6 +43,24 @@ interface Kunde {
   opprettetDato: string;
 }
 
+interface Produksjon {
+  id: number;
+  reseptId: number;
+  reseptNavn: string;
+  ordreNr: string;
+  planlagtDato: string;
+  ferdigmeldtDato: string | null;
+  antallProdusert: number;
+  ferdigvareLotNr: string;
+  status: string;
+  kommentar: string | null;
+  utfortAv: string | null;
+  opprettetDato: string;
+  ferdigvareId: number;
+  ferdigvareNavn: string;
+  ferdigvareEnhet: string;
+}
+
 type SearchType = 'lot' | 'kunde' | 'batch';
 
 function transaksjonTypeLabel(type: string): string {
@@ -76,10 +94,13 @@ export default function SporingPage() {
   const [data, setData] = useState<SporbarhetData | null>(null);
   const [error, setError] = useState('');
   const [kunder, setKunder] = useState<Kunde[]>([]);
+  const [produksjoner, setProduksjoner] = useState<Produksjon[]>([]);
   const [showKundeSuggestions, setShowKundeSuggestions] = useState(false);
+  const [showProduksjonSuggestions, setShowProduksjonSuggestions] = useState(false);
   const [filteredKunder, setFilteredKunder] = useState<Kunde[]>([]);
+  const [filteredProduksjoner, setFilteredProduksjoner] = useState<Produksjon[]>([]);
 
-  // Hent kundeliste ved første lasting
+  // Hent kundeliste og produksjonsliste ved første lasting
   useEffect(() => {
     async function loadKunder() {
       try {
@@ -89,7 +110,18 @@ export default function SporingPage() {
         console.error('Kunne ikke laste kunder:', err);
       }
     }
+    
+    async function loadProduksjoner() {
+      try {
+        const data = await get<Produksjon[]>('/produksjon');
+        setProduksjoner(data);
+      } catch (err) {
+        console.error('Kunne ikke laste produksjoner:', err);
+      }
+    }
+    
     loadKunder();
+    loadProduksjoner();
   }, []);
 
   // Filtrer kunder basert på søk
@@ -108,6 +140,23 @@ export default function SporingPage() {
     }
   }, [searchInput, searchType, kunder]);
 
+  // Filtrer produksjoner basert på søk
+  useEffect(() => {
+    if (searchType === 'batch' && searchInput.trim()) {
+      const query = searchInput.toLowerCase();
+      const filtered = produksjoner.filter(p => 
+        p.ordreNr.toLowerCase().includes(query) || 
+        p.reseptNavn.toLowerCase().includes(query) ||
+        p.ferdigvareLotNr.toLowerCase().includes(query) ||
+        (p.id.toString() === query)
+      );
+      setFilteredProduksjoner(filtered.slice(0, 5)); // Vis maks 5 forslag
+      setShowProduksjonSuggestions(filtered.length > 0);
+    } else {
+      setShowProduksjonSuggestions(false);
+    }
+  }, [searchInput, searchType, produksjoner]);
+
   async function sok(e: React.FormEvent) {
     e.preventDefault();
     if (!searchInput.trim()) return;
@@ -115,6 +164,7 @@ export default function SporingPage() {
     setError('');
     setData(null);
     setShowKundeSuggestions(false);
+    setShowProduksjonSuggestions(false);
     
     try {
       if (searchType === 'lot') {
@@ -145,9 +195,35 @@ export default function SporingPage() {
         const result = await get<SporbarhetData>(`/traceability/kunde/${kundeId}`);
         setData(result);
       } else if (searchType === 'batch') {
-        // For now, just search for lot - we'll implement batch search later
-        setError('Produksjons-søk er under utvikling. Bruk lot-søk for nå.');
-        return;
+        // Søk kan være produksjons-ID, ordreNr, reseptnavn eller ferdigvareLotNr
+        let batchId: string;
+        
+        // Sjekk om input er et tall (produksjons-ID)
+        if (!isNaN(parseInt(searchInput))) {
+          const prod = produksjoner.find(p => p.id === parseInt(searchInput));
+          if (!prod) {
+            setError(`Ingen produksjon funnet med ID "${searchInput}".`);
+            return;
+          }
+          batchId = prod.ordreNr;
+        } else {
+          // Søk på ordreNr, reseptNavn eller ferdigvareLotNr
+          const prod = produksjoner.find(p => 
+            p.ordreNr.toLowerCase() === searchInput.toLowerCase() ||
+            p.reseptNavn.toLowerCase() === searchInput.toLowerCase() ||
+            p.ferdigvareLotNr.toLowerCase() === searchInput.toLowerCase()
+          );
+          
+          if (!prod) {
+            setError(`Ingen produksjon funnet med "${searchInput}". Prøv ordrenummer, reseptnavn eller ferdigvare-lot.`);
+            return;
+          }
+          batchId = prod.ordreNr;
+        }
+        
+        // Bruk traceability/batch API
+        const result = await get<SporbarhetData>(`/traceability/batch/${encodeURIComponent(batchId)}`);
+        setData(result);
       }
     } catch (err) {
       const msg = (err as Error).message || '';
@@ -237,7 +313,10 @@ export default function SporingPage() {
                          'Skriv inn produksjonsnummer...'}
               value={searchInput}
               onChange={e => setSearchInput(e.target.value)}
-              onFocus={() => searchType === 'kunde' && setShowKundeSuggestions(true)}
+              onFocus={() => {
+                if (searchType === 'kunde') setShowKundeSuggestions(true);
+                if (searchType === 'batch') setShowProduksjonSuggestions(true);
+              }}
               autoFocus
             />
             <button type="submit" className="btn btn-primary" disabled={loading || !searchInput.trim()}>
@@ -259,6 +338,27 @@ export default function SporingPage() {
                     <div className="fw-medium">{kunde.navn}</div>
                     <div className="small text-muted">
                       ID: {kunde.id} • {kunde.orgNr ? `Org.nr: ${kunde.orgNr}` : 'Ingen org.nr'}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {/* Produksjons-forslag */}
+            {showProduksjonSuggestions && filteredProduksjoner.length > 0 && (
+              <div className="suggestions-dropdown">
+                {filteredProduksjoner.map(prod => (
+                  <div 
+                    key={prod.id} 
+                    className="suggestion-item"
+                    onClick={() => {
+                      setSearchInput(prod.ordreNr);
+                      setShowProduksjonSuggestions(false);
+                    }}
+                  >
+                    <div className="fw-medium">{prod.ordreNr}</div>
+                    <div className="small text-muted">
+                      {prod.reseptNavn} • {prod.status} • Ferdigvare: {prod.ferdigvareLotNr}
                     </div>
                   </div>
                 ))}
