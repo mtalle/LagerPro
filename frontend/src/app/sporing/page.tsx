@@ -2,21 +2,6 @@
 import { useEffect, useState } from 'react';
 import { get } from '../../lib/api';
 
-interface Kunde {
-  id: number;
-  navn: string;
-  kontaktperson?: string;
-  telefon?: string;
-  epost?: string;
-  adresse?: string;
-  postnr?: string;
-  poststed?: string;
-  orgNr?: string;
-  kommentar?: string;
-  aktiv: boolean;
-  opprettetDato: string;
-}
-
 // Types matching API contracts
 interface SporbarhetTransaksjon {
   id: number;
@@ -41,6 +26,21 @@ interface SporbarhetData {
   sistOppdatert: string;
   lokasjon: string | null;
   transaksjoner: SporbarhetTransaksjon[];
+}
+
+interface Kunde {
+  id: number;
+  navn: string;
+  kontaktperson?: string;
+  telefon?: string;
+  epost?: string;
+  adresse?: string;
+  postnr?: string;
+  poststed?: string;
+  orgNr?: string;
+  kommentar?: string;
+  aktiv: boolean;
+  opprettetDato: string;
 }
 
 type SearchType = 'lot' | 'kunde' | 'batch';
@@ -117,9 +117,8 @@ export default function SporingPage() {
     setShowKundeSuggestions(false);
     
     try {
-      let result;
       if (searchType === 'lot') {
-        result = await get<SporbarhetData>(`/traceability/lot/${encodeURIComponent(searchInput.trim())}`);
+        const result = await get<SporbarhetData>(`/traceability/lot/${encodeURIComponent(searchInput.trim())}`);
         setData(result);
       } else if (searchType === 'kunde') {
         // Søk kan være kunde-ID, navn eller org.nr
@@ -143,11 +142,12 @@ export default function SporingPage() {
         }
         
         // Bruk traceability/kunde API
-        result = await get<SporbarhetData>(`/traceability/kunde/${kundeId}`);
+        const result = await get<SporbarhetData>(`/traceability/kunde/${kundeId}`);
         setData(result);
       } else if (searchType === 'batch') {
-        result = await get<SporbarhetData>(`/traceability/batch/${encodeURIComponent(searchInput.trim())}`);
-        setData(result);
+        // For now, just search for lot - we'll implement batch search later
+        setError('Produksjons-søk er under utvikling. Bruk lot-søk for nå.');
+        return;
       }
     } catch (err) {
       const msg = (err as Error).message || '';
@@ -197,7 +197,7 @@ export default function SporingPage() {
     <div className="page-container">
       <div className="page-header">
         <h1>🧭 Sporing</h1>
-        <p className="page-subtitle">Spor varer fra vareinntak til vareutlevering via lot-nummer</p>
+        <p className="page-subtitle">Spor varer fra vareinntak til vareutlevering via lot-nummer, kunde eller produksjon</p>
       </div>
 
       <div className="search-section">
@@ -268,7 +268,7 @@ export default function SporingPage() {
           
           <div className="mt-2 text-muted small">
             {searchType === 'lot' && 'Søk på lot-nummer for å se full historikk, produksjoner og leveringer.'}
-            {searchType === 'kunde' && 'Søk på kunde-ID for å se alle leveringer til kunden.'}
+            {searchType === 'kunde' && 'Søk på kunde-ID, navn eller org.nr for å se alle leveringer til kunden.'}
             {searchType === 'batch' && 'Søk på produksjonsnummer for å se forbrukte råvarer og ferdigvarer.'}
           </div>
         </form>
