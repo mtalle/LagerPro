@@ -446,27 +446,32 @@ export default function SporingPage() {
                       <tbody>
                         {data.transaksjoner && data.transaksjoner
                           .filter(t => t.type === 'ProduksjonInn')
-                          .map((tx, idx) => (
-                            <tr key={idx}>
-                              <td>
-                                <button 
-                                  className="btn btn-sm btn-outline-primary"
-                                  onClick={() => {
-                                    setSearchType('batch');
-                                    setSearchInput(tx.kildeId?.toString() || '');
-                                    setTimeout(() => {
-                                      const form = document.querySelector('form');
-                                      if (form) form.requestSubmit();
-                                    }, 100);
-                                  }}
-                                >
-                                  {tx.kilde} #{tx.kildeId}
-                                </button>
-                              </td>
-                              <td>{formatDato(tx.tidspunkt)}</td>
-                              <td>{formatNummer(tx.mengde)} {data.enhet}</td>
-                            </tr>
-                          ))}
+                          .map((tx, idx) => {
+                            // Finn ordrenummer fra produksjons-ID
+                            const prod = produksjoner.find(p => p.id === tx.kildeId);
+                            const ordrenummer = prod?.ordreNr || `Produksjon #${tx.kildeId}`;
+                            return (
+                              <tr key={idx}>
+                                <td>
+                                  <button 
+                                    className="btn btn-sm btn-outline-primary"
+                                    onClick={() => {
+                                      setSearchType('batch');
+                                      setSearchInput(prod?.ordreNr || tx.kildeId?.toString() || '');
+                                      setTimeout(() => {
+                                        const form = document.querySelector('form');
+                                        if (form) form.requestSubmit();
+                                      }, 100);
+                                    }}
+                                  >
+                                    {ordrenummer}
+                                  </button>
+                                </td>
+                                <td>{formatDato(tx.tidspunkt)}</td>
+                                <td>{formatNummer(tx.mengde)} {data.enhet}</td>
+                              </tr>
+                            );
+                          })}
                       </tbody>
                     </table>
                   </div>
@@ -488,27 +493,32 @@ export default function SporingPage() {
                       <tbody>
                         {data.transaksjoner && data.transaksjoner
                           .filter(t => t.type === 'ProduksjonUt')
-                          .map((tx, idx) => (
-                            <tr key={idx}>
-                              <td>
-                                <button 
-                                  className="btn btn-sm btn-outline-primary"
-                                  onClick={() => {
-                                    setSearchType('batch');
-                                    setSearchInput(tx.kildeId?.toString() || '');
-                                    setTimeout(() => {
-                                      const form = document.querySelector('form');
-                                      if (form) form.requestSubmit();
-                                    }, 100);
-                                  }}
-                                >
-                                  {tx.kilde} #{tx.kildeId}
-                                </button>
-                              </td>
-                              <td>{formatDato(tx.tidspunkt)}</td>
-                              <td>{formatNummer(tx.mengde)} {data.enhet}</td>
-                            </tr>
-                          ))}
+                          .map((tx, idx) => {
+                            // Finn ordrenummer fra produksjons-ID
+                            const prod = produksjoner.find(p => p.id === tx.kildeId);
+                            const ordrenummer = prod?.ordreNr || `Produksjon #${tx.kildeId}`;
+                            return (
+                              <tr key={idx}>
+                                <td>
+                                  <button 
+                                    className="btn btn-sm btn-outline-primary"
+                                    onClick={() => {
+                                      setSearchType('batch');
+                                      setSearchInput(prod?.ordreNr || tx.kildeId?.toString() || '');
+                                      setTimeout(() => {
+                                        const form = document.querySelector('form');
+                                        if (form) form.requestSubmit();
+                                      }, 100);
+                                    }}
+                                  >
+                                    {ordrenummer}
+                                  </button>
+                                </td>
+                                <td>{formatDato(tx.tidspunkt)}</td>
+                                <td>{formatNummer(tx.mengde)} {data.enhet}</td>
+                              </tr>
+                            );
+                          })}
                       </tbody>
                     </table>
                   </div>
