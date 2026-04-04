@@ -127,6 +127,18 @@ export default function SporingPage() {
   // Funksjon for å hente kunde-ID fra levering
   async function getKundeIdFromLevering(leveringsId: number): Promise<number | null> {
     try {
+      const response = await fetch(`http://167.99.195.94:5000/api/levering/${leveringsId}`);
+      const levering = await response.json();
+      return levering.kundeId || null;
+    } catch (err) {
+      console.error('Kunne ikke hente leveringsdetaljer:', err);
+      return null;
+    }
+  }
+  
+  // Funksjon for å hente kunde-ID fra levering
+  async function getKundeIdFromLevering(leveringsId: number): Promise<number | null> {
+    try {
       const levering = await get<any>(`/levering/${leveringsId}`);
       return levering.kundeId || null;
     } catch (err) {
@@ -655,24 +667,9 @@ export default function SporingPage() {
               <p className="empty-state">Ingen transaksjoner funnet for denne lotten.</p>
             ) : (
               <div className="transaksjon-liste">
-                {(() => {
-                  // Enkel løsning: fjern dupliserte leveringer
-                  const leveringerMap = new Map();
-                  const transaksjoner = data.transaksjoner && data.transaksjoner.map(tx => {
-                    if (tx.type === 'Levering' || tx.type === 'LeveringBekreftet') {
-                      const key = tx.kildeId;
-                      if (!leveringerMap.has(key) || new Date(tx.tidspunkt) > new Date(leveringerMap.get(key).tidspunkt)) {
-                        leveringerMap.set(key, tx);
-                        return tx;
-                      }
-                      return null;
-                    }
-                    return tx;
-                  }).filter(tx => tx !== null);
-                  
-                  return transaksjoner && transaksjoner
-                    .sort((a, b) => new Date(b.tidspunkt).getTime() - new Date(a.tidspunkt).getTime())
-                    .map((tx, idx) => (
+                {data.transaksjoner && data.transaksjoner
+                  .sort((a, b) => new Date(b.tidspunkt).getTime() - new Date(a.tidspunkt).getTime())
+                  .map((tx, idx) => ({
                     <div key={tx.id} className={`transaksjon-rad ${transaksjonFarge(tx.type)}`}>
                       <div className="transaksjon-type-badge">
                         <span>{transaksjonTypeLabel(tx.type)}</span>
