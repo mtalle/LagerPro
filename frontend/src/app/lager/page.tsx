@@ -47,6 +47,12 @@ export default function LagerPage() {
   // Expanded article rows
   const [expandedArtikkel, setExpandedArtikkel] = useState<number | null>(null);
 
+  // Ny modal for artikkeldetaljer
+  const [selectedArticle, setSelectedArticle] = useState<LagerBeholdning | null>(null);
+  const [traceData, setTraceData] = useState<any>(null);
+  const [traceLoading, setTraceLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<'lot' | 'historikk'>('lot');
+
   useEffect(() => {
     async function init() { try { await getMe(); } catch { return; } loadData(); }
     init();
@@ -61,6 +67,26 @@ export default function LagerPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function openArticleModal(artikkel: LagerBeholdning) {
+    setSelectedArticle(artikkel);
+    setTraceData(null);
+    setActiveTab('lot');
+    setTraceLoading(true);
+    try {
+      const data = await get(`/traceability/artikkel/${artikkel.artikkelId}`);
+      setTraceData(data);
+    } catch (err) {
+      console.error('Kunne ikke hente sporbarhet:', err);
+    } finally {
+      setTraceLoading(false);
+    }
+  }
+
+  function closeArticleModal() {
+    setSelectedArticle(null);
+    setTraceData(null);
   }
 
   function openAdjust(b: LagerBeholdning) {
@@ -233,7 +259,7 @@ export default function LagerPage() {
               <Fragment key={a.artikkelId}>
                 <tr
                   style={erLav ? { background: '#fef2f2', cursor: 'pointer' } : { cursor: 'pointer' }}
-                  onClick={() => setExpandedArtikkel(isExpanded ? null : a.artikkelId)}
+                  onClick={() => openArticleModal(a.lots[0])}
                 >
                   <td style={{ width: 32, textAlign: 'center' }}>
                     {erLav && <span title={`Lav beholdning — minst ${a.minBeholdning} ${a.enhet}`}>⚠️</span>}
@@ -296,6 +322,106 @@ export default function LagerPage() {
           })}
         </tbody>
       </table>
+
+      {/* Modal for artikkeldetaljer */}
+      {selectedArticle && (
+        <div className="modal-overlay" onClick={closeArticleModal}>
+          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 900, maxHeight: '85vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <div className="modal-header">
+              <h2>{selectedArticle.artikkelNavn} ({selectedArticle.artikkelNr})</h2>
+              <button className="btn-close" onClick={closeArticleModal}>×</button>
+            </div>
+            <div className="modal-body" style={{ flex: 1, overflow: 'auto' }}>
+              <div className="tab-nav" style={{ display: 'flex', borderBottom: '1px solid #e5e7eb', marginBottom: '1rem' }}>
+                <button
+                  className={`tab-btn ${activeTab === 'lot' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('lot')}
+                >
+                  Lot-oversikt
+                </button>
+                <button
+                  className={`tab-btn ${activeTab === 'historikk' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('historikk')}
+                >
+                  Historikk
+                </button>
+              </div>
+
+              {traceLoading ? (
+                <p>Laster detaljer...</p>
+              ) : activeTab === 'lot' ? (
+                <div>
+                  <table className="table table-sm">
+                    <thead>
+                      <tr>
+                        <th>LotNr</th>
+                        <th>Beholdning</th>
+                        <th>Enhet</th>
+                        <th>Sist Oppdatert</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(traceData?.lots ?? []).map((lot: any) => (
+                        <tr key={lot.lotNr}>
+                          <td><a href={`/sporing?lot=${lot.lotNr}`} target="_blank">{lot.lotNr}</a></td>
+                          <td>{lot.gjeldendeMengde?.toFixed(2) || '0.00'}</td>
+                          <td>{lot.enhet}</td>
+                          <td>{lot.sistOppdatert ? new Date(lot.sistOppdatert).toLocaleString('no-NO') : '-'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <p style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '1rem' }}>
+                    Klikk på et lot-nummer for å gå til sporingssiden.
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <table className="table table-sm table-striped">
+                    <thead>
+                      <tr>
+                        <th>Tid</th>
+                        <th>Lot</th>
+                        <th>Hendelse</th>
+                        <th>Etter</th>
+                        <th>Bruker</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(traceData?.lots ?? [])
+                        .flatMap((lot: any) =>
+                          (lot.transaksjoner || []).map((t: any) => ({
+                            lot: lot.lotNr,
+                            enhet: lot.enhet,
+                            trans: t
+                          }))
+                        )
+                        .sort((a: any, b: any) => new Date(b.trans.tidspunkt).getTime() - new Date(a.trans.tidspunkt).getTime())
+                        .map(({ lot, enhet, trans }: any, idx: number) => (
+                          <tr key={idx}>
+                            <td>{new Date(trans.tidspunkt).toLocaleString('no-NO')}</td>
+                            <td><code>{lot}</code></td>
+                            <td>
+                              {trans.mengde > 0 ? (
+                                <span className="text-success fw-bold">+{trans.mengde.toFixed(2)} {enhet}</span>
+                              ) : (
+                                <span className="text-danger fw-bold">{trans.mengde.toFixed(2)} {enhet}</span>
+                              )}
+                              {' '}{trans.kilde} {trans.kildeId ? `(${trans.kildeId})` : ''}
+                            </td>
+                            <td>{trans.beholdningEtter?.toFixed(2) || '0.00'}</td>
+                            <td>{trans.utfortAv || '-'}</td>
+                          </tr>
+                        ))
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {adjustTarget && (
         <div className="modal-overlay" onClick={() => setAdjustTarget(null)}>
