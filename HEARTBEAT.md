@@ -6,6 +6,13 @@ Hver gang en heartbeat poll kommer inn:
 - Følg instruksjonene i meldingen
 - Hvis ingenting trenger handling, svar HEARTBEAT_OK
 
+## Kodeoppgaver med Groq-sub-agent
+- Når Martin gir kodingsoppgaver: Spawn en sub-agent med Groq-modellen (hvis mulig) til å skrive koden.
+- Sub-agenten skal IKKE pushe til Git direkte.
+- Jeg (Steve) leser gjennom koden, justerer om nødvendig, og pusher deretter til Git.
+- Jeg oppdaterer også serveren (pull + restart) etter push.
+- Pass på at layout.tsx ikke overskrives feilaktig.
+
 ## LagerPro
 - OpenClaw sin innebygde cron håndterer LagerPro-jobs hver time
 - Cron job ID: f5a82f23-deb0-42fc-a553-2260c8fc96b0 (Kjører på Groq)
