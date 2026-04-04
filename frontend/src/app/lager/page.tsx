@@ -52,9 +52,23 @@ export default function LagerPage() {
   const [traceData, setTraceData] = useState<any>(null);
   const [traceLoading, setTraceLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'lot' | 'historikk'>('lot');
+  const [justerLot, setJusterLot] = useState<any>(null);
+  const [justerNyMengde, setJusterNyMengde] = useState('');
+  const [justerKommentar, setJusterKommentar] = useState('');
+  const [justerError, setJusterError] = useState('');
+  const [justerLoading, setJusterLoading] = useState(false);
+  const [brukerErAdmin, setBrukerErAdmin] = useState(false);
 
   useEffect(() => {
-    async function init() { try { await getMe(); } catch { return; } loadData(); }
+    async function init() {
+      try {
+        const me = await getMe();
+        setBrukerErAdmin(me.erAdmin);
+      } catch {
+        // Ignorer
+      }
+      loadData();
+    }
     init();
   }, []);
 
@@ -87,6 +101,41 @@ export default function LagerPage() {
   function closeArticleModal() {
     setSelectedArticle(null);
     setTraceData(null);
+    setJusterLot(null);
+  }
+
+  function prepareJuster(lot: any) {
+    setJusterLot(lot);
+    setJusterNyMengde(lot.gjeldendeMengde.toString());
+    setJusterKommentar('');
+    setJusterError('');
+  }
+
+  async function utførJuster() {
+    if (!selectedArticle || !justerLot) return;
+    setJusterLoading(true);
+    setJusterError('');
+    try {
+      const success = await patch('/inventory/juster', {
+        artikkelId: selectedArticle.artikkelId,
+        lotNr: justerLot.lotNr,
+        nyMengde: parseFloat(justerNyMengde),
+        kommentar: justerKommentar || null,
+      });
+      if (success) {
+        setJusterLot(null);
+        // Oppdater sporbarhetsdata
+        const data = await get(`/traceability/artikkel/${selectedArticle.artikkelId}`);
+        setTraceData(data);
+        await loadData();
+      } else {
+        setJusterError('Kunne ikke lagre justering.');
+      }
+    } catch (err) {
+      setJusterError((err as Error).message);
+    } finally {
+      setJusterLoading(false);
+    }
   }
 
   function openAdjust(b: LagerBeholdning) {
@@ -348,76 +397,236 @@ export default function LagerPage() {
               </div>
 
               {traceLoading ? (
-                <p>Laster detaljer...</p>
+                <div className="text-center py-4">
+                  <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Laster...</span>
+                  </div>
+                  <p className="mt-2 text-muted">Laster detaljer...</p>
+                </div>
               ) : activeTab === 'lot' ? (
                 <div>
-                  <table className="table table-sm">
-                    <thead>
-                      <tr>
-                        <th>LotNr</th>
-                        <th>Beholdning</th>
-                        <th>Enhet</th>
-                        <th>Sist Oppdatert</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(traceData?.lots ?? []).map((lot: any) => (
-                        <tr key={lot.lotNr}>
-                          <td><a href={`/sporing?lot=${lot.lotNr}`} target="_blank">{lot.lotNr}</a></td>
-                          <td>{lot.gjeldendeMengde?.toFixed(2) || '0.00'}</td>
-                          <td>{lot.enhet}</td>
-                          <td>{lot.sistOppdatert ? new Date(lot.sistOppdatert).toLocaleString('no-NO') : '-'}</td>
+                  <div className="d-flex justify-content-between align-items-center mb-3">
+                    <h4 className="mb-0">Lot-oversikt</h4>
+                    {brukerErAdmin && (
+                      <button className="btn btn-sm btn-outline-primary">
+                        📝 Rediger artikkel
+                      </button>
+                    )}
+                  </div>
+                  
+                  <div className="table-responsive">
+                    <table className="table table-hover table-sm">
+                      <thead className="table-light">
+                        <tr>
+                          <th>LotNr</th>
+                          <th>Beholdning</th>
+                          <th>Enhet</th>
+                          <th>Sist Oppdatert</th>
+                          <th>Best før</th>
+                          <th>Handlinger</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  <p style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '1rem' }}>
-                    Klikk på et lot-nummer for å gå til sporingssiden.
-                  </p>
+                      </thead>
+                      <tbody>
+                        {(traceData?.lots ?? []).map((lot: any) => (
+                          <tr key={lot.lotNr}>
+                            <td>
+                              <a href={`/sporing?lot=${lot.lotNr}`} target="_blank" className="text-decoration-none">
+                                <code className="bg-light px-2 py-1 rounded">{lot.lotNr}</code>
+                              </a>
+                            </td>
+                            <td>
+                              <span className={`fw-bold ${lot.gjeldendeMengde < (lot.minBeholdning || 0) ? 'text-danger' : 'text-success'}`}>
+                                {lot.gjeldendeMengde?.toFixed(2) || '0.00'}
+                              </span>
+                            </td>
+                            <td>{lot.enhet}</td>
+                            <td>{lot.sistOppdatert ? new Date(lot.sistOppdatert).toLocaleString('no-NO') : '-'}</td>
+                            <td>
+                              {lot.bestForDato ? (
+                                <span className={`badge ${new Date(lot.bestForDato) < new Date() ? 'bg-danger' : 'bg-warning text-dark'}`}>
+                                  {new Date(lot.bestForDato).toLocaleDateString('no-NO')}
+                                </span>
+                              ) : '-'}
+                            </td>
+                            <td>
+                              <button
+                                className="btn btn-sm btn-outline-secondary"
+                                onClick={() => prepareJuster(lot)}
+                                title="Juster beholdning"
+                              >
+                                ✏️ Juster
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  <div className="alert alert-info mt-3">
+                    <small>
+                      <strong>Tips:</strong> Klikk på et lot-nummer for å gå til sporingssiden. 
+                      {brukerErAdmin && 'Admin-brukere kan justere beholdning direkte fra denne tabellen.'}
+                    </small>
+                  </div>
                 </div>
               ) : (
                 <div>
-                  <table className="table table-sm table-striped">
-                    <thead>
-                      <tr>
-                        <th>Tid</th>
-                        <th>Lot</th>
-                        <th>Hendelse</th>
-                        <th>Etter</th>
-                        <th>Bruker</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(traceData?.lots ?? [])
-                        .flatMap((lot: any) =>
-                          (lot.transaksjoner || []).map((t: any) => ({
-                            lot: lot.lotNr,
-                            enhet: lot.enhet,
-                            trans: t
-                          }))
-                        )
-                        .sort((a: any, b: any) => new Date(b.trans.tidspunkt).getTime() - new Date(a.trans.tidspunkt).getTime())
-                        .map(({ lot, enhet, trans }: any, idx: number) => (
-                          <tr key={idx}>
-                            <td>{new Date(trans.tidspunkt).toLocaleString('no-NO')}</td>
-                            <td><code>{lot}</code></td>
-                            <td>
-                              {trans.mengde > 0 ? (
-                                <span className="text-success fw-bold">+{trans.mengde.toFixed(2)} {enhet}</span>
-                              ) : (
-                                <span className="text-danger fw-bold">{trans.mengde.toFixed(2)} {enhet}</span>
-                              )}
-                              {' '}{trans.kilde} {trans.kildeId ? `(${trans.kildeId})` : ''}
-                            </td>
-                            <td>{trans.beholdningEtter?.toFixed(2) || '0.00'}</td>
-                            <td>{trans.utfortAv || '-'}</td>
-                          </tr>
-                        ))
-                      }
-                    </tbody>
-                  </table>
+                  <div className="d-flex justify-content-between align-items-center mb-3">
+                    <h4 className="mb-0">Transaksjonshistorikk</h4>
+                    <div className="btn-group btn-group-sm">
+                      <button className="btn btn-outline-secondary">📊 Eksporter</button>
+                      <button className="btn btn-outline-secondary">🔍 Filter</button>
+                    </div>
+                  </div>
+                  
+                  <div className="table-responsive">
+                    <table className="table table-sm table-hover">
+                      <thead className="table-light">
+                        <tr>
+                          <th>Tid</th>
+                          <th>Lot</th>
+                          <th>Hendelse</th>
+                          <th>Etter</th>
+                          <th>Bruker</th>
+                          <th>Kommentar</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(traceData?.lots ?? [])
+                          .flatMap((lot: any) =>
+                            (lot.transaksjoner || []).map((t: any) => ({
+                              lot: lot.lotNr,
+                              enhet: lot.enhet,
+                              trans: t
+                            }))
+                          )
+                          .sort((a: any, b: any) => new Date(b.trans.tidspunkt).getTime() - new Date(a.trans.tidspunkt).getTime())
+                          .map(({ lot, enhet, trans }: any, idx: number) => (
+                            <tr key={idx}>
+                              <td>
+                                <small className="text-muted">
+                                  {new Date(trans.tidspunkt).toLocaleDateString('no-NO')}<br/>
+                                  {new Date(trans.tidspunkt).toLocaleTimeString('no-NO', { hour: '2-digit', minute: '2-digit' })}
+                                </small>
+                              </td>
+                              <td>
+                                <code className="bg-light px-1 rounded">{lot}</code>
+                              </td>
+                              <td>
+                                <div className="d-flex align-items-center">
+                                  <span className={`badge ${trans.mengde > 0 ? 'bg-success' : 'bg-danger'} me-2`}>
+                                    {trans.mengde > 0 ? '+' : ''}{trans.mengde.toFixed(2)}
+                                  </span>
+                                  <div>
+                                    <div className="fw-medium">{trans.kilde}</div>
+                                    <small className="text-muted">
+                                      {trans.kildeId ? `ID: ${trans.kildeId}` : ''}
+                                    </small>
+                                  </div>
+                                </div>
+                              </td>
+                              <td>
+                                <span className="fw-bold">{trans.beholdningEtter?.toFixed(2) || '0.00'}</span>
+                                <small className="d-block text-muted">{enhet}</small>
+                              </td>
+                              <td>
+                                <span className="badge bg-secondary">{trans.utfortAv || 'System'}</span>
+                              </td>
+                              <td>
+                                {trans.kommentar ? (
+                                  <small className="text-muted" title={trans.kommentar}>
+                                    {trans.kommentar.length > 30 ? trans.kommentar.substring(0, 30) + '...' : trans.kommentar}
+                                  </small>
+                                ) : '-'}
+                              </td>
+                            </tr>
+                          ))
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  <div className="alert alert-light mt-3">
+                    <small>
+                      <strong>Totalt:</strong> {(traceData?.lots ?? []).flatMap((l: any) => l.transaksjoner || []).length} transaksjoner
+                    </small>
+                  </div>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal for justering av lot */}
+      {justerLot && selectedArticle && (
+        <div className="modal-overlay" onClick={() => setJusterLot(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 500 }}>
+            <div className="modal-header">
+              <h4>Juster beholdning</h4>
+              <button className="btn-close" onClick={() => setJusterLot(null)}>×</button>
+            </div>
+            <div className="modal-body">
+              <div className="mb-3">
+                <p className="mb-1">
+                  <strong>{selectedArticle.artikkelNavn}</strong> ({selectedArticle.artikkelNr})
+                </p>
+                <p className="mb-0 text-muted">
+                  Lot: <code>{justerLot.lotNr}</code> • Nåværende: {justerLot.gjeldendeMengde} {justerLot.enhet}
+                </p>
+              </div>
+              
+              {justerError && (
+                <div className="alert alert-danger">{justerError}</div>
+              )}
+              
+              <div className="mb-3">
+                <label className="form-label">Ny mengde ({justerLot.enhet})</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  step="0.001"
+                  min="0"
+                  value={justerNyMengde}
+                  onChange={e => setJusterNyMengde(e.target.value)}
+                  disabled={justerLoading}
+                />
+              </div>
+              
+              <div className="mb-3">
+                <label className="form-label">Kommentar (valgfritt)</label>
+                <textarea
+                  className="form-control"
+                  rows={2}
+                  value={justerKommentar}
+                  onChange={e => setJusterKommentar(e.target.value)}
+                  disabled={justerLoading}
+                  placeholder="F.eks. 'Korrigering etter varetelling'"
+                />
+              </div>
+              
+              <div className="d-flex justify-content-between">
+                <button
+                  className="btn btn-outline-secondary"
+                  onClick={() => setJusterLot(null)}
+                  disabled={justerLoading}
+                >
+                  Avbryt
+                </button>
+                <button
+                  className="btn btn-primary"
+                  onClick={utførJuster}
+                  disabled={justerLoading}
+                >
+                  {justerLoading ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-1"></span>
+                      Lagrer...
+                    </>
+                  ) : 'Lagre justering'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
