@@ -304,7 +304,6 @@ export default function SporingPage() {
   }
 
   function formatNummer(tall: number): string {
-    return Number(tall).toLocaleString('nb-NO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
   return (
