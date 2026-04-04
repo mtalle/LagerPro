@@ -46,6 +46,7 @@ export default function SporingPage() {
   const [error, setError] = useState('');
   const [kunder, setKunder] = useState<Kunde[]>([]);
   const [produksjoner, setProduksjoner] = useState<Produksjon[]>([]);
+  const [kundeNavnMap, setKundeNavnMap] = useState<Record<number, string>>({});
 
   // Last data
   useEffect(() => {
@@ -63,6 +64,37 @@ export default function SporingPage() {
     }
     loadData();
   }, []);
+  
+  // Last kundenavn for leveringer
+  useEffect(() => {
+    async function loadKundeNavn() {
+      if (!data || !data.transaksjoner) return;
+      
+      const leveringer = data.transaksjoner
+        .filter(t => t.type === 'Levering' || t.type === 'LeveringBekreftet')
+        .filter(t => t.kildeId !== null);
+      
+      const newMap: Record<number, string> = {};
+      
+      for (const tx of leveringer) {
+        if (tx.kildeId && !kundeNavnMap[tx.kildeId]) {
+          try {
+            const navn = await getKundeNavn(tx.kildeId);
+            newMap[tx.kildeId] = navn;
+          } catch (err) {
+            console.error(`Kunne ikke laste kundenavn for levering ${tx.kildeId}:`, err);
+            newMap[tx.kildeId] = 'Laster...';
+          }
+        }
+      }
+      
+      if (Object.keys(newMap).length > 0) {
+        setKundeNavnMap(prev => ({ ...prev, ...newMap }));
+      }
+    }
+    
+    loadKundeNavn();
+  }, [data]);
 
   async function sok(e: React.FormEvent) {
     e.preventDefault();
@@ -133,8 +165,22 @@ export default function SporingPage() {
 
   // Hjelpefunksjoner for visning
   function getOrdrenummer(produksjonsId: number): string {
+    if (!produksjonsId) return 'Ukjent produksjon';
     const prod = produksjoner.find(p => p.id === produksjonsId);
     return prod?.ordreNr || `Produksjon #${produksjonsId}`;
+  }
+  
+  // Funksjon for å hente kundenavn fra levering
+  async function getKundeNavn(leveringsId: number): Promise<string> {
+    if (!leveringsId) return 'Ukjent kunde';
+    try {
+      const response = await fetch(`http://167.99.195.94:5000/api/levering/${leveringsId}`);
+      const levering = await response.json();
+      return levering.kundeNavn || 'Ukjent kunde';
+    } catch (err) {
+      console.error('Kunne ikke hente kundenavn:', err);
+      return 'Feil ved lasting';
+    }
   }
 
   function getUnikeLeveringer() {
@@ -227,14 +273,18 @@ export default function SporingPage() {
                     {data.transaksjoner.filter(t => t.type === 'ProduksjonInn' || t.type === 'ProduksjonUt').map((tx, idx) => (
                       <tr key={idx}>
                         <td>
-                          <button className="btn btn-sm btn-outline-primary" onClick={() => {
-                            const ordrenummer = getOrdrenummer(tx.kildeId || 0);
-                            setSearchType('batch');
-                            setSearchInput(ordrenummer.includes('#') ? tx.kildeId?.toString() || '' : ordrenummer);
-                            setTimeout(() => document.querySelector('form')?.requestSubmit(), 100);
-                          }}>
-                            {getOrdrenummer(tx.kildeId || 0)}
-                          </button>
+                          {tx.kildeId ? (
+                            <button className="btn btn-sm btn-outline-primary" onClick={() => {
+                              const ordrenummer = getOrdrenummer(tx.kildeId!);
+                              setSearchType('batch');
+                              setSearchInput(ordrenummer.includes('#') ? tx.kildeId!.toString() : ordrenummer);
+                              setTimeout(() => document.querySelector('form')?.requestSubmit(), 100);
+                            }}>
+                              {getOrdrenummer(tx.kildeId!)}
+                            </button>
+                          ) : (
+                            <span>Ukjent produksjon</span>
+                          )}
                         </td>
                         <td>{formatDato(tx.tidspunkt)}</td>
                         <td>{formatNummer(tx.mengde)} {data.enhet}</td>
@@ -252,7 +302,7 @@ export default function SporingPage() {
               <div className="trace-card-header"><h3>📤 Levert til kunder</h3></div>
               <div className="table-responsive">
                 <table className="table table-sm">
-                  <thead><tr><th>Leveringsnummer</th><th>Tidspunkt</th><th>Mengde</th><th>Status</th></tr></thead>
+                  <thead><tr><th>Leveringsnummer</th><th>Kunde</th><th>Tidspunkt</th><th>Mengde</th><th>Status</th></tr></thead>
                   <tbody>
                     {getUnikeLeveringer().map((tx, idx) => (
                       <tr key={idx}>
@@ -264,6 +314,15 @@ export default function SporingPage() {
                           }}>
                             {tx.kilde} #{tx.kildeId}
                           </button>
+                        </td>
+                        <td>
+                          {tx.kildeId ? (
+                            kundeNavnMap[tx.kildeId] || (
+                              <span className="text-muted">Laster...</span>
+                            )
+                          ) : (
+                            <span className="text-muted">Ukjent kunde</span>
+                          )}
                         </td>
                         <td>{formatDato(tx.tidspunkt)}</td>
                         <td>{formatNummer(tx.mengde)} {data.enhet}</td>
