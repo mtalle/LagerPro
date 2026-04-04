@@ -99,6 +99,17 @@ export default function SporingPage() {
   const [showProduksjonSuggestions, setShowProduksjonSuggestions] = useState(false);
   const [filteredKunder, setFilteredKunder] = useState<Kunde[]>([]);
   const [filteredProduksjoner, setFilteredProduksjoner] = useState<Produksjon[]>([]);
+  
+  // Funksjon for å hente kunde-ID fra levering
+  async function getKundeIdFromLevering(leveringsId: number): Promise<number | null> {
+    try {
+      const levering = await get<any>(`/levering/${leveringsId}`);
+      return levering.kundeId || null;
+    } catch (err) {
+      console.error('Kunne ikke hente leveringsdetaljer:', err);
+      return null;
+    }
+  }
 
   // Hent kundeliste og produksjonsliste ved første lasting
   useEffect(() => {
@@ -528,21 +539,41 @@ export default function SporingPage() {
                       .map((tx, idx) => (
                         <tr key={idx}>
                           <td>
-                            <button 
-                              className="btn btn-sm btn-outline-info"
-                              onClick={() => {
-                                // Her må vi hente kunde-ID fra leveringen
-                                // For nå: søk på leveringsnummer
-                                setSearchType('lot');
-                                setSearchInput(data.lotNr);
-                                setTimeout(() => {
-                                  const form = document.querySelector('form');
-                                  if (form) form.requestSubmit();
-                                }, 100);
-                              }}
-                            >
-                              {tx.kilde} #{tx.kildeId}
-                            </button>
+                            <div className="d-flex gap-1">
+                              <button 
+                                className="btn btn-sm btn-outline-info"
+                                title="Vis leveringsdetaljer"
+                                onClick={() => {
+                                  // For nå: søk på lot
+                                  setSearchType('lot');
+                                  setSearchInput(data.lotNr);
+                                  setTimeout(() => {
+                                    const form = document.querySelector('form');
+                                    if (form) form.requestSubmit();
+                                  }, 100);
+                                }}
+                              >
+                                {tx.kilde} #{tx.kildeId}
+                              </button>
+                              <button 
+                                className="btn btn-sm btn-outline-secondary"
+                                title="Søk på kunden"
+                                onClick={async () => {
+                                  // Hent kunde-ID fra leveringen
+                                  const kundeId = await getKundeIdFromLevering(tx.kildeId || 0);
+                                  if (kundeId) {
+                                    setSearchType('kunde');
+                                    setSearchInput(kundeId.toString());
+                                    setTimeout(() => {
+                                      const form = document.querySelector('form');
+                                      if (form) form.requestSubmit();
+                                    }, 100);
+                                  }
+                                }}
+                              >
+                                👥
+                              </button>
+                            </div>
                           </td>
                           <td>{formatDato(tx.tidspunkt)}</td>
                           <td>{formatNummer(tx.mengde)} {data.enhet}</td>
