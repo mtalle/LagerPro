@@ -425,13 +425,13 @@ export default function SporingPage() {
           </div>
 
           {/* Produksjonsinformasjon */}
-          {data.transaksjoner.some(t => t.type === 'ProduksjonInn' || t.type === 'ProduksjonUt') && (
+          {data.transaksjoner && data.transaksjoner.some(t => t.type === 'ProduksjonInn' || t.type === 'ProduksjonUt') && (
             <div className="trace-card">
               <div className="trace-card-header">
                 <h3>🏭 Produksjonsinformasjon</h3>
               </div>
               
-              {data.transaksjoner.filter(t => t.type === 'ProduksjonInn').length > 0 && (
+              {data.transaksjoner && data.transaksjoner.filter(t => t.type === 'ProduksjonInn').length > 0 && (
                 <div className="mb-4">
                   <h4 className="mb-2">Gått inn i produksjon:</h4>
                   <div className="table-responsive">
@@ -444,7 +444,7 @@ export default function SporingPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {data.transaksjoner
+                        {data.transaksjoner && data.transaksjoner
                           .filter(t => t.type === 'ProduksjonInn')
                           .map((tx, idx) => (
                             <tr key={idx}>
@@ -473,7 +473,7 @@ export default function SporingPage() {
                 </div>
               )}
               
-              {data.transaksjoner.filter(t => t.type === 'ProduksjonUt').length > 0 && (
+              {data.transaksjoner && data.transaksjoner.filter(t => t.type === 'ProduksjonUt').length > 0 && (
                 <div>
                   <h4 className="mb-2">Produsert fra:</h4>
                   <div className="table-responsive">
@@ -486,7 +486,7 @@ export default function SporingPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {data.transaksjoner
+                        {data.transaksjoner && data.transaksjoner
                           .filter(t => t.type === 'ProduksjonUt')
                           .map((tx, idx) => (
                             <tr key={idx}>
@@ -518,7 +518,7 @@ export default function SporingPage() {
           )}
 
           {/* Leveringsinformasjon */}
-          {data.transaksjoner.some(t => t.type === 'Levering' || t.type === 'LeveringBekreftet') && (
+          {data.transaksjoner && data.transaksjoner.some(t => t.type === 'Levering' || t.type === 'LeveringBekreftet') && (
             <div className="trace-card">
               <div className="trace-card-header">
                 <h3>📤 Levert til kunder</h3>
@@ -534,7 +534,7 @@ export default function SporingPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {data.transaksjoner
+                    {data.transaksjoner && data.transaksjoner
                       .filter(t => t.type === 'Levering' || t.type === 'LeveringBekreftet')
                       .map((tx, idx) => (
                         <tr key={idx}>
@@ -596,11 +596,11 @@ export default function SporingPage() {
               <h3>📋 Transaksjoner ({data.transaksjoner.length})</h3>
             </div>
 
-            {data.transaksjoner.length === 0 ? (
+            {!data.transaksjoner || data.transaksjoner.length === 0 ? (
               <p className="empty-state">Ingen transaksjoner funnet for denne lotten.</p>
             ) : (
               <div className="transaksjon-liste">
-                {data.transaksjoner
+                {data.transaksjoner && data.transaksjoner
                   .sort((a, b) => new Date(b.tidspunkt).getTime() - new Date(a.tidspunkt).getTime())
                   .map((tx, idx) => (
                     <div key={tx.id} className={`transaksjon-rad ${transaksjonFarge(tx.type)}`}>
